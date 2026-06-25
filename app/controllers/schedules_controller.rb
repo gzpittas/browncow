@@ -1,26 +1,31 @@
 class SchedulesController < ApplicationController
   before_action :authenticate_user!
   before_action :require_account!
-  before_action :set_locations
-  before_action :set_location
-  before_action :set_schedule, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_locations, except: [ :current ]
+  before_action :set_location, except: [ :current ]
+  before_action :set_schedule, only: [ :show, :edit, :update, :destroy, :print ]
 
   def index
     @schedules = @location ? @location.schedules.ordered : Schedule.none
     @current_week_start = Schedule.week_start_for(Date.current)
-    @current_week_schedule = @location&.schedules&.find_by(week_start_date: @current_week_start)
+    @current_week_schedule = @location.present? ? Schedule.current_for(@location) : nil
   end
 
   def new
     @schedule = @location.schedules.build(week_start_date: Schedule.week_start_for(Date.current))
+    @selected_source_schedule = selected_source_schedule
   end
 
   def create
     week_start_date = schedule_params[:week_start_date].presence || Schedule.week_start_for(Date.current)
-    @schedule = @location.schedules.build(schedule_params.merge(week_start_date: week_start_date, status: "draft"))
+    @selected_source_schedule = selected_source_schedule
+    @schedule = @location.schedules.build(
+      schedule_params.slice(:notes).merge(week_start_date: week_start_date, status: "draft")
+    )
 
-    if @schedule.save
-      redirect_to location_schedule_path(@location, @schedule), notice: "Weekly schedule created."
+    if create_schedule_with_optional_copy
+      notice = @selected_source_schedule.present? ? "Weekly schedule created and shifts copied." : "Weekly schedule created."
+      redirect_to location_schedule_path(@location, @schedule), notice: notice
     else
       existing_schedule = @location.schedules.find_by(week_start_date: @schedule.week_start_date)
 
@@ -33,15 +38,16 @@ class SchedulesController < ApplicationController
   end
 
   def show
-    @view_mode = params[:view] == "employees" ? "employees" : "positions"
-    @week_dates = @schedule.week_dates
-    @employees = @location.employees.active.includes(:positions).order(:last_name, :first_name)
-    @positions = @location.positions.active.includes(:employees).order(:name)
-    @shifts = @schedule.shifts.includes(:employee, :position).ordered
-    @shifts_by_employee_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.shift_date ] }
-    @shifts_by_position_and_date = @shifts.group_by { |shift| [ shift.position_id, shift.shift_date ] }
+    prepare_schedule_view
     @previous_schedule = @location.schedules.find_by(week_start_date: @schedule.week_start_date - 7.days)
     @next_schedule = @location.schedules.find_by(week_start_date: @schedule.week_start_date + 7.days)
+  end
+
+  def print
+    prepare_schedule_view
+    @print_employees = Employee.where(id: @shifts.select(:employee_id)).includes(:positions).order(:last_name, :first_name)
+
+    render layout: "print"
   end
 
   def edit
@@ -58,6 +64,18 @@ class SchedulesController < ApplicationController
   def destroy
     @schedule.destroy
     redirect_to location_schedules_path(@location), notice: "Schedule deleted. All shifts for that week were also deleted."
+  end
+
+  def current
+    destination = current_schedule_destination_for(current_user, view: params[:view])
+
+    if current_schedule_record.present?
+      redirect_to destination
+    elsif current_schedule_location.present?
+      redirect_to destination, alert: "No current weekly schedule yet. Create this week's schedule to get started."
+    else
+      redirect_to destination
+    end
   end
 
   private
@@ -78,9 +96,38 @@ class SchedulesController < ApplicationController
     @schedule = @location.schedules.find(params[:id])
   end
 
-  def schedule_params
-    return ActionController::Parameters.new.permit(:week_start_date, :notes) if params[:schedule].blank?
+  def prepare_schedule_view
+    @view_mode = params[:view] == "employees" ? "employees" : "positions"
+    @week_dates = @schedule.week_dates
+    @employees = @location.employees.active.includes(:positions).order(:last_name, :first_name)
+    @positions = @location.positions.active.includes(:employees).order(:name)
+    @shifts = @schedule.shifts.includes(:employee, :position).ordered
+    @shifts_by_employee_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.shift_date ] }
+    @shifts_by_position_and_date = @shifts.group_by { |shift| [ shift.position_id, shift.shift_date ] }
+    @current_week_schedule = Schedule.current_for(@location)
+  end
 
-    params.require(:schedule).permit(:week_start_date, :notes)
+  def schedule_params
+    return ActionController::Parameters.new.permit(:week_start_date, :notes, :source_schedule_id) if params[:schedule].blank?
+
+    params.require(:schedule).permit(:week_start_date, :notes, :source_schedule_id)
+  end
+
+  def selected_source_schedule
+    source_schedule_id = schedule_params[:source_schedule_id].presence || params[:copy_from_schedule_id].presence
+    return if source_schedule_id.blank?
+
+    @location.schedules.find(source_schedule_id)
+  end
+
+  def create_schedule_with_optional_copy
+    Schedule.transaction do
+      @schedule.save!
+      @selected_source_schedule&.copy_shifts_to!(@schedule)
+    end
+
+    true
+  rescue ActiveRecord::RecordInvalid
+    false
   end
 end

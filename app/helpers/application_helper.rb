@@ -4,9 +4,20 @@ module ApplicationHelper
     end_date = schedule.week_end_date
 
     if start_date.month == end_date.month
-      "Week of #{start_date.strftime("%B %-d")}-#{end_date.strftime("%-d")}"
+      "Week of Sunday #{start_date.strftime("%B %-d")} - #{end_date.strftime("%-d")}"
     else
-      "Week of #{start_date.strftime("%B %-d")}-#{end_date.strftime("%B %-d")}"
+      "Week of Sunday #{start_date.strftime("%B %-d")} - #{end_date.strftime("%B %-d")}"
+    end
+  end
+
+  def schedule_print_week_label(schedule)
+    start_date = schedule.week_start_date
+    end_date = schedule.week_end_date
+
+    if start_date.month == end_date.month
+      "Week of #{start_date.strftime("%B %-d")}-#{end_date.strftime("%-d")}, #{end_date.year}"
+    else
+      "Week of #{start_date.strftime("%B %-d")}-#{end_date.strftime("%B %-d")}, #{end_date.year}"
     end
   end
 
@@ -23,7 +34,7 @@ module ApplicationHelper
   end
 
   def half_hour_time_options
-    (0...48).map do |offset|
+    (14...48).map do |offset|
       minutes = offset * 30
       time = Time.zone.parse("2000-01-01") + minutes.minutes
 
@@ -46,6 +57,21 @@ module ApplicationHelper
       next if existing_week_starts.include?(week_start)
 
       [ "Week of #{week_start.strftime("%A, %B %-d")}", week_start.iso8601 ]
+    end
+  end
+
+  def schedule_copy_source_options(location)
+    schedules = location.schedules.ordered.to_a
+    current_schedule = Schedule.current_for(location)
+
+    schedules.map do |schedule|
+      label = if current_schedule == schedule
+        "Current schedule (#{schedule_week_label(schedule)})"
+      else
+        schedule_week_label(schedule)
+      end
+
+      [ label, schedule.id ]
     end
   end
 end

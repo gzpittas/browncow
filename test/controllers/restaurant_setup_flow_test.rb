@@ -65,12 +65,39 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     assert_difference -> { location.positions.count }, 1 do
       post location_positions_path(location), params: {
         position: {
-          name: "Line Cook"
+          name: "Line Cook",
+          color: "#B85C38"
         }
       }
     end
 
+    assert_equal "#B85C38", location.positions.find_by!(name: "Line Cook").color
     assert_redirected_to location_positions_path(location)
+  end
+
+  test "position form renders the color palette" do
+    sign_in users(:manager)
+
+    get new_location_position_path(locations(:main))
+
+    assert_response :success
+    assert_select "input[name='position[color]'][type=radio]", count: Position::COLOR_PALETTE.size
+    assert_select "input[name='position[color]'][value='#{Position::COLOR_PALETTE.first}'][checked]"
+    assert_select ".position-color-swatch", count: Position::COLOR_PALETTE.size
+  end
+
+  test "a signed-in user can update a position color" do
+    sign_in users(:manager)
+
+    patch location_position_path(locations(:main), positions(:server)), params: {
+      position: {
+        name: "Server",
+        color: "#3F8F5F"
+      }
+    }
+
+    assert_redirected_to location_positions_path(locations(:main))
+    assert_equal "#3F8F5F", positions(:server).reload.color
   end
 
   test "a signed-in user can create an employee and assign positions" do

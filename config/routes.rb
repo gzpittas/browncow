@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   root "welcome#index"
   get "dashboard", to: "dashboard#show"
+  get "current-schedule", to: "schedules#current", as: :current_schedule
 
   resource :account, only: [ :new, :create, :edit, :update ]
 
@@ -18,6 +19,8 @@ Rails.application.routes.draw do
     end
 
     resources :schedules do
+      get :print, on: :member
+
       resources :shifts, except: [ :index, :show ]
     end
   end

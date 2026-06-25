@@ -1,0 +1,36 @@
+<table class="print-employee-table">
+  <thead>
+    <tr>
+      <th>Employee</th>
+      <% @week_dates.each do |date| %>
+        <th><%= schedule_day_label(date) %></th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <% @print_employees.each do |employee| %>
+      <tr>
+        <th><%= employee.display_name %></th>
+        <% @week_dates.each do |date| %>
+          <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
+          <td>
+            <% if shifts.any? %>
+              <% shifts.each do |shift| %>
+                <div class="print-shift-line">
+                  <strong><%= shift.position.name %></strong>
+                  <span><%= shift_time_range(shift) %></span>
+                </div>
+              <% end %>
+            <% else %>
+              <span class="print-off">Off</span>
+            <% end %>
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% if @print_employees.empty? %>
+  <p class="print-empty">No shifts have been added to this schedule yet.</p>
+<% end %>

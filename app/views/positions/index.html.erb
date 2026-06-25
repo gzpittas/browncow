@@ -34,7 +34,10 @@
           <tbody>
             <% @positions.each do |position| %>
               <tr>
-                <td class="fw-medium"><%= position.name %></td>
+                <td class="fw-medium">
+                  <span class="position-list-swatch" style="--position-color: <%= position.display_color %>"></span>
+                  <%= position.name %>
+                </td>
                 <td class="text-secondary"><%= @location.name %></td>
                 <td>
                   <span class="badge <%= position.active? ? "text-bg-success" : "text-bg-secondary" %>">

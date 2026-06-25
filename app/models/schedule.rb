@@ -16,6 +16,10 @@ class Schedule < ApplicationRecord
     date - date.wday
   end
 
+  def self.current_for(location, date = Date.current)
+    location.schedules.find_by(week_start_date: week_start_for(date))
+  end
+
   def week_end_date
     week_start_date + (DAYS_IN_WEEK - 1).days
   end
@@ -30,6 +34,25 @@ class Schedule < ApplicationRecord
 
   def draft?
     status == "draft"
+  end
+
+  def current_week?(date = Date.current)
+    week_start_date == self.class.week_start_for(date)
+  end
+
+  def copy_shifts_to!(target_schedule)
+    shifts.ordered.each do |shift|
+      day_offset = (shift.shift_date - week_start_date).to_i
+
+      target_schedule.shifts.create!(
+        employee: shift.employee,
+        position: shift.position,
+        shift_date: target_schedule.week_start_date + day_offset.days,
+        starts_at: shift.starts_at,
+        ends_at: shift.ends_at,
+        notes: shift.notes
+      )
+    end
   end
 
   private

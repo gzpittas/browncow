@@ -30,6 +30,7 @@
 
         <div class="ms-auto d-flex align-items-center flex-wrap justify-content-end gap-2">
           <% if user_signed_in? %>
+            <%= link_to "Current Schedule", current_schedule_path, class: "btn btn-primary btn-sm" %>
             <%= link_to "Schedules", schedules_path, class: "nav-link text-secondary" %>
             <%= link_to "Dashboard", dashboard_path, class: "nav-link text-secondary" %>
             <%= link_to "Locations", locations_path, class: "nav-link text-secondary" %>

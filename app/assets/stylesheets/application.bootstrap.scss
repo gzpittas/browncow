@@ -84,10 +84,10 @@ body {
 
 .shift-pill {
   display: block;
-  border: 1px solid rgba(138, 79, 42, 0.24);
-  border-left: 4px solid var(--hc-primary);
+  border: 1px solid color-mix(in srgb, var(--position-color, var(--hc-primary)) 28%, white);
+  border-left: 4px solid var(--position-color, var(--hc-primary));
   border-radius: 0.5rem;
-  background: #fffaf4;
+  background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 10%, white);
   color: #2f2a24;
   padding: 0.5rem 0.6rem;
   font-size: 0.875rem;
@@ -95,7 +95,7 @@ body {
 }
 
 .shift-pill:hover {
-  background: #fff3e6;
+  background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 16%, white);
   color: #2f2a24;
 }
 
@@ -118,4 +118,256 @@ body {
 
 .navbar-brand {
   letter-spacing: 0;
+}
+
+.position-color-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.position-color-choice {
+  cursor: pointer;
+  display: inline-flex;
+  margin: 0;
+  position: relative;
+}
+
+.position-color-input {
+  opacity: 0;
+  position: absolute;
+}
+
+.position-color-swatch {
+  background: var(--position-color);
+  border: 2px solid #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 1px rgba(47, 42, 36, 0.22);
+  display: inline-block;
+  height: 2.1rem;
+  width: 2.1rem;
+}
+
+.position-color-input:focus-visible + .position-color-swatch {
+  box-shadow:
+    0 0 0 1px rgba(47, 42, 36, 0.22),
+    0 0 0 0.25rem rgba(138, 79, 42, 0.22);
+}
+
+.position-color-input:checked + .position-color-swatch {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px var(--hc-primary);
+}
+
+.position-list-swatch,
+.position-heading-swatch {
+  background: var(--position-color);
+  border: 1px solid rgba(47, 42, 36, 0.18);
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.position-list-swatch {
+  border-radius: 999px;
+  height: 0.8rem;
+  margin-right: 0.45rem;
+  vertical-align: -0.08rem;
+  width: 0.8rem;
+}
+
+.position-heading-swatch {
+  border-radius: 0.3rem;
+  height: 1rem;
+  width: 1rem;
+}
+
+.print-body {
+  background: #f6f6f6;
+  color: #111;
+}
+
+.print-toolbar {
+  align-items: center;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 0.75rem 1rem;
+}
+
+.print-page {
+  background: #fff;
+  box-shadow: 0 0.25rem 1.5rem rgba(0, 0, 0, 0.12);
+  margin: 1.5rem auto;
+  max-width: 11in;
+  min-height: 8.5in;
+  padding: 0.45in;
+}
+
+.print-header {
+  align-items: flex-start;
+  border-bottom: 2px solid #111;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+}
+
+.print-brand {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin-bottom: 0.1rem;
+  text-transform: uppercase;
+}
+
+.print-header h1 {
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+.print-header p,
+.print-meta {
+  color: #333;
+  margin: 0;
+}
+
+.print-meta {
+  font-size: 0.95rem;
+  text-align: right;
+}
+
+.print-notes {
+  border: 1px solid #bbb;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.65rem;
+}
+
+.print-notes p {
+  display: inline;
+  margin: 0;
+}
+
+.print-position-section {
+  break-inside: avoid;
+  border-top: 1px solid #999;
+  margin-top: 0.85rem;
+  padding-top: 0.65rem;
+  page-break-inside: avoid;
+}
+
+.print-position-section h2 {
+  font-size: 1.05rem;
+  margin: 0 0 0.45rem;
+}
+
+.print-position-days {
+  display: grid;
+  gap: 0.45rem;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.print-day-block {
+  border-left: 1px solid #ccc;
+  min-height: 4.5rem;
+  padding: 0 0.35rem;
+}
+
+.print-day-block:first-child {
+  border-left: 0;
+}
+
+.print-day-block h3 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+}
+
+.print-shift-line {
+  break-inside: avoid;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  margin-bottom: 0.25rem;
+  page-break-inside: avoid;
+}
+
+.print-shift-line strong,
+.print-shift-line span {
+  display: block;
+}
+
+.print-employee-table {
+  border-collapse: collapse;
+  font-size: 0.76rem;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.print-employee-table th,
+.print-employee-table td {
+  border: 1px solid #aaa;
+  padding: 0.28rem 0.32rem;
+  vertical-align: top;
+}
+
+.print-employee-table thead th {
+  text-align: center;
+}
+
+.print-employee-table tbody th {
+  width: 1.4in;
+}
+
+.print-off,
+.print-empty {
+  color: #666;
+}
+
+@media print {
+  @page {
+    margin: 0.35in;
+    size: letter landscape;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .navbar,
+  .alert,
+  .screen-only,
+  .btn,
+  button {
+    display: none !important;
+  }
+
+  .print-page {
+    box-shadow: none !important;
+    margin: 0;
+    max-width: none;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .print-header,
+  .print-notes,
+  .print-position-section,
+  .print-day-block,
+  .print-employee-table th,
+  .print-employee-table td {
+    border-color: #000 !important;
+  }
+
+  .print-position-section,
+  .print-shift-line,
+  .print-employee-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }

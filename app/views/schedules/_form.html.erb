@@ -6,6 +6,15 @@
       <%= f.label :week_start_date, "Schedule week", class: "form-label" %>
       <%= f.select :week_start_date, schedule_week_options(@location, @schedule.week_start_date), { selected: @schedule.week_start_date&.iso8601 }, class: "form-select" %>
     </div>
+
+    <div class="mb-4">
+      <%= f.label :source_schedule_id, "Start from", class: "form-label" %>
+      <%= f.select :source_schedule_id,
+            options_for_select(schedule_copy_source_options(@location), @selected_source_schedule&.id),
+            { include_blank: "Blank schedule" },
+            class: "form-select" %>
+      <div class="form-text">Choose an existing week to copy its shifts into the new schedule, or leave this blank to start fresh.</div>
+    </div>
   <% else %>
     <div class="mb-3">
       <div class="form-label">Schedule week</div>

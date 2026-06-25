@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
 
   before_action :configure_permitted_parameters, if: :devise_controller?
 
+  helper_method :current_schedule_location, :current_schedule_record, :current_schedule_destination_for
+
   protected
 
   def configure_permitted_parameters
@@ -34,8 +36,33 @@ class ApplicationController < ActionController::Base
     location = user.account.locations.active.order(:name).first
     return dashboard_path if location.blank?
 
-    current_schedule = location.schedules.find_by(week_start_date: Schedule.week_start_for(Date.current))
+    current_schedule = Schedule.current_for(location)
     return location_schedule_path(location, current_schedule) if current_schedule
+
+    location_schedules_path(location)
+  end
+
+  def current_schedule_location
+    return unless user_signed_in?
+    return unless current_user.account.present?
+
+    @current_schedule_location ||= current_user.account.locations.active.order(:name).first
+  end
+
+  def current_schedule_record
+    return unless current_schedule_location
+
+    @current_schedule_record ||= Schedule.current_for(current_schedule_location)
+  end
+
+  def current_schedule_destination_for(user = current_user, view: nil)
+    return new_account_path if user.account.blank?
+
+    location = user.account.locations.active.order(:name).first
+    return dashboard_path if location.blank?
+
+    schedule = Schedule.current_for(location)
+    return location_schedule_path(location, schedule, view: view.presence) if schedule
 
     location_schedules_path(location)
   end

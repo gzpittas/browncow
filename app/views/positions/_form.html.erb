@@ -6,6 +6,18 @@
     <%= f.text_field :name, autofocus: true, class: "form-control" %>
   </div>
 
+  <fieldset class="mb-4">
+    <legend class="form-label mb-2">Color</legend>
+    <div class="position-color-palette">
+      <% Position::COLOR_PALETTE.each do |color| %>
+        <label class="position-color-choice" title="<%= color %>">
+          <%= f.radio_button :color, color, checked: @position.color.blank? ? color == Position::COLOR_PALETTE.first : @position.color == color, class: "position-color-input" %>
+          <span class="position-color-swatch" style="--position-color: <%= color %>"></span>
+        </label>
+      <% end %>
+    </div>
+  </fieldset>
+
   <% if @position.persisted? %>
     <div class="form-check mb-4">
       <%= f.check_box :active, class: "form-check-input" %>

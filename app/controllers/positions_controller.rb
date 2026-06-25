@@ -58,6 +58,6 @@ class PositionsController < ApplicationController
   end
 
   def position_params
-    params.require(:position).permit(:name, :active)
+    params.require(:position).permit(:name, :color, :active)
   end
 end

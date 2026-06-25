@@ -128,6 +128,7 @@ class AuthenticationFlowTest < ActionDispatch::IntegrationTest
     get dashboard_path
 
     assert_response :success
+    assert_select "a[href='#{current_schedule_path}']", text: "Current Schedule"
     assert_select "h1", "Welcome, Mae"
     assert_select "h2", "This Week's Schedule"
     assert_select "h2", "Next Week's Schedule"

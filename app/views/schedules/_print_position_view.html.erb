@@ -1,0 +1,22 @@
+<div class="print-position-schedule">
+  <% @positions.each do |position| %>
+    <section class="print-position-section">
+      <h2><%= position.name.pluralize %></h2>
+
+      <div class="print-position-days">
+        <% @week_dates.each do |date| %>
+          <% shifts = @shifts_by_position_and_date[[ position.id, date ]] || [] %>
+          <div class="print-day-block">
+            <h3><%= date.strftime("%A") %></h3>
+            <% shifts.each do |shift| %>
+              <div class="print-shift-line">
+                <strong><%= shift.employee.display_name %></strong>
+                <span><%= shift_time_range(shift) %></span>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>

@@ -21,7 +21,7 @@
                 <td class="schedule-cell">
                   <div class="d-grid gap-2">
                     <% shifts.each do |shift| %>
-                      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: "employees"), class: "shift-pill text-decoration-none" do %>
+                      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: "employees"), class: "shift-pill text-decoration-none", style: "--position-color: #{shift.position.display_color}" do %>
                         <span class="fw-semibold"><%= shift.position.name %></span>
                         <span class="text-nowrap"><%= shift_time_range(shift) %></span>
                       <% end %>

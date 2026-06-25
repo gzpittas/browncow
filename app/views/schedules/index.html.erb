@@ -10,8 +10,10 @@
     <div class="d-flex flex-wrap gap-2">
       <% if @current_week_schedule %>
         <%= link_to "Open This Week", location_schedule_path(@location, @current_week_schedule), class: "btn btn-primary" %>
+        <%= link_to "Current Schedule", current_schedule_path, class: "btn btn-outline-primary" %>
       <% else %>
         <%= button_to "Create This Week's Schedule", location_schedules_path(@location), method: :post, params: { schedule: { week_start_date: @current_week_start } }, class: "btn btn-primary" %>
+        <%= link_to "Current Schedule", current_schedule_path, class: "btn btn-outline-primary" %>
       <% end %>
       <%= link_to "Create New Weekly Schedule", new_location_schedule_path(@location), class: "btn btn-outline-primary" %>
     </div>
@@ -48,7 +50,12 @@
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
                     <%= link_to "Open", location_schedule_path(@location, schedule), class: "btn btn-sm btn-primary" %>
+                    <%= link_to "Copy", new_location_schedule_path(@location, copy_from_schedule_id: schedule.id), class: "btn btn-sm btn-outline-primary" %>
                     <%= link_to "Manage", edit_location_schedule_path(@location, schedule), class: "btn btn-sm btn-outline-secondary" %>
+                    <%= button_to "Delete", location_schedule_path(@location, schedule),
+                          method: :delete,
+                          class: "btn btn-sm btn-outline-danger",
+                          form: { class: "d-inline", onsubmit: "return confirm('Delete this schedule? This will permanently delete all shifts within this week.')" } %>
                   </div>
                 </td>
               </tr>
