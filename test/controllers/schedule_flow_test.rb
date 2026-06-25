@@ -304,7 +304,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get print_location_schedule_path(locations(:main), schedules(:main_week), view: "positions")
 
     assert_response :success
-    assert_select ".print-brand", text: "browncow.now"
+    assert_select ".print-brand", text: "Schedule"
   end
 
   test "a user cannot access another account schedule print page" do

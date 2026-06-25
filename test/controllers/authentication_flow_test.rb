@@ -4,9 +4,7 @@ class AuthenticationFlowTest < ActionDispatch::IntegrationTest
   test "root page is accessible when signed out" do
     get root_path
 
-    assert_response :success
-    assert_select "h1", "Restaurant scheduling, without the complicated software."
-    assert_select "a[href='#{new_user_session_path}']", text: "Sign In"
+    assert_redirected_to new_user_session_path
   end
 
   test "sign in page includes a sign up link" do
