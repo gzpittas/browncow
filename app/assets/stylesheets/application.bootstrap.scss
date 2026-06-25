@@ -124,20 +124,113 @@ body {
 }
 
 .shift-pill {
-  display: block;
   border: 1px solid color-mix(in srgb, var(--position-color, var(--hc-primary)) 28%, white);
   border-left: 4px solid var(--position-color, var(--hc-primary));
   border-radius: 0.5rem;
   background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 10%, white);
   color: #2f2a24;
-  padding: 0.5rem 0.6rem;
+  display: block;
   font-size: 0.875rem;
   line-height: 1.25;
+  padding: 0.5rem 0.6rem;
 }
 
 .shift-pill:hover {
   background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 16%, white);
   color: #2f2a24;
+}
+
+.shift-pill-link,
+.shift-pill-title-link,
+.shift-pill-time-link {
+  color: inherit;
+}
+
+.shift-pill-link:hover,
+.shift-pill-title-link:hover,
+.shift-pill-time-link:hover {
+  background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 16%, white);
+  color: #2f2a24;
+}
+
+.shift-pill-with-actions {
+  padding: 0;
+}
+
+.shift-pill-main {
+  display: grid;
+  gap: 0.1rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+}
+
+.shift-pill-top-row {
+  align-items: flex-start;
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: space-between;
+}
+
+.shift-pill-title-link {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.45rem 0.35rem 0 0.6rem;
+}
+
+.shift-pill-time-link {
+  display: block;
+  grid-column: 1 / 2;
+  padding: 0 0.35rem 0.45rem 0.6rem;
+}
+
+.shift-pill-title,
+.shift-pill-time {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.shift-pill-time {
+  font-size: 0.8125rem;
+  padding: 0;
+}
+
+.shift-pill-delete-form {
+  display: block;
+  margin: 0;
+}
+
+.shift-pill-delete {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--position-color, var(--hc-primary)) 20%, white);
+  border-bottom: 1px solid color-mix(in srgb, var(--position-color, var(--hc-primary)) 20%, white);
+  border-radius: 0 0.5rem 0 0.35rem;
+  color: #6d6258;
+  display: inline-flex;
+  font-size: 1rem;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 2rem;
+  min-width: 2rem;
+  padding: 0.25rem 0.45rem;
+  vertical-align: top;
+}
+
+.shift-pill-delete:hover {
+  background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 18%, white);
+  color: #8b1e1e;
+}
+
+.shift-pill-single-row .shift-pill-title-link {
+  padding-bottom: 0.45rem;
+}
+
+.shift-pill-single-row .shift-pill-delete {
+  border-bottom: 0;
+  border-radius: 0 0.5rem 0.5rem 0.35rem;
 }
 
 .schedule-add-link {
@@ -311,9 +404,7 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
 
 .print-position-section {
   break-inside: avoid;
-  border-top: 1px solid #999;
   margin-top: 0.85rem;
-  padding-top: 0.65rem;
   page-break-inside: avoid;
 }
 
@@ -323,15 +414,16 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
 }
 
 .print-position-days {
+  border: 1px solid #aaa;
   display: grid;
-  gap: 0.45rem;
+  gap: 0;
   grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .print-day-block {
-  border-left: 1px solid #ccc;
+  border-left: 1px solid #aaa;
   min-height: 4.5rem;
-  padding: 0 0.35rem;
+  padding: 0;
 }
 
 .print-day-block:first-child {
@@ -339,10 +431,18 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
 }
 
 .print-day-block h3 {
+  border-bottom: 1px solid #aaa;
   font-size: 0.78rem;
   font-weight: 700;
   margin: 0 0 0.35rem;
+  padding: 0.28rem 0.35rem;
   text-transform: uppercase;
+}
+
+.print-day-block .print-shift-line,
+.print-day-block .print-off {
+  margin-left: 0.35rem;
+  margin-right: 0.35rem;
 }
 
 .print-shift-line {

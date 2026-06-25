@@ -7,7 +7,7 @@
         <% @week_dates.each do |date| %>
           <% shifts = @shifts_by_position_and_date[[ position.id, date ]] || [] %>
           <div class="print-day-block">
-            <h3><%= date.strftime("%A") %></h3>
+            <h3><%= schedule_print_position_day_label(date) %></h3>
             <% shifts.each do |shift| %>
               <div class="print-shift-line">
                 <strong><%= shift.employee.display_name %></strong>

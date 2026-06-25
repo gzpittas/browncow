@@ -145,6 +145,17 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{location_schedule_path(locations(:main), schedules(:main_week))}'] button", text: "Delete"
   end
 
+  test "cross-month schedules on the list only show the month once" do
+    sign_in users(:manager)
+    locations(:main).schedules.create!(week_start_date: Date.new(2026, 6, 28), status: "draft")
+
+    get location_schedules_path(locations(:main))
+
+    assert_response :success
+    assert_select "td.fw-medium", text: /Week of Sunday June 28 29 30 1 2 3 4/
+    assert_select "td.fw-medium", text: /July/, count: 0
+  end
+
   test "a user cannot delete another account schedule" do
     sign_in users(:manager)
 
@@ -168,6 +179,46 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
           ends_at: "22:00"
         }
       }
+    end
+
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")
+  end
+
+  test "employee view shift pills include an inline delete button" do
+    sign_in users(:manager)
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "employees")
+
+    assert_response :success
+    assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'] button.shift-pill-delete"
+    assert_select ".shift-pill-delete span[aria-hidden='true']", text: "×"
+  end
+
+  test "position view shift pills include an inline delete button" do
+    sign_in users(:manager)
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "positions")
+
+    assert_response :success
+    assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "positions", section: "foh")}'] button.shift-pill-delete"
+    assert_select ".shift-pill-delete span[aria-hidden='true']", text: "×", minimum: 1
+  end
+
+  test "a user can delete a shift from the position view and return to the calendar" do
+    sign_in users(:manager)
+
+    assert_difference -> { schedules(:main_week).shifts.count }, -1 do
+      delete location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "positions", section: "foh")
+    end
+
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")
+  end
+
+  test "a user can delete a shift from the employee view and return to the calendar" do
+    sign_in users(:manager)
+
+    assert_difference -> { schedules(:main_week).shifts.count }, -1 do
+      delete location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")
     end
 
     assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")
@@ -335,6 +386,16 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")
   end
 
+  test "current schedule route preserves the both view when opening the current weekly schedule" do
+    sign_in users(:manager)
+
+    travel_to Date.new(2026, 6, 25) do
+      get current_schedule_path(view: "both")
+    end
+
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")
+  end
+
   test "current schedule route preserves the selected section from the session" do
     sign_in users(:manager)
 
@@ -474,6 +535,18 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".print-shift-line", text: /4:00-10:00 PM/
   end
 
+  test "printing from both view renders position and employee grouping" do
+    sign_in users(:manager)
+
+    get print_location_schedule_path(locations(:main), schedules(:main_week), view: "both")
+
+    assert_response :success
+    assert_select ".print-meta strong", text: "Schedule by Position and Employee"
+    assert_select ".print-position-section h2", text: "Servers"
+    assert_select "table.print-employee-table tbody th", text: "Sam Server"
+    assert_select ".print-shift-line", text: /4:00-10:00 PM/
+  end
+
   test "print page includes account location and sunday through saturday date range" do
     sign_in users(:manager)
 
@@ -483,8 +556,19 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".print-header h1", text: "Hickory Grill"
     assert_select ".print-header p", text: "Downtown"
     assert_select ".print-meta", text: /Week of Sunday June 21 22 23 24 25 26 27, 2026/
-    assert_select ".print-day-block h3:first-child", text: "Sunday"
-    assert_select ".print-day-block h3", text: "Saturday"
+    assert_select ".print-day-block h3:first-child", text: "SUN 21"
+    assert_select ".print-day-block h3", text: "SAT 27"
+  end
+
+  test "print page for a cross-month week shows the month only once" do
+    sign_in users(:manager)
+    cross_month_schedule = locations(:main).schedules.create!(week_start_date: Date.new(2026, 6, 28), status: "draft")
+
+    get print_location_schedule_path(locations(:main), cross_month_schedule, view: "positions")
+
+    assert_response :success
+    assert_select ".print-meta", text: /Week of Sunday June 28 29 30 1 2 3 4, 2026/
+    assert_select ".print-meta", text: /July/, count: 0
   end
 
   test "print page omits normal navigation and includes utility controls" do
@@ -616,6 +700,19 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".btn.btn-primary", text: "Employees"
     assert_select "table.schedule-table thead tr th:nth-child(2)", text: "Sun 21"
     assert_select ".schedule-name-column", text: /Sam Server/
+  end
+
+  test "opening a schedule with both view parameter renders positions grouped by employee" do
+    sign_in users(:manager)
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "both")
+
+    assert_response :success
+    assert_select ".btn.btn-primary", text: "Both"
+    assert_select ".card-header h2", text: /Server/
+    assert_select "table.schedule-table thead tr th:first-child", text: "Employee"
+    assert_select ".schedule-name-column", text: /Sam Server/
+    assert_select ".shift-pill", text: /4:00-10:00 PM/
   end
 
   test "boh and foh schedule views stay separated" do

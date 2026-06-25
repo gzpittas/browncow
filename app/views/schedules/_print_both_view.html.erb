@@ -1,0 +1,44 @@
+<div class="print-position-schedule">
+  <% @positions.each do |position| %>
+    <% position_employees = @employees_by_position[position] || [] %>
+    <section class="print-position-section">
+      <h2><%= position.name.pluralize %></h2>
+
+      <% if position_employees.any? %>
+        <table class="print-employee-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <% @week_dates.each do |date| %>
+                <th><%= schedule_day_label(date) %></th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody>
+            <% position_employees.each do |employee| %>
+              <tr>
+                <th><%= employee.display_name %></th>
+                <% @week_dates.each do |date| %>
+                  <% shifts = @shifts_by_employee_position_and_date[[ employee.id, position.id, date ]] || [] %>
+                  <td>
+                    <% if shifts.any? %>
+                      <% shifts.each do |shift| %>
+                        <div class="print-shift-line">
+                          <strong><%= shift_time_range(shift) %></strong>
+                        </div>
+                      <% end %>
+                    <% else %>
+                      <span class="print-off">Off</span>
+                    <% end %>
+                  </td>
+                <% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p class="print-empty">No active employees are assigned to this position yet.</p>
+      <% end %>
+    </section>
+  <% end %>
+</div>

@@ -14,7 +14,15 @@
     </div>
     <div class="print-meta">
       <div><%= schedule_print_week_label(@schedule) %></div>
-      <strong><%= @view_mode == "employees" ? "Schedule by Employee" : "Schedule by Position" %></strong>
+      <strong>
+        <%= if @view_mode == "employees"
+              "Schedule by Employee"
+            elsif @view_mode == "both"
+              "Schedule by Position and Employee"
+            else
+              "Schedule by Position"
+            end %>
+      </strong>
       <div><%= @section_label %></div>
     </div>
   </header>
@@ -28,6 +36,8 @@
 
   <% if @view_mode == "employees" %>
     <%= render "print_employee_view" %>
+  <% elsif @view_mode == "both" %>
+    <%= render "print_both_view" %>
   <% else %>
     <%= render "print_position_view" %>
   <% end %>

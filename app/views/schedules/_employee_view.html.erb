@@ -21,10 +21,7 @@
                 <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>">
                   <div class="d-grid gap-2">
                     <% shifts.each do |shift| %>
-                      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: "employees", section: @section_mode), class: "shift-pill text-decoration-none", style: "--position-color: #{shift.position.display_color}" do %>
-                        <span class="fw-semibold"><%= shift.position.name %></span>
-                        <span class="text-nowrap"><%= shift_time_range(shift) %></span>
-                      <% end %>
+                      <%= render "shift_pill", shift: shift, title: shift.position.name, secondary_text: shift_time_range(shift), view_mode: "employees" %>
                     <% end %>
                     <%= link_to "+ Add Shift", new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, shift_date: date, view: "employees", section: @section_mode), class: "schedule-add-link" %>
                   </div>

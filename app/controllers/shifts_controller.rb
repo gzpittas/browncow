@@ -83,7 +83,7 @@ class ShiftsController < ApplicationController
   end
 
   def schedule_return_path
-    view = params[:view] == "positions" ? "positions" : "employees"
+    view = normalized_schedule_view_mode(params[:view])
     location_schedule_path(@location, @schedule, view: view, section: params[:section].presence || @section_mode)
   end
 

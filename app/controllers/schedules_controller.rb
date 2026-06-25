@@ -45,7 +45,7 @@ class SchedulesController < ApplicationController
 
   def print
     prepare_schedule_view
-    @print_employees = Employee.where(id: @shifts.select(:employee_id)).includes(:positions).order(:first_name, :last_name)
+    @print_employees = Employee.where(id: @shifts.select(:employee_id)).includes(:positions).order(:first_name, :last_name) if @view_mode == "employees"
 
     render layout: "print"
   end
@@ -97,7 +97,7 @@ class SchedulesController < ApplicationController
   end
 
   def prepare_schedule_view
-    @view_mode = params[:view] == "employees" ? "employees" : "positions"
+    @view_mode = normalized_schedule_view_mode(params[:view])
     @section_mode = store_schedule_section_mode!(params[:section].presence || session[:schedule_section_mode])
     @section_label = schedule_section_label(@section_mode)
     @week_dates = @schedule.week_dates
@@ -109,6 +109,10 @@ class SchedulesController < ApplicationController
     @shifts = shifts_for_section.includes(:employee, :position).ordered
     @shifts_by_employee_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.shift_date ] }
     @shifts_by_position_and_date = @shifts.group_by { |shift| [ shift.position_id, shift.shift_date ] }
+    @shifts_by_employee_position_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.position_id, shift.shift_date ] }
+    @employees_by_position = @positions.index_with do |position|
+      position.employees.select(&:active?).sort_by { |employee| [ employee.first_name.to_s.downcase, employee.last_name.to_s.downcase ] }
+    end
     @current_week_schedule = Schedule.current_for(@location)
   end
 

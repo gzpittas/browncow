@@ -5,7 +5,7 @@ module ApplicationHelper
 
   def compact_week_date_label(schedule)
     schedule.week_dates.map do |date|
-      if date == schedule.week_start_date || date.month != schedule.week_start_date.month
+      if date == schedule.week_start_date
         date.strftime("%B %-d")
       else
         date.strftime("%-d")
@@ -23,6 +23,10 @@ module ApplicationHelper
 
   def schedule_day_label(date)
     date.strftime("%a %-d")
+  end
+
+  def schedule_print_position_day_label(date)
+    "#{date.strftime("%a").upcase} #{date.strftime("%-d")}"
   end
 
   def schedule_header_day_name(date)

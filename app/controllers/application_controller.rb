@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   SCHEDULE_SECTION_MODES = %w[foh boh all].freeze
+  SCHEDULE_VIEW_MODES = %w[positions employees both].freeze
 
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
@@ -85,5 +86,12 @@ class ApplicationController < ActionController::Base
     return normalized_value if SCHEDULE_SECTION_MODES.include?(normalized_value)
 
     nil
+  end
+
+  def normalized_schedule_view_mode(value)
+    normalized_value = value.to_s
+    return normalized_value if SCHEDULE_VIEW_MODES.include?(normalized_value)
+
+    "positions"
   end
 end
