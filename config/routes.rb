@@ -1,4 +1,31 @@
 Rails.application.routes.draw do
+  devise_for :users
+
+  root "welcome#index"
+  get "dashboard", to: "dashboard#show"
+
+  resource :account, only: [ :new, :create, :edit, :update ]
+
+  resources :locations, except: [ :show, :destroy ] do
+    patch :deactivate, on: :member
+
+    resources :positions, except: [ :show, :destroy ] do
+      patch :deactivate, on: :member
+    end
+
+    resources :employees, except: [ :show, :destroy ] do
+      patch :deactivate, on: :member
+    end
+
+    resources :schedules do
+      resources :shifts, except: [ :index, :show ]
+    end
+  end
+
+  get "positions", to: "positions#index", as: :positions
+  get "employees", to: "employees#index", as: :employees
+  get "schedules", to: "schedules#index", as: :schedules
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

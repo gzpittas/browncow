@@ -1,0 +1,17 @@
+sam_monday:
+  schedule: main_week
+  employee: sam
+  position: server
+  shift_date: 2026-06-22
+  starts_at: "16:00"
+  ends_at: "22:00"
+  notes:
+
+other_monday:
+  schedule: other_week
+  employee: other_employee
+  position: other_server
+  shift_date: 2026-06-22
+  starts_at: "16:00"
+  ends_at: "22:00"
+  notes:

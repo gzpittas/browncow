@@ -1,0 +1,17 @@
+main:
+  account: main
+  name: Downtown
+  address_line_1: 123 Main Street
+  city: Buffalo
+  state: NY
+  postal_code: "14202"
+  active: true
+
+other:
+  account: other
+  name: Uptown
+  address_line_1: 456 Oak Street
+  city: Buffalo
+  state: NY
+  postal_code: "14203"
+  active: true

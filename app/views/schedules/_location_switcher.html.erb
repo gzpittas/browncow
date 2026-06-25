@@ -1,0 +1,7 @@
+<% if @locations.any? %>
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <% @locations.each do |location| %>
+      <%= link_to location.name, location_schedules_path(location), class: "btn btn-sm #{location == @location ? "btn-primary" : "btn-outline-secondary"}" %>
+    <% end %>
+  </div>
+<% end %>

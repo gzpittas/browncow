@@ -1,0 +1,11 @@
+main_week:
+  location: main
+  week_start_date: 2026-06-21
+  status: draft
+  notes: Main schedule
+
+other_week:
+  location: other
+  week_start_date: 2026-06-21
+  status: draft
+  notes: Other schedule

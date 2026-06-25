@@ -1,0 +1,21 @@
+<% content_for :title, "Edit Schedule" %>
+
+<div class="auth-card card border-0 shadow-sm mx-auto">
+  <div class="card-body p-4 p-md-5">
+    <h1 class="h3 fw-semibold mb-2">Manage schedule</h1>
+    <p class="text-secondary mb-4"><%= @location.name %> · <%= schedule_week_label(@schedule) %></p>
+
+    <%= render "form" %>
+
+    <hr class="my-4">
+
+    <div class="d-flex flex-column gap-2">
+      <h2 class="h5 fw-semibold mb-0">Delete schedule</h2>
+      <p class="text-secondary mb-2">Deleting this schedule will also permanently delete all shifts within this week.</p>
+      <%= button_to "Delete Schedule", location_schedule_path(@location, @schedule),
+            method: :delete,
+            class: "btn btn-outline-danger",
+            form: { onsubmit: "return confirm('Delete this schedule? This will permanently delete all shifts within this week.')" } %>
+    </div>
+  </div>
+</div>

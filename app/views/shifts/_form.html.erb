@@ -1,0 +1,70 @@
+<% form_url = @shift.persisted? ? location_schedule_shift_path(@location, @schedule, @shift, view: params[:view]) : location_schedule_shifts_path(@location, @schedule, view: params[:view], employee_id: @selected_employee&.id, position_id: @selected_position&.id) %>
+
+<%= form_with model: [ @location, @schedule, @shift ], url: form_url do |f| %>
+  <%= render "devise/shared/error_messages", resource: @shift %>
+
+  <div class="border rounded p-3 bg-light mb-4">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="text-secondary small">Location</div>
+        <div class="fw-semibold"><%= @location.name %></div>
+      </div>
+      <div class="col-md-6">
+        <div class="text-secondary small">Week</div>
+        <div class="fw-semibold"><%= schedule_week_label(@schedule) %></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :shift_date, "Shift date", class: "form-label" %>
+    <%= f.date_field :shift_date, class: "form-control" %>
+  </div>
+
+  <% if @selected_employee %>
+    <%= f.hidden_field :employee_id, value: @selected_employee.id %>
+    <div class="mb-3">
+      <label class="form-label">Employee</label>
+      <div class="form-control-plaintext fw-semibold"><%= @selected_employee.display_name %></div>
+    </div>
+  <% else %>
+    <div class="mb-3">
+      <%= f.label :employee_id, "Employee", class: "form-label" %>
+      <%= f.collection_select :employee_id, @employees, :id, :display_name, { prompt: "Choose employee" }, class: "form-select" %>
+    </div>
+  <% end %>
+
+  <% if @selected_position %>
+    <%= f.hidden_field :position_id, value: @selected_position.id %>
+    <div class="mb-3">
+      <label class="form-label">Position</label>
+      <div class="form-control-plaintext fw-semibold"><%= @selected_position.name %></div>
+    </div>
+  <% else %>
+    <div class="mb-3">
+      <%= f.label :position_id, "Position", class: "form-label" %>
+      <%= f.collection_select :position_id, @positions, :id, :name, { prompt: "Choose position" }, class: "form-select" %>
+    </div>
+  <% end %>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <%= f.label :starts_at, "Start time", class: "form-label" %>
+      <%= f.select :starts_at, half_hour_time_options, { prompt: "Select a time", selected: time_select_value(@shift.starts_at) }, class: "form-select" %>
+    </div>
+    <div class="col-md-6">
+      <%= f.label :ends_at, "End time", class: "form-label" %>
+      <%= f.select :ends_at, half_hour_time_options, { prompt: "Select a time", selected: time_select_value(@shift.ends_at) }, class: "form-select" %>
+    </div>
+  </div>
+
+  <div class="my-3">
+    <%= f.label :notes, class: "form-label" %>
+    <%= f.text_area :notes, rows: 3, class: "form-control" %>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center gap-2 mt-4">
+    <%= link_to "Cancel", location_schedule_path(@location, @schedule, view: params[:view]), class: "btn btn-outline-secondary" %>
+    <%= f.submit @shift.persisted? ? "Update Shift" : "Save Shift", class: "btn btn-primary" %>
+  </div>
+<% end %>

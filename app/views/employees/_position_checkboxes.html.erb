@@ -1,0 +1,21 @@
+<div class="mb-4">
+  <label class="form-label">Positions</label>
+
+  <% if @positions.any? %>
+    <div class="border rounded p-3 bg-white">
+      <%= f.collection_check_boxes :position_ids, @positions, :id, :name do |box| %>
+        <div class="form-check">
+          <%= box.check_box(class: "form-check-input") %>
+          <%= box.label(class: "form-check-label") %>
+          <% unless box.object.active? %>
+            <span class="badge text-bg-secondary ms-1">Inactive</span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="border rounded p-3 bg-light text-secondary">
+      Add positions for this location before assigning them to employees.
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,17 @@
+sam:
+  location: main
+  first_name: Sam
+  last_name: Server
+  phone_number: 555-1111
+  email: sam@example.com
+  active: true
+  notes:
+
+other_employee:
+  location: other
+  first_name: Pat
+  last_name: Prep
+  phone_number: 555-2222
+  email: pat@example.com
+  active: true
+  notes:

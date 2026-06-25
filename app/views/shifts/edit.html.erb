@@ -1,0 +1,17 @@
+<% content_for :title, "Edit Shift" %>
+
+<div class="card border-0 shadow-sm mx-auto form-card-wide">
+  <div class="card-body p-4 p-md-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+      <div>
+        <h1 class="h3 fw-semibold mb-2">Edit shift</h1>
+        <p class="text-secondary mb-0"><%= @shift.employee.display_name %> · <%= @shift.position.name %> · <%= @shift.shift_date.strftime("%A, %B %-d") %></p>
+      </div>
+      <div>
+        <%= button_to "Delete Shift", location_schedule_shift_path(@location, @schedule, @shift), method: :delete, class: "btn btn-outline-danger" %>
+      </div>
+    </div>
+
+    <%= render "form" %>
+  </div>
+</div>

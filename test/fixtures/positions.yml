@@ -1,0 +1,14 @@
+server:
+  location: main
+  name: Server
+  active: true
+
+bartender:
+  location: main
+  name: Bartender
+  active: true
+
+other_server:
+  location: other
+  name: Server
+  active: true

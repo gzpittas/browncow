@@ -1,0 +1,57 @@
+<% content_for :title, "Locations" %>
+
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+  <div>
+    <p class="text-uppercase small fw-semibold text-primary mb-2">Setup</p>
+    <h1 class="h2 fw-semibold mb-0">Locations</h1>
+  </div>
+  <%= link_to "Add Location", new_location_path, class: "btn btn-primary" %>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <% if @locations.any? %>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @locations.each do |location| %>
+              <tr>
+                <td class="fw-medium"><%= location.name %></td>
+                <td class="text-secondary">
+                  <%= [ location.address_line_1, location.city, location.state, location.postal_code ].compact_blank.join(", ").presence || "Not added" %>
+                </td>
+                <td>
+                  <span class="badge <%= location.active? ? "text-bg-success" : "text-bg-secondary" %>">
+                    <%= location.active? ? "Active" : "Inactive" %>
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex gap-2">
+                    <%= link_to "Edit", edit_location_path(location), class: "btn btn-sm btn-outline-secondary" %>
+                    <% if location.active? %>
+                      <%= button_to "Mark Inactive", deactivate_location_path(location), method: :patch, class: "btn btn-sm btn-outline-secondary" %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-4 p-md-5">
+        <h2 class="h4 fw-semibold mb-2">Add your first location</h2>
+        <p class="text-secondary mb-4">Locations keep positions and employees organized for each restaurant.</p>
+        <%= link_to "Add Location", new_location_path, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

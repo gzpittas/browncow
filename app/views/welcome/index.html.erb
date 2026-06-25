@@ -1,0 +1,34 @@
+<% content_for :title, "Hickory Clock" %>
+
+<section class="welcome-panel mx-auto">
+  <div class="row align-items-center g-4 g-lg-5">
+    <div class="col-lg-7">
+      <p class="text-uppercase small fw-semibold text-primary mb-3">Hickory Clock</p>
+      <h1 class="display-5 fw-semibold text-dark mb-3">Restaurant scheduling, without the complicated software.</h1>
+      <p class="lead text-secondary mb-4">
+        Build, share, and adjust weekly schedules simply, so managers can spend less time wrestling with software and more time running the restaurant.
+      </p>
+      <%= link_to "Sign In", new_user_session_path, class: "btn btn-primary btn-lg px-4" %>
+    </div>
+    <div class="col-lg-5">
+      <div class="schedule-preview border bg-white shadow-sm">
+        <div class="d-flex justify-content-between align-items-center border-bottom px-4 py-3">
+          <div>
+            <p class="fw-semibold mb-0">Weekly Schedule</p>
+            <p class="small text-secondary mb-0">Simple planning view</p>
+          </div>
+          <span class="badge text-bg-light border">Preview</span>
+        </div>
+        <div class="p-4">
+          <% [ "Sunday", "Monday", "Tuesday" ].each do |day| %>
+            <div class="d-flex align-items-center justify-content-between py-3 border-bottom">
+              <span class="fw-medium"><%= day %></span>
+              <span class="text-secondary small">No shifts yet</span>
+            </div>
+          <% end %>
+          <div class="text-secondary small pt-3">Restaurant setup comes next.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

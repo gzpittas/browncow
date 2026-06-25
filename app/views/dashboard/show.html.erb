@@ -1,0 +1,80 @@
+<% content_for :title, "Dashboard" %>
+
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+  <div>
+    <p class="text-uppercase small fw-semibold text-primary mb-2">Dashboard</p>
+    <h1 class="h2 fw-semibold mb-0">Welcome, <%= current_user.first_name.presence || current_user.display_name %></h1>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-md-5">
+        <h2 class="h4 fw-semibold mb-3">Set up your restaurant</h2>
+        <p class="text-secondary mb-4">
+          Add the basics first. Once locations, positions, and employees are in place, weekly scheduling can be built on top of real restaurant data.
+        </p>
+
+        <div class="list-group list-group-flush setup-checklist">
+          <%= link_to locations_path, class: "list-group-item list-group-item-action d-flex align-items-center justify-content-between px-0" do %>
+            <span>1. Add a location</span>
+            <span class="badge <%= @locations_count.positive? ? "text-bg-success" : "text-bg-light border text-secondary" %>">
+              <%= @locations_count.positive? ? "Done" : "Next" %>
+            </span>
+          <% end %>
+
+          <%= link_to positions_path, class: "list-group-item list-group-item-action d-flex align-items-center justify-content-between px-0" do %>
+            <span>2. Add positions</span>
+            <span class="badge <%= @positions_count.positive? ? "text-bg-success" : "text-bg-light border text-secondary" %>">
+              <%= @positions_count.positive? ? "Done" : "Pending" %>
+            </span>
+          <% end %>
+
+          <%= link_to employees_path, class: "list-group-item list-group-item-action d-flex align-items-center justify-content-between px-0" do %>
+            <span>3. Add employees</span>
+            <span class="badge <%= @employees_count.positive? ? "text-bg-success" : "text-bg-light border text-secondary" %>">
+              <%= @employees_count.positive? ? "Done" : "Pending" %>
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="schedule-stack d-grid gap-3">
+      <section class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+              <h2 class="h5 fw-semibold mb-2">This Week's Schedule</h2>
+              <% if @current_week_schedule %>
+                <p class="text-secondary small mb-3">A schedule exists for <%= @first_active_location.name %>.</p>
+                <%= link_to "Open Schedule", location_schedule_path(@first_active_location, @current_week_schedule), class: "btn btn-sm btn-primary" %>
+              <% elsif @setup_complete && @first_active_location %>
+                <p class="text-secondary small mb-3">Your setup is ready for scheduling.</p>
+                <%= link_to "Create your first weekly schedule", location_schedules_path(@first_active_location), class: "btn btn-sm btn-primary" %>
+              <% else %>
+                <p class="text-secondary small mb-0">Finish locations, positions, and employees before scheduling.</p>
+              <% end %>
+            </div>
+            <span class="badge text-bg-light border"><%= @current_week_schedule ? "Ready" : "Draft" %></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card border-0 shadow-sm schedule-card-disabled" aria-disabled="true">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+              <h2 class="h5 fw-semibold mb-2">Next Week's Schedule</h2>
+              <p class="text-secondary small mb-0">Plan-ahead tools will appear here later.</p>
+            </div>
+            <span class="badge text-bg-light border">Coming soon</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

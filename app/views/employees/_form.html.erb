@@ -1,0 +1,46 @@
+<%= form_with model: [ @location, @employee ] do |f| %>
+  <%= render "devise/shared/error_messages", resource: @employee %>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <%= f.label :first_name, class: "form-label" %>
+      <%= f.text_field :first_name, autofocus: true, class: "form-control" %>
+    </div>
+
+    <div class="col-md-6">
+      <%= f.label :last_name, class: "form-label" %>
+      <%= f.text_field :last_name, class: "form-control" %>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-0">
+    <div class="col-md-6">
+      <%= f.label :phone_number, "Phone number", class: "form-label" %>
+      <%= f.telephone_field :phone_number, class: "form-control" %>
+    </div>
+
+    <div class="col-md-6">
+      <%= f.label :email, class: "form-label" %>
+      <%= f.email_field :email, class: "form-control" %>
+    </div>
+  </div>
+
+  <div class="my-3">
+    <%= f.label :notes, class: "form-label" %>
+    <%= f.text_area :notes, rows: 4, class: "form-control" %>
+  </div>
+
+  <%= render "position_checkboxes", f: f %>
+
+  <% if @employee.persisted? %>
+    <div class="form-check mb-4">
+      <%= f.check_box :active, class: "form-check-input" %>
+      <%= f.label :active, "Active", class: "form-check-label" %>
+    </div>
+  <% end %>
+
+  <div class="d-flex justify-content-between align-items-center gap-2">
+    <%= link_to "Back", location_employees_path(@location), class: "btn btn-outline-secondary" %>
+    <%= f.submit @employee.persisted? ? "Save Employee" : "Add Employee", class: "btn btn-primary" %>
+  </div>
+<% end %>

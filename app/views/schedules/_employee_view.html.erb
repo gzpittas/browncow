@@ -1,0 +1,49 @@
+<div class="card border-0 shadow-sm schedule-board">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-bordered align-top mb-0 schedule-table">
+        <thead>
+          <tr>
+            <th class="schedule-name-column bg-white">Employee</th>
+            <% @week_dates.each do |date| %>
+              <th class="text-center bg-white"><%= schedule_day_label(date) %></th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <% @employees.each do |employee| %>
+            <tr>
+              <th class="schedule-name-column bg-white">
+                <span class="fw-semibold"><%= employee.display_name %></span>
+              </th>
+              <% @week_dates.each do |date| %>
+                <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
+                <td class="schedule-cell">
+                  <div class="d-grid gap-2">
+                    <% shifts.each do |shift| %>
+                      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: "employees"), class: "shift-pill text-decoration-none" do %>
+                        <span class="fw-semibold"><%= shift.position.name %></span>
+                        <span class="text-nowrap"><%= shift_time_range(shift) %></span>
+                      <% end %>
+                    <% end %>
+                    <%= link_to "+ Add Shift", new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, shift_date: date, view: "employees"), class: "schedule-add-link" %>
+                  </div>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+
+          <% if @employees.empty? %>
+            <tr>
+              <td colspan="8" class="p-4 p-md-5 text-center">
+                <h2 class="h5 fw-semibold mb-2">Add employees first</h2>
+                <p class="text-secondary mb-3">The schedule grid will show active employees for this location.</p>
+                <%= link_to "Add Employees", location_employees_path(@location), class: "btn btn-primary" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+main:
+  name: Hickory Grill
+  phone_number: 555-0100
+  email: manager@example.com
+
+other:
+  name: Other Cafe
+  phone_number: 555-0200
+  email: owner@example.com

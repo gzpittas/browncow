@@ -1,0 +1,67 @@
+<% content_for :title, "Schedules" %>
+
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+  <div>
+    <p class="text-uppercase small fw-semibold text-primary mb-2">Schedule</p>
+    <h1 class="h2 fw-semibold mb-0">Weekly Schedules</h1>
+  </div>
+
+  <% if @location %>
+    <div class="d-flex flex-wrap gap-2">
+      <% if @current_week_schedule %>
+        <%= link_to "Open This Week", location_schedule_path(@location, @current_week_schedule), class: "btn btn-primary" %>
+      <% else %>
+        <%= button_to "Create This Week's Schedule", location_schedules_path(@location), method: :post, params: { schedule: { week_start_date: @current_week_start } }, class: "btn btn-primary" %>
+      <% end %>
+      <%= link_to "Create New Weekly Schedule", new_location_schedule_path(@location), class: "btn btn-outline-primary" %>
+    </div>
+  <% end %>
+</div>
+
+<%= render "location_switcher" %>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <% if @location.blank? %>
+      <div class="p-4 p-md-5">
+        <h2 class="h4 fw-semibold mb-2">Add a location first</h2>
+        <p class="text-secondary mb-4">Weekly schedules belong to a restaurant location.</p>
+        <%= link_to "Add Location", new_location_path, class: "btn btn-primary" %>
+      </div>
+    <% elsif @schedules.any? %>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Week</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @schedules.each do |schedule| %>
+              <tr>
+                <td class="fw-medium"><%= schedule_week_label(schedule) %></td>
+                <td><span class="badge text-bg-light border"><%= schedule.status.titleize %></span></td>
+                <td class="text-secondary"><%= truncate(schedule.notes.presence || "No notes", length: 70) %></td>
+                <td class="text-end">
+                  <div class="d-inline-flex gap-2">
+                    <%= link_to "Open", location_schedule_path(@location, schedule), class: "btn btn-sm btn-primary" %>
+                    <%= link_to "Manage", edit_location_schedule_path(@location, schedule), class: "btn btn-sm btn-outline-secondary" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-4 p-md-5">
+        <h2 class="h4 fw-semibold mb-2">Create your first weekly schedule</h2>
+        <p class="text-secondary mb-4">Start with a blank Sunday-through-Saturday week for <%= @location.name %>.</p>
+        <%= button_to "Create This Week's Schedule", location_schedules_path(@location), method: :post, params: { schedule: { week_start_date: @current_week_start } }, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

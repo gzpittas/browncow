@@ -1,0 +1,33 @@
+<% content_for :title, schedule_week_label(@schedule) %>
+
+<div class="d-flex flex-column flex-xl-row align-items-xl-start justify-content-between gap-3 mb-4">
+  <div>
+    <p class="text-uppercase small fw-semibold text-primary mb-2"><%= @location.name %></p>
+    <h1 class="h2 fw-semibold mb-1"><%= schedule_week_label(@schedule) %></h1>
+    <p class="text-secondary mb-0"><span class="badge text-bg-light border"><%= @schedule.status.titleize %></span></p>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2">
+    <% if @previous_schedule %>
+      <%= link_to "Previous Week", location_schedule_path(@location, @previous_schedule, view: @view_mode), class: "btn btn-outline-secondary" %>
+    <% end %>
+    <% if @next_schedule %>
+      <%= link_to "Next Week", location_schedule_path(@location, @next_schedule, view: @view_mode), class: "btn btn-outline-secondary" %>
+    <% end %>
+    <%= link_to "All Schedules", location_schedules_path(@location), class: "btn btn-outline-secondary" %>
+    <%= link_to "Manage Schedule", edit_location_schedule_path(@location, @schedule), class: "btn btn-outline-secondary" %>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+  <div class="btn-group" role="group" aria-label="Schedule view">
+    <%= link_to "Positions", location_schedule_path(@location, @schedule, view: "positions"), class: "btn #{@view_mode == "positions" ? "btn-primary" : "btn-outline-primary"}" %>
+    <%= link_to "Employees", location_schedule_path(@location, @schedule, view: "employees"), class: "btn #{@view_mode == "employees" ? "btn-primary" : "btn-outline-primary"}" %>
+  </div>
+</div>
+
+<% if @view_mode == "positions" %>
+  <%= render "position_view" %>
+<% else %>
+  <%= render "employee_view" %>
+<% end %>

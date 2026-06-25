@@ -1,0 +1,25 @@
+<%= form_with model: @account, url: @account.persisted? ? account_path : account_path do |f| %>
+  <%= render "devise/shared/error_messages", resource: @account %>
+
+  <div class="mb-3">
+    <%= f.label :name, "Restaurant or business name", class: "form-label" %>
+    <%= f.text_field :name, autofocus: true, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :phone_number, "Phone number", class: "form-label" %>
+    <%= f.telephone_field :phone_number, class: "form-control" %>
+  </div>
+
+  <div class="mb-4">
+    <%= f.label :email, "Email", class: "form-label" %>
+    <%= f.email_field :email, class: "form-control" %>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2">
+    <% if @account.persisted? %>
+      <%= link_to "Cancel", dashboard_path, class: "btn btn-outline-secondary" %>
+    <% end %>
+    <%= f.submit @account.persisted? ? "Save Account" : "Create Account", class: "btn btn-primary" %>
+  </div>
+<% end %>

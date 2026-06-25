@@ -1,0 +1,7 @@
+sam_server:
+  employee: sam
+  position: server
+
+other_employee_server:
+  employee: other_employee
+  position: other_server

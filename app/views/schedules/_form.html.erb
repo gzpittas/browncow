@@ -1,0 +1,26 @@
+<%= form_with model: [ @location, @schedule ] do |f| %>
+  <%= render "devise/shared/error_messages", resource: @schedule %>
+
+  <% unless @schedule.persisted? %>
+    <div class="mb-3">
+      <%= f.label :week_start_date, "Schedule week", class: "form-label" %>
+      <%= f.select :week_start_date, schedule_week_options(@location, @schedule.week_start_date), { selected: @schedule.week_start_date&.iso8601 }, class: "form-select" %>
+    </div>
+  <% else %>
+    <div class="mb-3">
+      <div class="form-label">Schedule week</div>
+      <div class="form-control-plaintext fw-semibold"><%= schedule_week_label(@schedule) %></div>
+      <div class="form-text">The schedule week cannot be changed after creation. Create a new schedule if you selected the wrong week.</div>
+    </div>
+  <% end %>
+
+  <div class="mb-4">
+    <%= f.label :notes, class: "form-label" %>
+    <%= f.text_area :notes, rows: 4, class: "form-control" %>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center gap-2">
+    <%= link_to @schedule.persisted? ? "Return to Weekly Schedule" : "Cancel", @schedule.persisted? ? location_schedule_path(@location, @schedule) : location_schedules_path(@location), class: "btn btn-outline-secondary" %>
+    <%= f.submit @schedule.persisted? ? "Save Notes" : "Create Schedule", class: "btn btn-primary" %>
+  </div>
+<% end %>

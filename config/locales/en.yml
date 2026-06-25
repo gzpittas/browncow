@@ -29,3 +29,8 @@
 
 en:
   hello: "Hello world"
+  activerecord:
+    attributes:
+      shift:
+        starts_at: "Start time"
+        ends_at: "End time"
