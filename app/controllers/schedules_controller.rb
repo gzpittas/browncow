@@ -45,7 +45,7 @@ class SchedulesController < ApplicationController
 
   def print
     prepare_schedule_view
-    @print_employees = Employee.where(id: @shifts.select(:employee_id)).includes(:positions).order(:last_name, :first_name)
+    @print_employees = Employee.where(id: @shifts.select(:employee_id)).includes(:positions).order(:first_name, :last_name)
 
     render layout: "print"
   end
@@ -67,7 +67,7 @@ class SchedulesController < ApplicationController
   end
 
   def current
-    destination = current_schedule_destination_for(current_user, view: params[:view])
+    destination = current_schedule_destination_for(current_user, view: params[:view], section: params[:section])
 
     if current_schedule_record.present?
       redirect_to destination
@@ -98,10 +98,15 @@ class SchedulesController < ApplicationController
 
   def prepare_schedule_view
     @view_mode = params[:view] == "employees" ? "employees" : "positions"
+    @section_mode = store_schedule_section_mode!(params[:section].presence || session[:schedule_section_mode])
+    @section_label = schedule_section_label(@section_mode)
     @week_dates = @schedule.week_dates
-    @employees = @location.employees.active.includes(:positions).order(:last_name, :first_name)
-    @positions = @location.positions.active.includes(:employees).order(:name)
-    @shifts = @schedule.shifts.includes(:employee, :position).ordered
+    @positions = positions_for_section.includes(:employees).ordered
+    @employees = employees_for_section
+      .includes(:positions)
+      .distinct
+      .order(:first_name, :last_name)
+    @shifts = shifts_for_section.includes(:employee, :position).ordered
     @shifts_by_employee_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.shift_date ] }
     @shifts_by_position_and_date = @shifts.group_by { |shift| [ shift.position_id, shift.shift_date ] }
     @current_week_schedule = Schedule.current_for(@location)
@@ -129,5 +134,32 @@ class SchedulesController < ApplicationController
     true
   rescue ActiveRecord::RecordInvalid
     false
+  end
+
+  def positions_for_section
+    scope = @location.positions.active
+    return scope if @section_mode == "all"
+
+    scope.where(section: @section_mode)
+  end
+
+  def employees_for_section
+    scope = @location.employees.active.joins(:positions)
+    return scope if @section_mode == "all"
+
+    scope.where(positions: { section: @section_mode })
+  end
+
+  def shifts_for_section
+    scope = @schedule.shifts.joins(:position)
+    return scope if @section_mode == "all"
+
+    scope.where(positions: { section: @section_mode })
+  end
+
+  def schedule_section_label(section_mode)
+    return "All Divisions" if section_mode == "all"
+
+    Position::SECTIONS.fetch(section_mode)
   end
 end

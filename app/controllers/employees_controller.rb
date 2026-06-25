@@ -7,7 +7,7 @@ class EmployeesController < ApplicationController
   before_action :set_positions, only: [ :index, :new, :create, :edit, :update ]
 
   def index
-    @employees = @location ? @location.employees.includes(:positions).order(active: :desc, last_name: :asc, first_name: :asc) : Employee.none
+    @employees = @location ? @location.employees.includes(:positions).order(active: :desc, first_name: :asc, last_name: :asc) : Employee.none
   end
 
   def new
@@ -63,7 +63,7 @@ class EmployeesController < ApplicationController
   end
 
   def set_positions
-    @positions = @location ? @location.positions.order(active: :desc, name: :asc) : Position.none
+    @positions = @location ? @location.positions.ordered : Position.none
   end
 
   def employee_params

@@ -20,49 +20,70 @@
         <p class="text-secondary mb-4">Positions belong to a restaurant location.</p>
         <%= link_to "Add Location", new_location_path, class: "btn btn-primary" %>
       </div>
-    <% elsif @positions.any? %>
-      <div class="table-responsive">
-        <table class="table align-middle mb-0">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Location</th>
-              <th>Status</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @positions.each do |position| %>
-              <tr>
-                <td class="fw-medium">
-                  <span class="position-list-swatch" style="--position-color: <%= position.display_color %>"></span>
-                  <%= position.name %>
-                </td>
-                <td class="text-secondary"><%= @location.name %></td>
-                <td>
-                  <span class="badge <%= position.active? ? "text-bg-success" : "text-bg-secondary" %>">
-                    <%= position.active? ? "Active" : "Inactive" %>
-                  </span>
-                </td>
-                <td class="text-end">
-                  <div class="d-inline-flex gap-2">
-                    <%= link_to "Edit", edit_location_position_path(@location, position), class: "btn btn-sm btn-outline-secondary" %>
-                    <% if position.active? %>
-                      <%= button_to "Mark Inactive", deactivate_location_position_path(@location, position), method: :patch, class: "btn btn-sm btn-outline-secondary" %>
-                    <% end %>
-                  </div>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
     <% else %>
-      <div class="p-4 p-md-5">
-        <h2 class="h4 fw-semibold mb-2">Add positions for <%= @location.name %></h2>
-        <p class="text-secondary mb-4">Examples include Server, Bartender, Host, Line Cook, Prep Cook, Dishwasher, and Manager.</p>
-        <%= link_to "Add Position", new_location_position_path(@location), class: "btn btn-primary" %>
-      </div>
+      <% [[ "Back of House", "boh", @boh_positions ], [ "Front of House", "foh", @foh_positions ]].each do |division_label, division_key, positions| %>
+        <section class="border-top">
+          <div class="p-4 p-md-5 pb-3">
+            <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+              <div>
+                <h2 class="h4 fw-semibold mb-1"><%= division_label %></h2>
+                <p class="text-secondary mb-0"><%= division_label == "Back of House" ? "Kitchen and prep positions." : "Service and guest-facing positions." %></p>
+              </div>
+              <%= link_to "Add Position", new_location_position_path(@location), class: "btn btn-primary" %>
+            </div>
+
+            <% if positions.any? %>
+              <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th class="position-drag-column"></th>
+                      <th>Name</th>
+                      <th>Location</th>
+                      <th>Status</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    data-controller="position-sort"
+                    data-position-sort-url-value="<%= reorder_location_positions_path(@location) %>"
+                    data-position-sort-section-value="<%= division_key %>">
+                    <% positions.each do |position| %>
+                      <tr draggable="true" data-position-sort-target="row" data-position-id="<%= position.id %>">
+                        <td class="position-drag-column text-center text-secondary">
+                          <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none px-1 position-drag-handle" aria-label="Drag to reorder">
+                            <i class="bi bi-grip-vertical"></i>
+                          </button>
+                        </td>
+                        <td class="fw-medium">
+                          <span class="position-list-swatch" style="--position-color: <%= position.display_color %>"></span>
+                          <%= position.name %>
+                        </td>
+                        <td class="text-secondary"><%= @location.name %></td>
+                        <td>
+                          <span class="badge <%= position.active? ? "text-bg-success" : "text-bg-secondary" %>">
+                            <%= position.active? ? "Active" : "Inactive" %>
+                          </span>
+                        </td>
+                        <td class="text-end">
+                          <div class="d-inline-flex gap-2">
+                            <%= link_to "Edit", edit_location_position_path(@location, position), class: "btn btn-sm btn-outline-secondary" %>
+                            <% if position.active? %>
+                              <%= button_to "Mark Inactive", deactivate_location_position_path(@location, position), method: :patch, class: "btn btn-sm btn-outline-secondary" %>
+                            <% end %>
+                          </div>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            <% else %>
+              <div class="text-secondary">No positions in this division yet.</div>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
     <% end %>
   </div>
 </div>

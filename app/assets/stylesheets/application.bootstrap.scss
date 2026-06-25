@@ -64,6 +64,43 @@ body {
   border-radius: 0.5rem;
 }
 
+.schedule-week-cards {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin-bottom: 1rem;
+  max-width: 52rem;
+}
+
+.schedule-week-card {
+  background: #fffaf4;
+  border: 1px solid rgba(47, 42, 36, 0.12);
+  border-radius: 0.65rem;
+  padding: 0.6rem 0.45rem 0.55rem;
+  text-align: center;
+}
+
+.schedule-week-card.is-today {
+  background: color-mix(in srgb, var(--hc-primary) 14%, white);
+  border-color: color-mix(in srgb, var(--hc-primary) 38%, white);
+  box-shadow: inset 0 0 0 1px rgba(138, 79, 42, 0.18);
+}
+
+.schedule-week-card-name {
+  color: #7a6e62;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.2rem;
+}
+
+.schedule-week-card-date {
+  color: #2f2a24;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .schedule-table {
   min-width: 980px;
   table-layout: fixed;
@@ -72,6 +109,10 @@ body {
 .schedule-table th,
 .schedule-table td {
   width: 12.5%;
+}
+
+.schedule-today-column {
+  background: color-mix(in srgb, var(--hc-primary) 8%, white) !important;
 }
 
 .schedule-name-column {
@@ -180,6 +221,22 @@ body {
   border-radius: 0.3rem;
   height: 1rem;
   width: 1rem;
+}
+
+.position-drag-column {
+  width: 2.75rem;
+}
+
+.position-drag-handle {
+  cursor: grab;
+}
+
+tbody[data-controller~="position-sort"] tr[draggable="true"] {
+  cursor: grab;
+}
+
+tbody[data-controller~="position-sort"] tr.is-dragging {
+  opacity: 0.55;
 }
 
 .print-body {
@@ -326,6 +383,13 @@ body {
 .print-off,
 .print-empty {
   color: #666;
+}
+
+@media (max-width: 767.98px) {
+  .schedule-week-cards {
+    gap: 0.5rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 @media print {

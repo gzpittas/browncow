@@ -1,4 +1,4 @@
-<% form_url = @shift.persisted? ? location_schedule_shift_path(@location, @schedule, @shift, view: params[:view]) : location_schedule_shifts_path(@location, @schedule, view: params[:view], employee_id: @selected_employee&.id, position_id: @selected_position&.id) %>
+<% form_url = @shift.persisted? ? location_schedule_shift_path(@location, @schedule, @shift, view: params[:view], section: params[:section]) : location_schedule_shifts_path(@location, @schedule, view: params[:view], section: params[:section], employee_id: @selected_employee&.id, position_id: @selected_position&.id) %>
 
 <%= form_with model: [ @location, @schedule, @shift ], url: form_url do |f| %>
   <%= render "devise/shared/error_messages", resource: @shift %>
@@ -12,6 +12,18 @@
       <div class="col-md-6">
         <div class="text-secondary small">Week</div>
         <div class="fw-semibold"><%= schedule_week_label(@schedule) %></div>
+      </div>
+      <div class="col-md-6">
+        <div class="text-secondary small">Division</div>
+        <div class="fw-semibold">
+          <%= if @section_mode == "all"
+                "All Divisions"
+              elsif @section_mode == "foh"
+                "Front of House"
+              else
+                "Back of House"
+              end %>
+        </div>
       </div>
     </div>
   </div>
@@ -64,7 +76,7 @@
   </div>
 
   <div class="d-flex justify-content-between align-items-center gap-2 mt-4">
-    <%= link_to "Cancel", location_schedule_path(@location, @schedule, view: params[:view]), class: "btn btn-outline-secondary" %>
+    <%= link_to "Cancel", location_schedule_path(@location, @schedule, view: params[:view], section: params[:section]), class: "btn btn-outline-secondary" %>
     <%= f.submit @shift.persisted? ? "Update Shift" : "Save Shift", class: "btn btn-primary" %>
   </div>
 <% end %>

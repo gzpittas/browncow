@@ -18,4 +18,25 @@ class PositionTest < ActiveSupport::TestCase
 
     assert_equal Position::COLOR_PALETTE.first, position.display_color
   end
+
+  test "section must be back of house or front of house" do
+    position = positions(:server)
+
+    position.section = "boh"
+    assert position.valid?
+
+    position.section = "kitchen"
+    assert_not position.valid?
+    assert_includes position.errors[:section], "is not included in the list"
+  end
+
+  test "new positions are placed at the end of their division order" do
+    position = locations(:main).positions.create!(
+      name: "Host",
+      section: "foh",
+      color: Position::COLOR_PALETTE.first
+    )
+
+    assert_equal 3, position.position_order
+  end
 end

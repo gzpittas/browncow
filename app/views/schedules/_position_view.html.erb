@@ -1,4 +1,8 @@
 <div class="d-grid gap-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="badge text-bg-light border"><%= @section_label %></div>
+  </div>
+
   <% @positions.each do |position| %>
     <section class="card border-0 shadow-sm schedule-board">
       <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -14,7 +18,7 @@
             <thead>
               <tr>
                 <% @week_dates.each do |date| %>
-                  <th class="text-center bg-white"><%= schedule_day_label(date) %></th>
+                  <th class="text-center bg-white <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
                 <% end %>
               </tr>
             </thead>
@@ -22,15 +26,15 @@
               <tr>
                 <% @week_dates.each do |date| %>
                   <% shifts = @shifts_by_position_and_date[[ position.id, date ]] || [] %>
-                  <td class="schedule-cell">
+                  <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>">
                     <div class="d-grid gap-2">
                       <% shifts.each do |shift| %>
-                        <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: "positions"), class: "shift-pill text-decoration-none", style: "--position-color: #{shift.position.display_color}" do %>
+                        <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: "positions", section: @section_mode), class: "shift-pill text-decoration-none", style: "--position-color: #{shift.position.display_color}" do %>
                           <span class="fw-semibold"><%= shift.employee.display_name %></span>
                           <span class="text-nowrap"><%= shift_time_range(shift) %></span>
                         <% end %>
                       <% end %>
-                      <%= link_to "+ Add #{position.name}", new_location_schedule_shift_path(@location, @schedule, position_id: position.id, shift_date: date, view: "positions"), class: "schedule-add-link" %>
+                      <%= link_to "+ Add #{position.name}", new_location_schedule_shift_path(@location, @schedule, position_id: position.id, shift_date: date, view: "positions", section: @section_mode), class: "schedule-add-link" %>
                     </div>
                   </td>
                 <% end %>

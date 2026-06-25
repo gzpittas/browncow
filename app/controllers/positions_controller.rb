@@ -6,7 +6,8 @@ class PositionsController < ApplicationController
   before_action :set_position, only: [ :edit, :update, :deactivate ]
 
   def index
-    @positions = @location ? @location.positions.order(active: :desc, name: :asc) : Position.none
+    @boh_positions = @location ? @location.positions.boh.ordered : Position.none
+    @foh_positions = @location ? @location.positions.foh.ordered : Position.none
   end
 
   def new
@@ -39,6 +40,25 @@ class PositionsController < ApplicationController
     redirect_to location_positions_path(@location), notice: "Position marked inactive."
   end
 
+  def reorder
+    section = params.require(:position).fetch(:section)
+    ordered_ids = Array(params[:position][:ordered_ids]).map(&:to_i)
+    positions = @location.positions.where(id: ordered_ids)
+
+    if !Position::SECTIONS.key?(section) || positions.size != ordered_ids.size || positions.where.not(section: section).exists?
+      head :unprocessable_entity
+      return
+    end
+
+    Position.transaction do
+      ordered_ids.each_with_index do |id, index|
+        positions.find { |position| position.id == id }&.update_columns(position_order: index + 1)
+      end
+    end
+
+    head :ok
+  end
+
   private
 
   def set_locations
@@ -58,6 +78,6 @@ class PositionsController < ApplicationController
   end
 
   def position_params
-    params.require(:position).permit(:name, :color, :active)
+    params.require(:position).permit(:name, :section, :color, :active)
   end
 end

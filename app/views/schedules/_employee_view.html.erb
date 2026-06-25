@@ -6,7 +6,7 @@
           <tr>
             <th class="schedule-name-column bg-white">Employee</th>
             <% @week_dates.each do |date| %>
-              <th class="text-center bg-white"><%= schedule_day_label(date) %></th>
+              <th class="text-center bg-white <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
             <% end %>
           </tr>
         </thead>
@@ -18,15 +18,15 @@
               </th>
               <% @week_dates.each do |date| %>
                 <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
-                <td class="schedule-cell">
+                <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>">
                   <div class="d-grid gap-2">
                     <% shifts.each do |shift| %>
-                      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: "employees"), class: "shift-pill text-decoration-none", style: "--position-color: #{shift.position.display_color}" do %>
+                      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: "employees", section: @section_mode), class: "shift-pill text-decoration-none", style: "--position-color: #{shift.position.display_color}" do %>
                         <span class="fw-semibold"><%= shift.position.name %></span>
                         <span class="text-nowrap"><%= shift_time_range(shift) %></span>
                       <% end %>
                     <% end %>
-                    <%= link_to "+ Add Shift", new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, shift_date: date, view: "employees"), class: "schedule-add-link" %>
+                    <%= link_to "+ Add Shift", new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, shift_date: date, view: "employees", section: @section_mode), class: "schedule-add-link" %>
                   </div>
                 </td>
               <% end %>

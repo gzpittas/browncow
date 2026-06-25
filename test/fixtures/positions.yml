@@ -1,17 +1,23 @@
 server:
   location: main
   name: Server
+  section: foh
+  position_order: 1
   color: "#8A4F2A"
   active: true
 
 bartender:
   location: main
   name: Bartender
+  section: foh
+  position_order: 2
   color: "#2E7FA3"
   active: true
 
 other_server:
   location: other
   name: Server
+  section: foh
+  position_order: 1
   color: "#8A4F2A"
   active: true

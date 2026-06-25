@@ -2,7 +2,7 @@
 
 <div class="print-toolbar screen-only">
   <button type="button" class="btn btn-primary" onclick="window.print()">Print</button>
-  <%= link_to "Back to Schedule", location_schedule_path(@location, @schedule, view: @view_mode), class: "btn btn-outline-secondary" %>
+  <%= link_to "Back to Schedule", location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode), class: "btn btn-outline-secondary" %>
 </div>
 
 <main class="print-page">
@@ -15,6 +15,7 @@
     <div class="print-meta">
       <div><%= schedule_print_week_label(@schedule) %></div>
       <strong><%= @view_mode == "employees" ? "Schedule by Employee" : "Schedule by Position" %></strong>
+      <div><%= @section_label %></div>
     </div>
   </header>
 

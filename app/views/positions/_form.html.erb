@@ -6,6 +6,12 @@
     <%= f.text_field :name, autofocus: true, class: "form-control" %>
   </div>
 
+  <div class="mb-3">
+    <%= f.label :section, "Division", class: "form-label" %>
+    <%= f.select :section, position_section_options, { prompt: "Choose division" }, class: "form-select" %>
+    <div class="form-text">Back of House covers kitchen and prep work. Front of House covers service and guest-facing work.</div>
+  </div>
+
   <fieldset class="mb-4">
     <legend class="form-label mb-2">Color</legend>
     <div class="position-color-palette">

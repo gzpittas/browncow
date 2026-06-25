@@ -1,28 +1,36 @@
 module ApplicationHelper
-  def schedule_week_label(schedule)
-    start_date = schedule.week_start_date
-    end_date = schedule.week_end_date
+  def schedule_header_title(schedule)
+    "Week of Sunday #{schedule.week_start_date.strftime("%B %-d")}"
+  end
 
-    if start_date.month == end_date.month
-      "Week of Sunday #{start_date.strftime("%B %-d")} - #{end_date.strftime("%-d")}"
-    else
-      "Week of Sunday #{start_date.strftime("%B %-d")} - #{end_date.strftime("%B %-d")}"
-    end
+  def compact_week_date_label(schedule)
+    schedule.week_dates.map do |date|
+      if date == schedule.week_start_date || date.month != schedule.week_start_date.month
+        date.strftime("%B %-d")
+      else
+        date.strftime("%-d")
+      end
+    end.join(" ")
+  end
+
+  def schedule_week_label(schedule)
+    "Week of Sunday #{compact_week_date_label(schedule)}"
   end
 
   def schedule_print_week_label(schedule)
-    start_date = schedule.week_start_date
-    end_date = schedule.week_end_date
-
-    if start_date.month == end_date.month
-      "Week of #{start_date.strftime("%B %-d")}-#{end_date.strftime("%-d")}, #{end_date.year}"
-    else
-      "Week of #{start_date.strftime("%B %-d")}-#{end_date.strftime("%B %-d")}, #{end_date.year}"
-    end
+    "#{schedule_week_label(schedule)}, #{schedule.week_end_date.year}"
   end
 
   def schedule_day_label(date)
     date.strftime("%a %-d")
+  end
+
+  def schedule_header_day_name(date)
+    date.strftime("%a").upcase
+  end
+
+  def schedule_today?(date)
+    date == Date.current
   end
 
   def shift_time_range(shift)
@@ -73,5 +81,9 @@ module ApplicationHelper
 
       [ label, schedule.id ]
     end
+  end
+
+  def position_section_options
+    Position::SECTIONS.map { |key, label| [ label, key ] }
   end
 end
