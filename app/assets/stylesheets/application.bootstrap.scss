@@ -554,9 +554,10 @@ body {
 }
 
 .position-color-palette {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 0.65rem;
+  grid-template-columns: repeat(9, 2.1rem);
+  width: fit-content;
 }
 
 .position-color-choice {
@@ -579,6 +580,12 @@ body {
   display: inline-block;
   height: 2.1rem;
   width: 2.1rem;
+}
+
+@media (max-width: 767.98px) {
+  .position-color-palette {
+    grid-template-columns: repeat(6, 2.1rem);
+  }
 }
 
 .position-color-input:focus-visible + .position-color-swatch {

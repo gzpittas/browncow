@@ -1,13 +1,18 @@
 require "test_helper"
 
 class PositionTest < ActiveSupport::TestCase
+  test "position palette includes 36 colors" do
+    assert_equal 36, Position::COLOR_PALETTE.size
+    assert_equal Position::COLOR_PALETTE.uniq.size, Position::COLOR_PALETTE.size
+  end
+
   test "color must come from the position palette" do
     position = positions(:server)
 
     position.color = Position::COLOR_PALETTE.last
     assert position.valid?
 
-    position.color = "#FFFFFF"
+    position.color = "#123456"
     assert_not position.valid?
     assert_includes position.errors[:color], "is not included in the list"
   end

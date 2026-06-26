@@ -12,6 +12,7 @@ class PositionsController < ApplicationController
 
   def new
     @position = @location.positions.build
+    @position.color = Position::COLOR_PALETTE.first
   end
 
   def create
