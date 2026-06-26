@@ -22,7 +22,10 @@ Rails.application.routes.draw do
     resources :schedules do
       get :print, on: :member
 
-      resources :shifts, except: [ :index, :show ]
+      resources :shifts, except: [ :index, :show ] do
+        patch :move, on: :member
+        post :copy, on: :member
+      end
     end
   end
 

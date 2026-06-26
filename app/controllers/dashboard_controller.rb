@@ -11,3 +11,4 @@ class DashboardController < ApplicationController
     @current_week_schedule = @first_active_location&.schedules&.find_by(week_start_date: Schedule.week_start_for(Date.current))
   end
 end
+1

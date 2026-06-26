@@ -26,7 +26,12 @@
               <tr>
                 <% @week_dates.each do |date| %>
                   <% shifts = @shifts_by_position_and_date[[ position.id, date ]] || [] %>
-                  <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>">
+                  <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>"
+                      data-schedule-quick-edit-target="cell"
+                      data-action="click->schedule-quick-edit#cellClick dragenter->schedule-quick-edit#dragEnter dragover->schedule-quick-edit#dragOver dragleave->schedule-quick-edit#dragLeave drop->schedule-quick-edit#drop"
+                      data-view-mode="positions"
+                      data-shift-date="<%= date.iso8601 %>"
+                      data-position-id="<%= position.id %>">
                     <div class="d-grid gap-2">
                       <% shifts.each do |shift| %>
                         <%= render "shift_pill", shift: shift, title: shift.employee.display_name, secondary_text: shift_time_range(shift), view_mode: "positions" %>

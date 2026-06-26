@@ -184,6 +184,112 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")
   end
 
+  test "a user can move their own shift to another date in the same schedule week" do
+    sign_in users(:manager)
+    shift = shifts(:sam_monday)
+    shift.update!(notes: "Patio section")
+
+    patch move_location_schedule_shift_path(locations(:main), schedules(:main_week), shift, view: "employees", section: "foh"),
+      params: { shift: { shift_date: "2026-06-25" } },
+      as: :json
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_equal location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh"), payload["redirect_url"]
+
+    shift.reload
+    assert_equal Date.new(2026, 6, 25), shift.shift_date
+    assert_equal employees(:sam), shift.employee
+    assert_equal positions(:server), shift.position
+    assert_equal "16:00", shift.starts_at.strftime("%H:%M")
+    assert_equal "22:00", shift.ends_at.strftime("%H:%M")
+    assert_equal "Patio section", shift.notes
+  end
+
+  test "moving a shift outside the schedule week is rejected" do
+    sign_in users(:manager)
+    shift = shifts(:sam_monday)
+    original_date = shift.shift_date
+
+    patch move_location_schedule_shift_path(locations(:main), schedules(:main_week), shift),
+      params: { shift: { shift_date: "2026-06-28" } },
+      as: :json
+
+    assert_response :unprocessable_entity
+    assert_equal original_date, shift.reload.shift_date
+  end
+
+  test "a user cannot move another account shift" do
+    sign_in users(:manager)
+
+    patch move_location_schedule_shift_path(locations(:other), schedules(:other_week), shifts(:other_monday)),
+      params: { shift: { shift_date: "2026-06-25" } },
+      as: :json
+
+    assert_response :not_found
+  end
+
+  test "a user can copy their own shift to another date in the same schedule week" do
+    sign_in users(:manager)
+    shift = shifts(:sam_monday)
+    shift.update!(notes: "Patio section")
+
+    assert_difference -> { schedules(:main_week).shifts.count }, 1 do
+      post copy_location_schedule_shift_path(locations(:main), schedules(:main_week), shift, view: "positions", section: "foh"),
+        params: { shift: { shift_date: "2026-06-25" } },
+        as: :json
+    end
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_equal location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh"), payload["redirect_url"]
+
+    shift.reload
+    copied_shift = schedules(:main_week).shifts.where.not(id: shift.id).find_by!(shift_date: Date.new(2026, 6, 25))
+    assert_equal Date.new(2026, 6, 22), shift.shift_date
+    assert_equal shift.employee, copied_shift.employee
+    assert_equal shift.position, copied_shift.position
+    assert_equal "16:00", copied_shift.starts_at.strftime("%H:%M")
+    assert_equal "22:00", copied_shift.ends_at.strftime("%H:%M")
+    assert_equal "Patio section", copied_shift.notes
+  end
+
+  test "copying a shift to its original date is rejected" do
+    sign_in users(:manager)
+
+    assert_no_difference -> { schedules(:main_week).shifts.count } do
+      post copy_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday)),
+        params: { shift: { shift_date: shifts(:sam_monday).shift_date.iso8601 } },
+        as: :json
+    end
+
+    assert_response :unprocessable_entity
+  end
+
+  test "copying a shift outside the schedule week is rejected" do
+    sign_in users(:manager)
+
+    assert_no_difference -> { schedules(:main_week).shifts.count } do
+      post copy_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday)),
+        params: { shift: { shift_date: "2026-06-28" } },
+        as: :json
+    end
+
+    assert_response :unprocessable_entity
+  end
+
+  test "a user cannot copy another account shift" do
+    sign_in users(:manager)
+
+    assert_no_difference -> { Shift.count } do
+      post copy_location_schedule_shift_path(locations(:other), schedules(:other_week), shifts(:other_monday)),
+        params: { shift: { shift_date: "2026-06-25" } },
+        as: :json
+    end
+
+    assert_response :not_found
+  end
+
   test "employee view shift pills include an inline delete button" do
     sign_in users(:manager)
 
@@ -192,6 +298,13 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'] button.shift-pill-delete"
     assert_select ".shift-pill-delete span[aria-hidden='true']", text: "×"
+    assert_select ".shift-pill[draggable='true'][data-shift-id='#{shifts(:sam_monday).id}'][data-move-url='#{move_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'][data-copy-url='#{copy_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}']"
+    assert_select ".shift-pill[data-action*='pointerdown->schedule-quick-edit#optionPointerDown']"
+    assert_select ".shift-pill-title-link[draggable='false']"
+    assert_select ".shift-pill-time-link[draggable='false']"
+    assert_select "button.shift-pill-copy[aria-label='Copy shift'] svg.shift-pill-copy-icon"
+    assert_select ".schedule-quick-edit-message[data-schedule-quick-edit-target='alert']"
+    assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='employees'][data-employee-id='#{employees(:sam).id}'][data-shift-date='2026-06-23']"
   end
 
   test "position view shift pills include an inline delete button" do
@@ -202,6 +315,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "positions", section: "foh")}'] button.shift-pill-delete"
     assert_select ".shift-pill-delete span[aria-hidden='true']", text: "×", minimum: 1
+    assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='positions'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23']"
   end
 
   test "a user can delete a shift from the position view and return to the calendar" do
@@ -713,6 +827,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select "table.schedule-table thead tr th:first-child", text: "Employee"
     assert_select ".schedule-name-column", text: /Sam Server/
     assert_select ".shift-pill", text: /4:00-10:00 PM/
+    assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23']"
   end
 
   test "boh and foh schedule views stay separated" do

@@ -3,7 +3,7 @@ class ShiftsController < ApplicationController
   before_action :require_account!
   before_action :set_location
   before_action :set_schedule
-  before_action :set_shift, only: [ :edit, :update, :destroy ]
+  before_action :set_shift, only: [ :edit, :update, :destroy, :move, :copy ]
   before_action :set_form_context, only: [ :new, :create, :edit, :update ]
 
   def new
@@ -40,6 +40,44 @@ class ShiftsController < ApplicationController
   def destroy
     @shift.destroy
     redirect_to location_schedule_path(@location, @schedule, view: params[:view].presence || "positions", section: params[:section].presence || @section_mode), notice: "Shift deleted."
+  end
+
+  def move
+    original_date = @shift.shift_date
+
+    if @shift.update(quick_edit_shift_params)
+      respond_to_quick_edit_success("Shift moved to #{shift_date_message(@shift.shift_date)}.")
+    else
+      @shift.shift_date = original_date
+      respond_to_quick_edit_failure(@shift.errors.full_messages.to_sentence)
+    end
+  end
+
+  def copy
+    destination_date = quick_edit_shift_date
+
+    if destination_date.blank?
+      return respond_to_quick_edit_failure("Choose a day inside this schedule week.")
+    end
+
+    if destination_date == @shift.shift_date
+      return respond_to_quick_edit_failure("Choose a different day for the copied shift.")
+    end
+
+    copied_shift = @schedule.shifts.build(
+      employee: @shift.employee,
+      position: @shift.position,
+      shift_date: destination_date,
+      starts_at: @shift.starts_at,
+      ends_at: @shift.ends_at,
+      notes: @shift.notes
+    )
+
+    if copied_shift.save
+      respond_to_quick_edit_success("Shift copied to #{shift_date_message(copied_shift.shift_date)}.")
+    else
+      respond_to_quick_edit_failure(copied_shift.errors.full_messages.to_sentence)
+    end
   end
 
   private
@@ -82,9 +120,41 @@ class ShiftsController < ApplicationController
     params.require(:shift).permit(:employee_id, :position_id, :shift_date, :starts_at, :ends_at, :notes)
   end
 
+  def quick_edit_shift_params
+    params.require(:shift).permit(:shift_date)
+  end
+
+  def quick_edit_shift_date
+    value = quick_edit_shift_params[:shift_date]
+    Date.iso8601(value) if value.present?
+  rescue ArgumentError
+    nil
+  end
+
   def schedule_return_path
     view = normalized_schedule_view_mode(params[:view])
-    location_schedule_path(@location, @schedule, view: view, section: params[:section].presence || @section_mode)
+    section = params[:section].presence || (defined?(@section_mode) && @section_mode) || current_schedule_section_mode
+    location_schedule_path(@location, @schedule, view: view, section: section)
+  end
+
+  def respond_to_quick_edit_success(message)
+    respond_to do |format|
+      format.json { render json: { message: message, redirect_url: schedule_return_path } }
+      format.html { redirect_to schedule_return_path, notice: message }
+    end
+  end
+
+  def respond_to_quick_edit_failure(message)
+    message = "Shift could not be updated." if message.blank?
+
+    respond_to do |format|
+      format.json { render json: { error: message }, status: :unprocessable_entity }
+      format.html { redirect_to schedule_return_path, alert: message }
+    end
+  end
+
+  def shift_date_message(date)
+    date.strftime("%A")
   end
 
   def selected_position_for_section

@@ -1,0 +1,288 @@
+/* ======================
+
+Menu Rooster Colors
+
+var(--menurooster-green-soft);
+var(--menurooster-green-light);
+var(--menurooster-green);
+var(--menurooster-green-medium);
+var(--menurooster-green-dark);
+
+var(--menurooster-pink-soft);
+var(--menurooster-pink-light);
+var(--menurooster-pink);
+var(--menurooster-pink-medium);
+var(--menurooster-pink-dark);
+
+var(--menurooster-purple-soft);
+var(--menurooster-purple-light);
+var(--menurooster-purple);
+var(--menurooster-purple-medium);
+var(--menurooster-purple-dark);
+
+var(--menurooster-red-soft);
+var(--menurooster-red-light);
+var(--menurooster-red);
+var(--menurooster-red-medium);
+var(--menurooster-red-dark);
+
+var(--menurooster-blue-soft);
+var(--menurooster-blue-light);
+var(--menurooster-blue);
+var(--menurooster-blue-medium);
+var(--menurooster-blue-dodger);
+
+var(--menurooster-yellow-soft);
+var(--menurooster-yellow-light);
+var(--menurooster-yellow);
+var(--menurooster-yellow-medium);
+var(--menurooster-yellow-dark);
+
+var(--menurooster-orange-soft);
+var(--menurooster-orange-light);
+var(--menurooster-orange);
+var(--menurooster-orange-medium);
+var(--menurooster-orange-dark);
+
+var(--menurooster-white);
+
+var(--menurooster-putty);
+
+var(--menurooster-grey-001);
+var(--menurooster-grey-002);
+var(--menurooster-grey-003);
+var(--menurooster-grey-004);
+var(--menurooster-grey-005);
+var(--menurooster-grey-006);
+var(--menurooster-grey-007);
+var(--menurooster-grey-008);
+var(--menurooster-grey-009);
+
+var(--menurooster-grey-01);
+var(--menurooster-grey-02);
+var(--menurooster-grey-03);
+var(--menurooster-grey-04);
+var(--menurooster-grey-05);
+var(--menurooster-grey-06);
+var(--menurooster-grey-07);
+var(--menurooster-grey-08);
+var(--menurooster-grey-09);
+
+var(--menurooster-grey-10);
+var(--menurooster-grey-15);
+var(--menurooster-grey-20);
+var(--menurooster-grey-25);
+var(--menurooster-grey-30);
+var(--menurooster-grey-35);
+var(--menurooster-grey-40);
+var(--menurooster-grey-45);
+var(--menurooster-grey-50);
+var(--menurooster-grey-55);
+var(--menurooster-grey-60);
+var(--menurooster-grey-65);
+var(--menurooster-grey-70);
+var(--menurooster-grey-75);
+var(--menurooster-grey-80);
+var(--menurooster-grey-85);
+var(--menurooster-grey-90);
+var(--menurooster-grey-95);
+
+var(--menurooster-grey-96);
+var(--menurooster-grey-97);
+var(--menurooster-grey-98);
+var(--menurooster-grey-99);
+var(--menurooster-grey-100);
+
+var(--menurooster-black);
+
+var(--menurooster-french-grey-001);
+var(--menurooster-french-grey-002);
+var(--menurooster-french-grey-003);
+var(--menurooster-french-grey-004);
+var(--menurooster-french-grey-005);
+var(--menurooster-french-grey-006);
+var(--menurooster-french-grey-007);
+var(--menurooster-french-grey-008);
+var(--menurooster-french-grey-009);
+
+var(--menurooster-french-grey-01);
+var(--menurooster-french-grey-02);
+var(--menurooster-french-grey-03);
+var(--menurooster-french-grey-04);
+var(--menurooster-french-grey-05);
+var(--menurooster-french-grey-06);
+var(--menurooster-french-grey-07);
+var(--menurooster-french-grey-08);
+var(--menurooster-french-grey-09);
+
+var(--menurooster-french-grey-10);
+var(--menurooster-french-grey-15);
+var(--menurooster-french-grey-20);
+var(--menurooster-french-grey-25);
+var(--menurooster-french-grey-30);
+var(--menurooster-french-grey-35);
+var(--menurooster-french-grey-40);
+var(--menurooster-french-grey-45);
+var(--menurooster-french-grey-50);
+var(--menurooster-french-grey-55);
+var(--menurooster-french-grey-60);
+var(--menurooster-french-grey-65);
+var(--menurooster-french-grey-70);
+var(--menurooster-french-grey-75);
+var(--menurooster-french-grey-80);
+var(--menurooster-french-grey-85);
+var(--menurooster-french-grey-90);
+var(--menurooster-french-grey-95);
+
+var(--menurooster-french-grey-96);
+var(--menurooster-french-grey-97);
+var(--menurooster-french-grey-98);
+var(--menurooster-french-grey-99);
+var(--menurooster-french-grey-100);
+
+
+====================== */
+
+:root {
+  --menurooster-green-soft: #e6f9e6;
+  --menurooster-green-light: #bff0b3;
+  --menurooster-green: #8ce680;
+  --menurooster-green-medium: #5ccf4d;
+  --menurooster-green-dark: #2fa626;
+
+  --menurooster-pink-soft: #fde8f1;
+  --menurooster-pink-light: #f8b9d2;
+  --menurooster-pink: #f07caf;
+  --menurooster-pink-medium: #d94f8b;
+  --menurooster-pink-dark: #a82663;
+
+  --menurooster-purple-soft: #f3effa;
+  --menurooster-purple-light: #d8cbed;
+  --menurooster-purple: #b19cd8;
+  --menurooster-purple-medium: #8f73c2;
+  --menurooster-purple-dark: #62459a;
+
+  --menurooster-red: #d45968;
+  --menurooster-red-soft: #f9a5b8;
+  --menurooster-red-light: #ed8395;
+  --menurooster-red-medium: #be1e2d;
+  --menurooster-red-dark: #961531;
+
+  --menurooster-blue: #272d47;
+  --menurooster-blue-soft: #6d80ad;
+  --menurooster-blue-light: #526394;
+  --menurooster-blue-medium: #404b72;
+  --menurooster-blue-dark: #272d47;
+  --menurooster-blue-dodger: #1e90ff;
+
+  --menurooster-yellow: #ffd084;
+  --menurooster-yellow-soft: #ffe7c7;
+  --menurooster-yellow-light: #ffd9a1;
+  --menurooster-yellow-medium: #ffb64d;
+  --menurooster-yellow-dark: #ff9b17;
+
+  --menurooster-orange: #ff8b00;
+  --menurooster-orange-soft: #ffcb92;
+  --menurooster-orange-light: #ffb966;
+  --menurooster-orange-medium: #d87e13;
+  --menurooster-orange-dark: #b75300;
+
+  --menurooster-white: #ffffff;
+
+  --menurooster-putty: #f4f3f2;
+
+  --menurooster-grey-001: #ffffff;
+  --menurooster-grey-002: #fdfdfd;
+  --menurooster-grey-003: #fcfcfc;
+  --menurooster-grey-004: #fbfbfb;
+  --menurooster-grey-005: #f8f9f9;
+  --menurooster-grey-006: #f6f7f7;
+  --menurooster-grey-007: #f4f5f5;
+  --menurooster-grey-008: #f2f3f3;
+  --menurooster-grey-009: #f0f1f1;
+
+  --menurooster-grey-01: #f1f2f2;
+  --menurooster-grey-02: #eceded;
+  --menurooster-grey-03: #e8e9ea;
+  --menurooster-grey-04: #e4e5e6;
+  --menurooster-grey-05: #e0e1e2;
+  --menurooster-grey-06: #dbdcdd;
+  --menurooster-grey-07: #d6d7d8;
+  --menurooster-grey-08: #d1d2d3;
+  --menurooster-grey-09: #cccdce;
+
+  --menurooster-grey-10: #c8c9ca;
+  --menurooster-grey-15: #b8b9bb;
+  --menurooster-grey-20: #a9aaac;
+  --menurooster-grey-25: #999a9c;
+  --menurooster-grey-30: #8a8b8d;
+  --menurooster-grey-35: #7c7d7f;
+  --menurooster-grey-40: #6e6f71;
+  --menurooster-grey-45: #636466;
+  --menurooster-grey-50: #58595b;
+  --menurooster-grey-55: #4d4e50;
+  --menurooster-grey-60: #434345;
+  --menurooster-grey-65: #3a3a3b;
+  --menurooster-grey-70: #323233;
+  --menurooster-grey-75: #2b2b2c;
+  --menurooster-grey-80: #252526;
+  --menurooster-grey-85: #1f1f20;
+  --menurooster-grey-90: #1a1a1b;
+  --menurooster-grey-95: #131314;
+
+  --menurooster-grey-96: #101010;
+  --menurooster-grey-97: #0d0d0d;
+  --menurooster-grey-98: #0a0a0a;
+  --menurooster-grey-99: #070707;
+  --menurooster-grey-100: #000000;
+
+  --menurooster-black: #000000;
+
+  --menurooster-olive: #869447;
+  --menurooster-moss: #658865;
+
+  --menurooster-french-grey-001: #ffffff;
+  --menurooster-french-grey-002: #fefdfc;
+  --menurooster-french-grey-003: #fdfcfb;
+  --menurooster-french-grey-004: #fcfbf9;
+  --menurooster-french-grey-005: #fbfaf8;
+  --menurooster-french-grey-006: #faf9f7;
+  --menurooster-french-grey-007: #f8f7f5;
+  --menurooster-french-grey-008: #f7f6f3;
+  --menurooster-french-grey-009: #f6f5f2;
+
+  --menurooster-french-grey-01: #faf9f7;
+  --menurooster-french-grey-02: #f5f3f1;
+  --menurooster-french-grey-03: #f0eeeb;
+  --menurooster-french-grey-04: #eae7e4;
+  --menurooster-french-grey-05: #e4e1de;
+  --menurooster-french-grey-06: #e2dedb;
+  --menurooster-french-grey-07: #dfdbd7;
+  --menurooster-french-grey-08: #ddd8d4;
+  --menurooster-french-grey-09: #dad6d2;
+
+  --menurooster-french-grey-10: #d9d5d1;
+  --menurooster-french-grey-15: #d1ccc7;
+  --menurooster-french-grey-20: #c7c2bd;
+  --menurooster-french-grey-25: #bdb8b2;
+  --menurooster-french-grey-30: #b5b0aa;
+  --menurooster-french-grey-35: #aba6a0;
+  --menurooster-french-grey-40: #a29e98;
+  --menurooster-french-grey-45: #99958f;
+  --menurooster-french-grey-50: #8f8b85;
+  --menurooster-french-grey-55: #86827d;
+  --menurooster-french-grey-60: #7c7973;
+  --menurooster-french-grey-65: #736f6a;
+  --menurooster-french-grey-70: #696762;
+  --menurooster-french-grey-75: #605e5a;
+  --menurooster-french-grey-80: #565450;
+  --menurooster-french-grey-85: #4d4b48;
+  --menurooster-french-grey-90: #43413e;
+  --menurooster-french-grey-95: #363432;
+
+  --menurooster-french-grey-96: #32302e;
+  --menurooster-french-grey-97: #2e2c2a;
+  --menurooster-french-grey-98: #2a2826;
+  --menurooster-french-grey-99: #252423;
+  --menurooster-french-grey-100: #1f1e1d;
+}

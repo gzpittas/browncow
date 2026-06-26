@@ -1,22 +1,42 @@
 <% secondary_text = local_assigns[:secondary_text] %>
 
-<div class="shift-pill shift-pill-with-actions <%= "shift-pill-single-row" if secondary_text.blank? %>" style="--position-color: <%= shift.position.display_color %>">
+<div class="shift-pill shift-pill-with-actions <%= "shift-pill-single-row" if secondary_text.blank? %>"
+     draggable="true"
+     style="--position-color: <%= shift.position.display_color %>"
+     data-schedule-quick-edit-target="shift"
+     data-action="pointerdown->schedule-quick-edit#optionPointerDown dragstart->schedule-quick-edit#dragStart dragend->schedule-quick-edit#dragEnd"
+     data-shift-id="<%= shift.id %>"
+     data-shift-date="<%= shift.shift_date.iso8601 %>"
+     data-employee-id="<%= shift.employee_id %>"
+     data-position-id="<%= shift.position_id %>"
+     data-shift-label="<%= "#{shift.employee.display_name}'s #{shift.position.name} shift" %>"
+     data-move-url="<%= move_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode) %>"
+     data-copy-url="<%= copy_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode) %>">
   <div class="shift-pill-main">
-    <div class="shift-pill-top-row">
-      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode), class: "shift-pill-title-link text-decoration-none" do %>
-        <span class="shift-pill-title fw-semibold"><%= title %></span>
-      <% end %>
+    <div class="shift-pill-action-row">
+      <button type="button"
+              class="shift-pill-copy"
+              aria-label="Copy shift"
+              title="Copy shift"
+              data-action="schedule-quick-edit#startCopy">
+        <svg class="shift-pill-copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L400 115.9 400 320c0 8.8-7.2 16-16 16zM192 384l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9L366.1 14.1c-9-9-21.2-14.1-33.9-14.1L192 0c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-48 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-48-32 0z"/>
+        </svg>
+        <span class="visually-hidden">Copy shift</span>
+      </button>
       <%= button_to location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode),
             method: :delete,
             class: "shift-pill-delete",
-            form_class: "shift-pill-delete-form",
-            form: { onsubmit: "return confirm('Delete this shift?')" } do %>
+            form_class: "shift-pill-delete-form" do %>
         <span aria-hidden="true">&times;</span>
         <span class="visually-hidden">Delete shift</span>
       <% end %>
     </div>
+    <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode), class: "shift-pill-title-link text-decoration-none", draggable: false do %>
+      <span class="shift-pill-title fw-semibold"><%= title %></span>
+    <% end %>
     <% if secondary_text.present? %>
-      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode), class: "shift-pill-time-link text-decoration-none" do %>
+      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode), class: "shift-pill-time-link text-decoration-none", draggable: false do %>
         <span class="shift-pill-time text-nowrap"><%= secondary_text %></span>
       <% end %>
     <% end %>
