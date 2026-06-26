@@ -301,6 +301,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".shift-pill[draggable='true'][data-shift-id='#{shifts(:sam_monday).id}'][data-move-url='#{move_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'][data-copy-url='#{copy_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}']"
     assert_select ".shift-pill[data-action*='pointerdown->schedule-quick-edit#optionPointerDown']"
     assert_select ".shift-pill-title-link[draggable='false']"
+    assert_select ".shift-pill-secondary-link[draggable='false']"
     assert_select ".shift-pill-time-link[draggable='false']"
     assert_select ".schedule-quick-edit-message[data-schedule-quick-edit-target='alert']"
     assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='employees'][data-employee-id='#{employees(:sam).id}'][data-shift-date='2026-06-23']"
