@@ -82,9 +82,9 @@ body {
 }
 
 .schedule-week-card.is-today {
-  background: color-mix(in srgb, var(--hc-primary) 14%, white);
-  border-color: color-mix(in srgb, var(--hc-primary) 38%, white);
-  box-shadow: inset 0 0 0 1px rgba(138, 79, 42, 0.18);
+  background: var(--menurooster-yellow-soft);
+  border-color: color-mix(in srgb, var(--menurooster-yellow-medium) 45%, white);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--menurooster-yellow-dark) 20%, white);
 }
 
 .schedule-week-card-name {
@@ -112,8 +112,13 @@ body {
   width: 12.5%;
 }
 
+.schedule-table-seven th,
+.schedule-table-seven td {
+  width: calc(100% / 7);
+}
+
 .schedule-today-column {
-  background: color-mix(in srgb, var(--hc-primary) 8%, white) !important;
+  background: var(--menurooster-yellow-soft) !important;
 }
 
 .schedule-name-column {
@@ -158,12 +163,14 @@ body {
 
 .shift-pill-link,
 .shift-pill-title-link,
+.shift-pill-secondary-link,
 .shift-pill-time-link {
   color: inherit;
 }
 
 .shift-pill-link:hover,
 .shift-pill-title-link:hover,
+.shift-pill-secondary-link:hover,
 .shift-pill-time-link:hover {
   background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 16%, white);
   color: #2f2a24;
@@ -193,19 +200,30 @@ body {
   text-align: left;
 }
 
+.shift-pill-secondary-link,
 .shift-pill-time-link {
   display: block;
+  text-align: left;
+}
+
+.shift-pill-secondary-link {
+  padding: 0.05rem 0.45rem 0;
+}
+
+.shift-pill-time-link {
   padding: 0.05rem 0.45rem 0.45rem;
   text-align: left;
 }
 
 .shift-pill-title,
+.shift-pill-secondary,
 .shift-pill-time {
   display: block;
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
+.shift-pill-secondary,
 .shift-pill-time {
   font-size: 0.8125rem;
   padding: 0;

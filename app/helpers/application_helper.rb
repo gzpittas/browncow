@@ -3,18 +3,8 @@ module ApplicationHelper
     "Week of Sunday #{schedule.week_start_date.strftime("%B %-d")}"
   end
 
-  def compact_week_date_label(schedule)
-    schedule.week_dates.map do |date|
-      if date == schedule.week_start_date
-        date.strftime("%B %-d")
-      else
-        date.strftime("%-d")
-      end
-    end.join(" ")
-  end
-
   def schedule_week_label(schedule)
-    "Week of Sunday #{compact_week_date_label(schedule)}"
+    schedule_header_title(schedule)
   end
 
   def schedule_print_week_label(schedule)

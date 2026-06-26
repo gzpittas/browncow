@@ -15,10 +15,9 @@
       </div>
       <div class="card-body p-0">
         <div class="table-responsive">
-          <table class="table table-bordered align-top mb-0 schedule-table">
+          <table class="table table-bordered align-top mb-0 schedule-table schedule-table-seven">
             <thead>
               <tr>
-                <th class="schedule-name-column bg-white">Employee</th>
                 <% @week_dates.each do |date| %>
                   <th class="text-center bg-white <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
                 <% end %>
@@ -27,9 +26,6 @@
             <tbody>
               <% position_employees.each do |employee| %>
                 <tr>
-                  <th class="schedule-name-column bg-white">
-                    <span class="fw-semibold"><%= employee.display_name %></span>
-                  </th>
                   <% @week_dates.each do |date| %>
                     <% shifts = @shifts_by_employee_position_and_date[[ employee.id, position.id, date ]] || [] %>
                     <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>"
@@ -41,7 +37,7 @@
                         data-position-id="<%= position.id %>">
                       <div class="d-grid gap-2">
                         <% shifts.each do |shift| %>
-                          <%= render "shift_pill", shift: shift, title: shift_time_range(shift), view_mode: "both" %>
+                          <%= render "shift_pill", shift: shift, title: shift.employee.display_name, secondary_text: shift_time_range(shift), view_mode: "both" %>
                         <% end %>
                         <%= link_to "+ Add Shift", new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, position_id: position.id, shift_date: date, view: "both", section: @section_mode), class: "schedule-add-link" %>
                       </div>
@@ -52,7 +48,7 @@
 
               <% if position_employees.empty? %>
                 <tr>
-                  <td colspan="8" class="p-4 text-center text-secondary">
+                  <td colspan="7" class="p-4 text-center text-secondary">
                     No active employees are assigned to this position yet.
                   </td>
                 </tr>
