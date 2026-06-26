@@ -73,6 +73,38 @@ body {
   max-width: 52rem;
 }
 
+.schedule-hero-date {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  line-height: 0.9;
+}
+
+.schedule-hero-date-prefix {
+  color: #6d6258;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.schedule-hero-date-month {
+  color: #5f564d;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.schedule-hero-date-day {
+  color: #2f2a24;
+  font-size: 6rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.9;
+}
+
 .schedule-week-card {
   background: #fffaf4;
   border: 1px solid rgba(47, 42, 36, 0.12);

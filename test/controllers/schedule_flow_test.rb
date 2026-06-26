@@ -308,6 +308,9 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'] button.shift-pill-delete"
     assert_select ".shift-pill-delete span[aria-hidden='true']", text: "×"
+    assert_select ".schedule-hero-date-prefix", text: "Week of"
+    assert_select ".schedule-hero-date-month", text: "JUN"
+    assert_select ".schedule-hero-date-day", text: "21"
     assert_select ".shift-pill[draggable='true'][data-shift-id='#{shifts(:sam_monday).id}'][data-move-url='#{move_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'][data-copy-url='#{copy_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}']"
     assert_select ".shift-pill[data-action*='pointerdown->schedule-quick-edit#optionPointerDown']"
     assert_select ".shift-pill-title-link[draggable='false']"
