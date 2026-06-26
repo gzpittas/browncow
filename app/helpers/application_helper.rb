@@ -27,6 +27,48 @@ module ApplicationHelper
     date == Date.current
   end
 
+  def schedule_mini_month_weeks(date)
+    month_start = date.beginning_of_month
+    month_end = date.end_of_month
+    grid_start = month_start.beginning_of_week(:sunday)
+    grid_end = month_end.end_of_week(:sunday)
+
+    (grid_start..grid_end).to_a.each_slice(7)
+  end
+
+  def schedule_mini_month_title(date)
+    date.strftime("%B %Y")
+  end
+
+  def schedule_mini_month_destination(location, date, view:, section:)
+    week_start = Schedule.week_start_for(date)
+    target_schedule = schedule_mini_month_schedule_lookup(location, date: date)[week_start]
+
+    if target_schedule.present?
+      location_schedule_path(location, target_schedule, view: view, section: section)
+    else
+      new_location_schedule_path(location, week_start_date: week_start.iso8601, view: view, section: section)
+    end
+  end
+
+  def schedule_mini_month_has_schedule?(location, date)
+    schedule_mini_month_schedule_lookup(location, date: date).key?(Schedule.week_start_for(date))
+  end
+
+  def schedule_mini_month_schedule_lookup(location, date:)
+    @schedule_mini_month_schedule_lookup ||= {}
+    cache_key = [ location.id, date.beginning_of_month ]
+
+    @schedule_mini_month_schedule_lookup[cache_key] ||= begin
+      month_start = date.beginning_of_month.beginning_of_week(:sunday)
+      month_end = date.end_of_month.end_of_week(:sunday)
+
+      location.schedules
+        .where(week_start_date: month_start..month_end)
+        .index_by(&:week_start_date)
+    end
+  end
+
   def shift_time_range(shift)
     if shift.starts_at.strftime("%p") == shift.ends_at.strftime("%p")
       "#{shift.starts_at.strftime("%-l:%M")}-#{shift.ends_at.strftime("%-l:%M %p")}"

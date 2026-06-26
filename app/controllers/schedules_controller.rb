@@ -12,7 +12,8 @@ class SchedulesController < ApplicationController
   end
 
   def new
-    @schedule = @location.schedules.build(week_start_date: Schedule.week_start_for(Date.current))
+    selected_week = params[:week_start_date].presence || Schedule.week_start_for(Date.current)
+    @schedule = @location.schedules.build(week_start_date: selected_week)
     @selected_source_schedule = selected_source_schedule
   end
 
@@ -97,10 +98,11 @@ class SchedulesController < ApplicationController
   end
 
   def prepare_schedule_view
-    @view_mode = normalized_schedule_view_mode(params[:view])
+    @view_mode = store_schedule_view_mode!(params[:view].presence || session[:schedule_view_mode])
     @section_mode = store_schedule_section_mode!(params[:section].presence || session[:schedule_section_mode])
     @section_label = schedule_section_label(@section_mode)
     @week_dates = @schedule.week_dates
+    @mini_calendar_date = mini_calendar_date
     @positions = positions_for_section.includes(:employees).ordered
     @employees = employees_for_section
       .includes(:positions)
@@ -114,6 +116,7 @@ class SchedulesController < ApplicationController
       position.employees.select(&:active?).sort_by { |employee| [ employee.first_name.to_s.downcase, employee.last_name.to_s.downcase ] }
     end
     @current_week_schedule = Schedule.current_for(@location)
+    remember_schedule_context!(location: @location, schedule: @schedule, view: @view_mode, section: @section_mode)
   end
 
   def schedule_params
@@ -165,5 +168,13 @@ class SchedulesController < ApplicationController
     return "All Divisions" if section_mode == "all"
 
     Position::SECTIONS.fetch(section_mode)
+  end
+
+  def mini_calendar_date
+    return @schedule.week_start_date if params[:calendar_month].blank?
+
+    Date.iso8601(params[:calendar_month])
+  rescue ArgumentError
+    @schedule.week_start_date
   end
 end

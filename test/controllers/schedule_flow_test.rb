@@ -54,6 +54,15 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select "select[name='schedule[source_schedule_id]'] option[selected][value='#{schedules(:main_week).id}']"
   end
 
+  test "new schedule form honors a selected week start" do
+    sign_in users(:manager)
+
+    get new_location_schedule_path(locations(:main), week_start_date: "2026-06-28")
+
+    assert_response :success
+    assert_select "select[name='schedule[week_start_date]'] option[selected][value='2026-06-28']"
+  end
+
   test "create this week's schedule uses the current sunday" do
     sign_in users(:manager)
 
@@ -495,14 +504,14 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "current schedule route opens the current weekly schedule" do
+  test "current schedule route opens the current weekly schedule when no schedule has been remembered" do
     sign_in users(:manager)
 
     travel_to Date.new(2026, 6, 25) do
       get current_schedule_path
     end
 
-    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), section: "foh")
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")
   end
 
   test "current schedule route preserves the selected view when opening the current weekly schedule" do
@@ -534,7 +543,17 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
       get current_schedule_path
     end
 
-    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), section: "all")
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "all")
+  end
+
+  test "current schedule route opens the last schedule the user worked on" do
+    sign_in users(:manager)
+    older_schedule = locations(:main).schedules.create!(week_start_date: Date.new(2026, 6, 14), status: "draft")
+
+    get location_schedule_path(locations(:main), older_schedule, view: "employees", section: "all")
+    get current_schedule_path
+
+    assert_redirected_to location_schedule_path(locations(:main), older_schedule, view: "employees", section: "all")
   end
 
   test "current schedule route falls back to the schedule list when the current week does not exist" do
@@ -742,6 +761,16 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", "Week of Sunday June 21"
     assert_select ".schedule-week-card", count: 7
+    assert_select ".schedule-mini-month-nav a[aria-label='Last Month'][data-bs-toggle='tooltip'][data-bs-title='Last Month']", count: 1
+    assert_select ".schedule-mini-month-nav a[aria-label='Current Schedule'][data-bs-toggle='tooltip'][data-bs-title='Current Schedule']", count: 1
+    assert_select ".schedule-mini-month-nav a[aria-label='Today'][data-bs-toggle='tooltip'][data-bs-title='Today']", count: 1
+    assert_select ".schedule-mini-month-nav a[aria-label='Next Month'][data-bs-toggle='tooltip'][data-bs-title='Next Month']", count: 1
+    assert_select ".schedule-mini-month-title", text: "June 2026"
+    assert_select ".schedule-mini-month-weekdays span", count: 7
+    assert_select ".schedule-mini-month-day.is-in-schedule-week", count: 7
+    assert_select ".schedule-mini-month-day.has-schedule", count: 7
+    assert_select "a.schedule-mini-month-day[data-action='click->schedule-quick-edit#rememberMiniCalendarViewport'][href='#{location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}']", text: "21"
+    assert_select "a.schedule-mini-month-day[data-action='click->schedule-quick-edit#rememberMiniCalendarViewport'][href='#{new_location_schedule_path(locations(:main), week_start_date: "2026-06-28", view: "positions", section: "foh")}']", text: "28"
     assert_select ".schedule-week-card-name", text: "SUN"
     assert_select ".schedule-week-card-name", text: "SAT"
     assert_select "a[href='#{edit_location_schedule_path(locations(:main), schedules(:main_week))}']", text: "Manage Schedule"
@@ -889,6 +918,6 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    assert_select "a[href='#{current_schedule_path(view: "employees", section: "foh")}']", text: "Current Schedule"
+    assert_select "a[href='#{current_schedule_path(view: "employees", section: "foh")}'][aria-label='Current Schedule']", count: 1
   end
 end

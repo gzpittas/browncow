@@ -23,7 +23,7 @@ class AuthenticationFlowTest < ActionDispatch::IntegrationTest
         }
       }
 
-      assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), section: "foh")
+      assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")
     end
   end
 
@@ -34,7 +34,7 @@ class AuthenticationFlowTest < ActionDispatch::IntegrationTest
       get root_path
     end
 
-    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), section: "foh")
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")
   end
 
   test "a user with a location but no current schedule signs in to the schedule list" do

@@ -26,6 +26,7 @@ export default class extends Controller {
     document.addEventListener("keydown", this.keyDownHandler)
     document.addEventListener("keyup", this.keyUpHandler)
     window.addEventListener("blur", this.blurHandler)
+    this.restoreViewport()
   }
 
   disconnect() {
@@ -302,6 +303,46 @@ export default class extends Controller {
   removeOptionPointerListeners() {
     document.removeEventListener("pointermove", this.pointerMoveHandler)
     document.removeEventListener("pointerup", this.pointerUpHandler)
+  }
+
+  rememberMiniCalendarViewport(event) {
+    if (event.defaultPrevented) return
+    if (event.button !== 0) return
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+
+    this.storeViewport(event.currentTarget.href)
+  }
+
+  storeViewport(url) {
+    try {
+      const destination = new URL(url, window.location.href)
+      sessionStorage.setItem("scheduleViewport", JSON.stringify({
+        path: destination.pathname,
+        search: destination.search,
+        x: window.scrollX,
+        y: window.scrollY
+      }))
+    } catch (_error) {
+      sessionStorage.removeItem("scheduleViewport")
+    }
+  }
+
+  restoreViewport() {
+    try {
+      const storedViewport = sessionStorage.getItem("scheduleViewport")
+      if (!storedViewport) return
+
+      const viewport = JSON.parse(storedViewport)
+      if (viewport.path !== window.location.pathname || viewport.search !== window.location.search) return
+
+      sessionStorage.removeItem("scheduleViewport")
+      window.scrollTo(viewport.x || 0, viewport.y || 0)
+      requestAnimationFrame(() => {
+        window.scrollTo(viewport.x || 0, viewport.y || 0)
+      })
+    } catch (_error) {
+      sessionStorage.removeItem("scheduleViewport")
+    }
   }
 
   applyQuickEdit(payload, targetCell) {
