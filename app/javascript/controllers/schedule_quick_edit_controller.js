@@ -112,9 +112,9 @@ export default class extends Controller {
     }
 
     if (this.dragAction(event) === "copy") {
-      this.sendQuickEdit(this.draggedShift.copyUrl, "POST", cell.dataset.shiftDate)
+      this.sendQuickEdit(this.draggedShift.copyUrl, "POST", cell.dataset.shiftDate, cell)
     } else {
-      this.sendQuickEdit(this.draggedShift.moveUrl, "PATCH", cell.dataset.shiftDate)
+      this.sendQuickEdit(this.draggedShift.moveUrl, "PATCH", cell.dataset.shiftDate, cell)
     }
   }
 
@@ -151,7 +151,7 @@ export default class extends Controller {
       return
     }
 
-    this.sendQuickEdit(shift.copyUrl, "POST", cell.dataset.shiftDate)
+    this.sendQuickEdit(shift.copyUrl, "POST", cell.dataset.shiftDate, cell)
   }
 
   startCopy(event) {
@@ -181,10 +181,10 @@ export default class extends Controller {
       return
     }
 
-    this.sendQuickEdit(this.copyShift.copyUrl, "POST", cell.dataset.shiftDate)
+    this.sendQuickEdit(this.copyShift.copyUrl, "POST", cell.dataset.shiftDate, cell)
   }
 
-  async sendQuickEdit(url, method, shiftDate) {
+  async sendQuickEdit(url, method, shiftDate, targetCell) {
     const csrfToken = document.querySelector("meta[name='csrf-token']")?.content
 
     try {
@@ -204,7 +204,12 @@ export default class extends Controller {
 
       const payload = await response.json()
       if (response.ok) {
-        window.location.href = payload.redirect_url || window.location.href
+        if (payload.shift_html && targetCell) {
+          this.applyQuickEdit(payload, targetCell)
+        } else {
+          const redirectUrl = payload.redirect_url || window.location.href
+          window.location.href = redirectUrl
+        }
       } else {
         this.showError(payload.error || "Shift could not be updated.")
       }
@@ -297,6 +302,29 @@ export default class extends Controller {
   removeOptionPointerListeners() {
     document.removeEventListener("pointermove", this.pointerMoveHandler)
     document.removeEventListener("pointerup", this.pointerUpHandler)
+  }
+
+  applyQuickEdit(payload, targetCell) {
+    const template = document.createElement("template")
+    template.innerHTML = payload.shift_html.trim()
+    const updatedShift = template.content.firstElementChild
+    if (!updatedShift) return
+
+    if (payload.action === "move") {
+      this.element.querySelector(`[data-shift-id="${CSS.escape(String(payload.shift_id))}"]`)?.remove()
+    }
+
+    const addLink = targetCell.querySelector(".schedule-add-link")
+    if (addLink) {
+      addLink.before(updatedShift)
+    } else {
+      targetCell.querySelector(".d-grid")?.append(updatedShift)
+    }
+
+    this.copyShift = null
+    this.draggedShift = null
+    this.clearTargetMarks()
+    this.showInfo(payload.message)
   }
 
   showInfo(message) {

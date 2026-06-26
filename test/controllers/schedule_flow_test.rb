@@ -195,6 +195,11 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     payload = JSON.parse(response.body)
+    assert_equal "move", payload["action"]
+    assert_equal shift.id, payload["shift_id"]
+    assert_equal "2026-06-25", payload["shift_date"]
+    assert_includes payload["shift_html"], "data-shift-id=\"#{shift.id}\""
+    assert_includes payload["shift_html"], "data-shift-date=\"2026-06-25\""
     assert_equal location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh"), payload["redirect_url"]
 
     shift.reload
@@ -242,10 +247,15 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     payload = JSON.parse(response.body)
-    assert_equal location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh"), payload["redirect_url"]
 
     shift.reload
     copied_shift = schedules(:main_week).shifts.where.not(id: shift.id).find_by!(shift_date: Date.new(2026, 6, 25))
+    assert_equal "copy", payload["action"]
+    assert_equal copied_shift.id, payload["shift_id"]
+    assert_equal "2026-06-25", payload["shift_date"]
+    assert_includes payload["shift_html"], "data-shift-id=\"#{copied_shift.id}\""
+    assert_includes payload["shift_html"], "data-shift-date=\"2026-06-25\""
+    assert_equal location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh"), payload["redirect_url"]
     assert_equal Date.new(2026, 6, 22), shift.shift_date
     assert_equal shift.employee, copied_shift.employee
     assert_equal shift.position, copied_shift.position

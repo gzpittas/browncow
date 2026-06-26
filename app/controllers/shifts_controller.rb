@@ -46,7 +46,7 @@ class ShiftsController < ApplicationController
     original_date = @shift.shift_date
 
     if @shift.update(quick_edit_shift_params)
-      respond_to_quick_edit_success("Shift moved to #{shift_date_message(@shift.shift_date)}.")
+      respond_to_quick_edit_success("Shift moved to #{shift_date_message(@shift.shift_date)}.", shift: @shift, action: "move")
     else
       @shift.shift_date = original_date
       respond_to_quick_edit_failure(@shift.errors.full_messages.to_sentence)
@@ -74,7 +74,7 @@ class ShiftsController < ApplicationController
     )
 
     if copied_shift.save
-      respond_to_quick_edit_success("Shift copied to #{shift_date_message(copied_shift.shift_date)}.")
+      respond_to_quick_edit_success("Shift copied to #{shift_date_message(copied_shift.shift_date)}.", shift: copied_shift, action: "copy")
     else
       respond_to_quick_edit_failure(copied_shift.errors.full_messages.to_sentence)
     end
@@ -137,9 +137,18 @@ class ShiftsController < ApplicationController
     location_schedule_path(@location, @schedule, view: view, section: section)
   end
 
-  def respond_to_quick_edit_success(message)
+  def respond_to_quick_edit_success(message, shift:, action:)
     respond_to do |format|
-      format.json { render json: { message: message, redirect_url: schedule_return_path } }
+      format.json do
+        render json: {
+          message: message,
+          action: action,
+          shift_id: shift.id,
+          shift_date: shift.shift_date.iso8601,
+          shift_html: rendered_shift_pill(shift),
+          redirect_url: schedule_return_path
+        }
+      end
       format.html { redirect_to schedule_return_path, notice: message }
     end
   end
@@ -155,6 +164,31 @@ class ShiftsController < ApplicationController
 
   def shift_date_message(date)
     date.strftime("%A")
+  end
+
+  def rendered_shift_pill(shift)
+    @section_mode = params[:section].presence || current_schedule_section_mode
+
+    render_to_string(
+      partial: "schedules/shift_pill",
+      formats: [ :html ],
+      locals: shift_pill_locals(shift)
+    )
+  end
+
+  def shift_pill_locals(shift)
+    view_mode = normalized_schedule_view_mode(params[:view])
+    locals = {
+      shift: shift,
+      title: shift.employee.display_name,
+      view_mode: view_mode
+    }
+
+    if view_mode == "employees"
+      locals.merge(secondary_text: shift.position.name, tertiary_text: helpers.shift_time_range(shift))
+    else
+      locals.merge(secondary_text: helpers.shift_time_range(shift))
+    end
   end
 
   def selected_position_for_section
