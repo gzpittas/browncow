@@ -1,123 +1,93 @@
 <% content_for :title, schedule_header_title(@schedule) %>
+<% content_for :body_class, "app-background-section-#{@section_mode}" %>
 
 <div data-controller="schedule-quick-edit">
   <div class="d-flex flex-column gap-3 mb-4">
-    <div>
-      <p class="text-uppercase small fw-semibold text-primary mb-2"><%= @location.name %></p>
-      <h1 class="h2 fw-semibold mb-3"><%= schedule_header_title(@schedule) %></h1>
-      <div class="schedule-week-cards" aria-label="Schedule week days">
-        <% @week_dates.each do |date| %>
-          <div class="schedule-week-card <%= "is-today" if schedule_today?(date) %>">
-            <div class="schedule-week-card-name"><%= schedule_header_day_name(date) %></div>
-            <div class="schedule-week-card-date"><%= date.strftime("%-d") %></div>
+    <div class="schedule-header-toolbar">
+      <% section_display =
+           case @section_mode
+           when "boh" then "BOH"
+           when "foh" then "FOH"
+           end %>
+      <div class="schedule-header-left">
+        <div class="schedule-hero-date schedule-week-title" aria-label="<%= schedule_header_title(@schedule) %>">
+          <span class="schedule-hero-date-prefix">Week of</span>
+          <span class="schedule-hero-date-month"><%= @schedule.week_start_date.strftime("%b").upcase %></span>
+          <span class="schedule-hero-date-day"><%= @schedule.week_start_date.day %></span>
+        </div>
+        <% if section_display.present? %>
+          <div class="schedule-section-display" aria-label="<%= section_display %>">
+            <%= section_display %>
           </div>
         <% end %>
       </div>
-    </div>
 
-    <div class="d-flex flex-column gap-3">
-      <div class="d-flex flex-wrap gap-2">
-        <% if @previous_schedule %>
-          <%= link_to "Previous Week", location_schedule_path(@location, @previous_schedule, view: @view_mode, section: @section_mode), class: "btn btn-outline-secondary" %>
-        <% end %>
-        <% if @next_schedule %>
-          <%= link_to "Next Week", location_schedule_path(@location, @next_schedule, view: @view_mode, section: @section_mode), class: "btn btn-outline-secondary" %>
-        <% end %>
-        <% if @current_week_schedule.present? && @current_week_schedule != @schedule %>
-          <%= link_to "Current Schedule", current_schedule_path(view: @view_mode, section: @section_mode), class: "btn btn-primary" %>
-        <% end %>
-        <%= link_to "All Schedules", location_schedules_path(@location), class: "btn btn-outline-secondary" %>
-        <%= link_to "Copy Schedule", new_location_schedule_path(@location, copy_from_schedule_id: @schedule.id), class: "btn btn-outline-primary" %>
-        <%= link_to "Manage Schedule", edit_location_schedule_path(@location, @schedule), class: "btn btn-outline-secondary" %>
-        <%= link_to "Print Schedule", print_location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode), class: "btn btn-primary", target: "_blank", rel: "noopener" %>
-      </div>
+      <div class="schedule-header-center"></div>
 
-      <div class="schedule-header-toolbar">
-        <div class="schedule-header-main">
-          <div class="d-flex flex-wrap gap-2 align-items-center">
-            <div class="btn-group" role="group" aria-label="Schedule view">
-              <%= link_to "Positions", location_schedule_path(@location, @schedule, view: "positions", section: @section_mode), class: "btn #{@view_mode == "positions" ? "btn-primary" : "btn-outline-primary"}" %>
-              <%= link_to "Employees", location_schedule_path(@location, @schedule, view: "employees", section: @section_mode), class: "btn #{@view_mode == "employees" ? "btn-primary" : "btn-outline-primary"}" %>
-              <%= link_to "Both", location_schedule_path(@location, @schedule, view: "both", section: @section_mode), class: "btn #{@view_mode == "both" ? "btn-primary" : "btn-outline-primary"}" %>
-            </div>
-
-            <div class="btn-group" role="group" aria-label="Schedule section">
-              <%= link_to "All", location_schedule_path(@location, @schedule, view: @view_mode, section: "all"), class: "btn #{@section_mode == "all" ? "btn-primary" : "btn-outline-primary"}" %>
-              <%= link_to "BOH", location_schedule_path(@location, @schedule, view: @view_mode, section: "boh"), class: "btn #{@section_mode == "boh" ? "btn-primary" : "btn-outline-primary"}" %>
-              <%= link_to "FOH", location_schedule_path(@location, @schedule, view: @view_mode, section: "foh"), class: "btn #{@section_mode == "foh" ? "btn-primary" : "btn-outline-primary"}" %>
-            </div>
+      <div class="schedule-hero-stack schedule-header-right">
+        <div class="d-flex flex-wrap gap-2 schedule-mini-month-nav">
+          <div class="cta-with-label schedule-mini-month-control">
+            <%= link_to location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode, calendar_month: @mini_calendar_date.prev_month.beginning_of_month.iso8601),
+              class: "btn btn-call-to-action-primary calendar-nav-blue-medium shadow-sm",
+              "aria-label": "Last Month",
+              title: "Last Month",
+              data: { bs_toggle: "tooltip", bs_title: "Last Month", action: "click->schedule-quick-edit#rememberMiniCalendarViewport" } do %>
+              <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+            <% end %>
+            <span class="cta-label">PREV</span>
           </div>
-
-          <div class="schedule-header-summary">
-            <p class="text-secondary mb-0 d-flex flex-wrap gap-2">
-              <span class="badge text-bg-light border"><%= @schedule.status.titleize %></span>
-              <span class="badge text-bg-light border"><%= @section_label %></span>
-              <% if @schedule.current_week? %>
-                <span class="badge text-bg-primary">Current Week</span>
-              <% end %>
-            </p>
-
-            <div class="schedule-hero-date" aria-label="<%= @schedule.week_start_date.strftime("%B %-d") %>">
-              <span class="schedule-hero-date-prefix">Week of</span>
-              <span class="schedule-hero-date-month"><%= @schedule.week_start_date.strftime("%b").upcase %></span>
-              <span class="schedule-hero-date-day"><%= @schedule.week_start_date.strftime("%-d") %></span>
-            </div>
+          <div class="cta-with-label schedule-mini-month-control">
+            <%= link_to current_schedule_path(view: @view_mode, section: @section_mode),
+              class: "btn btn-call-to-action-view current-menu-toggle shadow-sm",
+              "aria-label": "Current Schedule",
+              title: "Current Schedule",
+              data: { bs_toggle: "tooltip", bs_title: "Current Schedule", action: "click->schedule-quick-edit#rememberMiniCalendarViewport" } do %>
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+            <% end %>
+            <span class="cta-label">CURRENT</span>
+          </div>
+          <div class="cta-with-label schedule-mini-month-control">
+            <%= link_to schedule_mini_month_destination(@location, Date.current, view: @view_mode, section: @section_mode),
+              class: "btn btn-call-to-action shadow-sm",
+              "aria-label": "Today",
+              title: "Today",
+              data: { bs_toggle: "tooltip", bs_title: "Today", action: "click->schedule-quick-edit#rememberMiniCalendarViewport" } do %>
+              <i class="fa-solid fa-calendar-day" aria-hidden="true"></i>
+            <% end %>
+            <span class="cta-label">TODAY</span>
+          </div>
+          <div class="cta-with-label schedule-mini-month-control">
+            <%= link_to location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode, calendar_month: @mini_calendar_date.next_month.beginning_of_month.iso8601),
+              class: "btn btn-call-to-action-primary calendar-nav-blue-medium shadow-sm",
+              "aria-label": "Next Month",
+              title: "Next Month",
+              data: { bs_toggle: "tooltip", bs_title: "Next Month", action: "click->schedule-quick-edit#rememberMiniCalendarViewport" } do %>
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            <% end %>
+            <span class="cta-label">NEXT</span>
           </div>
         </div>
-
-        <div class="schedule-hero-stack">
-          <div class="d-flex flex-wrap justify-content-end gap-2 schedule-mini-month-nav">
-              <%= link_to location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode, calendar_month: @mini_calendar_date.prev_month.beginning_of_month.iso8601),
-                class: "btn btn-sm btn-outline-secondary",
-                "aria-label": "Last Month",
-                title: "Last Month",
-                data: { bs_toggle: "tooltip", bs_title: "Last Month", action: "click->schedule-quick-edit#rememberMiniCalendarViewport" } do %>
-                <i class="bi bi-chevron-left" aria-hidden="true"></i>
-              <% end %>
-              <%= link_to current_schedule_path(view: @view_mode, section: @section_mode),
-                class: "btn btn-sm btn-outline-secondary",
-                "aria-label": "Current Schedule",
-                title: "Current Schedule",
-                data: { bs_toggle: "tooltip", bs_title: "Current Schedule", action: "click->schedule-quick-edit#rememberMiniCalendarViewport" } do %>
-                <i class="bi bi-calendar-week" aria-hidden="true"></i>
-              <% end %>
-              <%= link_to schedule_mini_month_destination(@location, Date.current, view: @view_mode, section: @section_mode),
-                class: "btn btn-sm btn-outline-secondary",
-                "aria-label": "Today",
-                title: "Today",
-                data: { bs_toggle: "tooltip", bs_title: "Today", action: "click->schedule-quick-edit#rememberMiniCalendarViewport" } do %>
-                <i class="bi bi-calendar-day" aria-hidden="true"></i>
-              <% end %>
-              <%= link_to location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode, calendar_month: @mini_calendar_date.next_month.beginning_of_month.iso8601),
-                class: "btn btn-sm btn-outline-secondary",
-                "aria-label": "Next Month",
-                title: "Next Month",
-                data: { bs_toggle: "tooltip", bs_title: "Next Month", action: "click->schedule-quick-edit#rememberMiniCalendarViewport" } do %>
-                <i class="bi bi-chevron-right" aria-hidden="true"></i>
-              <% end %>
+        <div class="schedule-mini-month" aria-label="<%= schedule_mini_month_title(@mini_calendar_date) %>">
+          <div class="schedule-mini-month-title"><%= schedule_mini_month_title(@mini_calendar_date) %></div>
+          <div class="schedule-mini-month-weekdays" aria-hidden="true">
+            <% %w[S M T W T F S].each do |day_name| %>
+              <span><%= day_name %></span>
+            <% end %>
           </div>
-          <div class="schedule-mini-month" aria-label="<%= schedule_mini_month_title(@mini_calendar_date) %>">
-            <div class="schedule-mini-month-title"><%= schedule_mini_month_title(@mini_calendar_date) %></div>
-            <div class="schedule-mini-month-weekdays" aria-hidden="true">
-              <% %w[S M T W T F S].each do |day_name| %>
-                <span><%= day_name %></span>
+          <div class="schedule-mini-month-grid">
+            <% schedule_mini_month_weeks(@mini_calendar_date).each do |week| %>
+              <% week.each do |date| %>
+                <% classes = ["schedule-mini-month-day"] %>
+                <% classes << "is-outside-month" if date.month != @mini_calendar_date.month %>
+                <% classes << "has-schedule" if schedule_mini_month_has_schedule?(@location, date) %>
+                <% classes << "is-in-schedule-week" if @week_dates.include?(date) %>
+                <% classes << "is-today" if schedule_today?(date) %>
+                <%= link_to date.day,
+                  schedule_mini_month_destination(@location, date, view: @view_mode, section: @section_mode),
+                  class: classes.join(" "),
+                  data: { action: "click->schedule-quick-edit#rememberMiniCalendarViewport" } %>
               <% end %>
-            </div>
-            <div class="schedule-mini-month-grid">
-              <% schedule_mini_month_weeks(@mini_calendar_date).each do |week| %>
-                <% week.each do |date| %>
-                  <% classes = ["schedule-mini-month-day"] %>
-                  <% classes << "is-outside-month" if date.month != @mini_calendar_date.month %>
-                  <% classes << "has-schedule" if schedule_mini_month_has_schedule?(@location, date) %>
-                  <% classes << "is-in-schedule-week" if @week_dates.include?(date) %>
-                  <% classes << "is-today" if schedule_today?(date) %>
-                  <%= link_to date.day,
-                    schedule_mini_month_destination(@location, date, view: @view_mode, section: @section_mode),
-                    class: classes.join(" "),
-                    data: { action: "click->schedule-quick-edit#rememberMiniCalendarViewport" } %>
-                <% end %>
-              <% end %>
-            </div>
+            <% end %>
           </div>
         </div>
       </div>
@@ -127,6 +97,27 @@
   <div class="alert alert-info d-none schedule-quick-edit-message align-items-center justify-content-between gap-3 mb-4" role="status" data-schedule-quick-edit-target="alert">
     <span data-schedule-quick-edit-target="message"></span>
     <button type="button" class="btn btn-sm btn-outline-secondary" data-action="schedule-quick-edit#cancelCopy">Cancel</button>
+  </div>
+
+  <div class="schedule-schedule-controls mb-3">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <div class="btn-group" role="group" aria-label="Schedule view">
+        <%= link_to "Positions", location_schedule_path(@location, @schedule, view: "positions", section: @section_mode), class: "btn #{@view_mode == "positions" ? "btn-primary" : "btn-outline-primary"}" %>
+        <%= link_to "Employees", location_schedule_path(@location, @schedule, view: "employees", section: @section_mode), class: "btn #{@view_mode == "employees" ? "btn-primary" : "btn-outline-primary"}" %>
+        <%= link_to "Both", location_schedule_path(@location, @schedule, view: "both", section: @section_mode), class: "btn #{@view_mode == "both" ? "btn-primary" : "btn-outline-primary"}" %>
+      </div>
+
+      <div class="btn-group" role="group" aria-label="Schedule section">
+        <%= link_to "BOH", location_schedule_path(@location, @schedule, view: @view_mode, section: "boh"), class: "btn #{@section_mode == "boh" ? "btn-primary" : "btn-outline-primary"}" %>
+        <%= link_to "FOH", location_schedule_path(@location, @schedule, view: @view_mode, section: "foh"), class: "btn #{@section_mode == "foh" ? "btn-primary" : "btn-outline-primary"}" %>
+        <%= link_to "Both", location_schedule_path(@location, @schedule, view: @view_mode, section: "all"), class: "btn #{@section_mode == "all" ? "btn-primary" : "btn-outline-primary"}" %>
+      </div>
+    </div>
+
+    <div class="schedule-schedule-actions">
+      <%= link_to "Copy Schedule", new_location_schedule_path(@location, copy_from_schedule_id: @schedule.id), class: "btn btn-outline-primary" %>
+      <%= link_to "Print Schedule", print_location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode), class: "btn btn-primary", target: "_blank", rel: "noopener" %>
+    </div>
   </div>
 
   <% if @view_mode == "positions" %>

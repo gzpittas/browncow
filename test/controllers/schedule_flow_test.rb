@@ -317,17 +317,15 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'] button.shift-pill-delete"
     assert_select ".shift-pill-delete span[aria-hidden='true']", text: "×"
-    assert_select ".schedule-hero-date-prefix", text: "Week of"
-    assert_select ".schedule-hero-date-month", text: "JUN"
-    assert_select ".schedule-hero-date-day", text: "21"
     assert_select ".shift-pill[draggable='true'][data-shift-id='#{shifts(:sam_monday).id}'][data-move-url='#{move_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'][data-copy-url='#{copy_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}']"
     assert_select ".shift-pill[data-action*='pointerdown->schedule-quick-edit#optionPointerDown']"
     assert_select ".shift-pill-title-link[draggable='false']"
     assert_select ".shift-pill-secondary-link[draggable='false']"
     assert_select ".shift-pill-time-link[draggable='false']"
     assert_select ".schedule-quick-edit-message[data-schedule-quick-edit-target='alert']"
-    assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='employees'][data-employee-id='#{employees(:sam).id}'][data-shift-date='2026-06-23']"
-    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-23", view: "employees", section: "foh")}']", text: "+ Add Shift"
+    assert_select "td.schedule-cell-has-shift[style*='--position-color: #{positions(:server).display_color}'][data-schedule-quick-edit-target='cell'][data-view-mode='employees'][data-employee-id='#{employees(:sam).id}'][data-shift-date='2026-06-22']"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-23", view: "employees", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-23", view: "employees", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"
   end
 
   test "position view shift pills include an inline delete button" do
@@ -339,7 +337,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "positions", section: "foh")}'] button.shift-pill-delete"
     assert_select ".shift-pill-delete span[aria-hidden='true']", text: "×", minimum: 1
     assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='positions'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23']"
-    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), position_id: positions(:server).id, shift_date: "2026-06-23", view: "positions", section: "foh")}']", text: "+ Add Server"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), position_id: positions(:server).id, shift_date: "2026-06-23", view: "positions", section: "foh")}'] .schedule-add-link-context", count: 0
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), position_id: positions(:server).id, shift_date: "2026-06-23", view: "positions", section: "foh")}'] .schedule-add-link-label", text: "+ Add Server"
   end
 
   test "a user can delete a shift from the position view and return to the calendar" do
@@ -642,7 +641,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".print-meta strong", text: "Schedule by Position"
-    assert_select ".print-position-section h2", text: "Servers"
+    assert_select ".print-position-section[style*='--print-position-color'] h2", text: "Servers"
     assert_select ".print-shift-line", text: /Sam Server/
     assert_select ".print-shift-line", text: /4:00-10:00 PM/
   end
@@ -686,6 +685,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select "table.print-employee-table tbody th", text: "Sam Server"
     assert_select ".print-shift-line", text: /Server/
     assert_select ".print-shift-line", text: /4:00-10:00 PM/
+    assert_select ".print-off", count: 0
   end
 
   test "printing from both view renders position and employee grouping" do
@@ -695,9 +695,10 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".print-meta strong", text: "Schedule by Position and Employee"
-    assert_select ".print-position-section h2", text: "Servers"
+    assert_select ".print-position-section[style*='--print-position-color'] h2", text: "Servers"
     assert_select "table.print-employee-table tbody th", text: "Sam Server"
     assert_select ".print-shift-line", text: /4:00-10:00 PM/
+    assert_select ".print-off", count: 0
   end
 
   test "print page includes account location and sunday start label" do
@@ -741,7 +742,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "employees")
 
     assert_response :success
-    assert_select "a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}'][target='_blank']", text: "Print Schedule"
+    assert_select ".schedule-schedule-actions a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}'][target='_blank']", text: "Print Schedule"
   end
 
   test "regular schedule page includes a visible copy schedule action" do
@@ -750,30 +751,45 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "employees")
 
     assert_response :success
-    assert_select "a[href='#{new_location_schedule_path(locations(:main), copy_from_schedule_id: schedules(:main_week).id)}']", text: "Copy Schedule"
+    assert_select ".schedule-schedule-actions a[href='#{new_location_schedule_path(locations(:main), copy_from_schedule_id: schedules(:main_week).id)}']", text: "Copy Schedule"
   end
 
-  test "schedule show page contains a visible manage schedule action" do
+  test "schedule show page contains visible schedule actions" do
     sign_in users(:manager)
 
     get location_schedule_path(locations(:main), schedules(:main_week))
 
     assert_response :success
-    assert_select "h1", "Week of Sunday June 21"
-    assert_select ".schedule-week-card", count: 7
+    assert_select ".schedule-schedule-controls .btn-group", count: 2
+    assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Positions"
+    assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule section'] .btn.btn-primary", text: "FOH"
+    assert_select ".schedule-schedule-actions", count: 1
+    assert_select ".schedule-schedule-actions a[href='#{new_location_schedule_path(locations(:main), copy_from_schedule_id: schedules(:main_week).id)}']", text: "Copy Schedule"
+    assert_select ".schedule-schedule-actions a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}'][target='_blank']", text: "Print Schedule"
+    assert_select ".schedule-week-title", count: 1
+    assert_select ".schedule-week-title .schedule-hero-date-prefix", text: "Week of"
+    assert_select ".schedule-week-title .schedule-hero-date-month", text: schedules(:main_week).week_start_date.strftime("%b").upcase
+    assert_select ".schedule-week-title .schedule-hero-date-day", text: schedules(:main_week).week_start_date.day.to_s
     assert_select ".schedule-mini-month-nav a[aria-label='Last Month'][data-bs-toggle='tooltip'][data-bs-title='Last Month']", count: 1
     assert_select ".schedule-mini-month-nav a[aria-label='Current Schedule'][data-bs-toggle='tooltip'][data-bs-title='Current Schedule']", count: 1
     assert_select ".schedule-mini-month-nav a[aria-label='Today'][data-bs-toggle='tooltip'][data-bs-title='Today']", count: 1
     assert_select ".schedule-mini-month-nav a[aria-label='Next Month'][data-bs-toggle='tooltip'][data-bs-title='Next Month']", count: 1
+    assert_select ".schedule-mini-month-control", count: 4
+    assert_select ".schedule-mini-month-control .btn-call-to-action-primary", count: 2
+    assert_select ".schedule-mini-month-control .btn-call-to-action-view.current-menu-toggle", count: 1
+    assert_select ".schedule-mini-month-control .btn-call-to-action", count: 1
+    assert_select ".schedule-mini-month-control .fa-solid", count: 4
+    assert_select ".schedule-mini-month-control .bi", count: 0
+    assert_select ".schedule-mini-month-nav .cta-label", text: "PREV"
+    assert_select ".schedule-mini-month-nav .cta-label", text: "CURRENT"
+    assert_select ".schedule-mini-month-nav .cta-label", text: "TODAY"
+    assert_select ".schedule-mini-month-nav .cta-label", text: "NEXT"
     assert_select ".schedule-mini-month-title", text: "June 2026"
     assert_select ".schedule-mini-month-weekdays span", count: 7
     assert_select ".schedule-mini-month-day.is-in-schedule-week", count: 7
     assert_select ".schedule-mini-month-day.has-schedule", count: 7
     assert_select "a.schedule-mini-month-day[data-action='click->schedule-quick-edit#rememberMiniCalendarViewport'][href='#{location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}']", text: "21"
     assert_select "a.schedule-mini-month-day[data-action='click->schedule-quick-edit#rememberMiniCalendarViewport'][href='#{new_location_schedule_path(locations(:main), week_start_date: "2026-06-28", view: "positions", section: "foh")}']", text: "28"
-    assert_select ".schedule-week-card-name", text: "SUN"
-    assert_select ".schedule-week-card-name", text: "SAT"
-    assert_select "a[href='#{edit_location_schedule_path(locations(:main), schedules(:main_week))}']", text: "Manage Schedule"
   end
 
   test "schedule show page highlights today in the header cards and calendar column" do
@@ -784,8 +800,6 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    assert_select ".schedule-week-card.is-today", count: 1
-    assert_select ".schedule-week-card.is-today .schedule-week-card-name", text: "THU"
     assert_select "th.schedule-today-column", text: "Thu 25"
     assert_select "td.schedule-today-column", minimum: 1
   end
@@ -798,8 +812,6 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    assert_select ".schedule-week-card.is-today", count: 1
-    assert_select ".schedule-week-card.is-today .schedule-week-card-name", text: "FRI"
     assert_select "th.schedule-today-column", text: "Fri 26"
   end
 
@@ -854,16 +866,16 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "all")
 
     assert_response :success
-    assert_select ".btn.btn-primary", text: "All"
-    assert_select ".badge", text: "All Divisions"
+    assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule section'] .btn.btn-primary", text: "Both"
+    assert_select ".schedule-section-display", count: 0
     assert_select ".card-header h2", text: /Server/
     assert_select ".card-header h2", text: /Prep Cook/
 
     get location_schedule_path(locations(:main), schedules(:main_week), view: "positions")
 
     assert_response :success
-    assert_select ".btn.btn-primary", text: "All"
-    assert_select ".badge", text: "All Divisions"
+    assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule section'] .btn.btn-primary", text: "Both"
+    assert_select ".schedule-section-display", count: 0
     assert_select ".card-header h2", text: /Prep Cook/
   end
 
@@ -873,9 +885,10 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "employees")
 
     assert_response :success
-    assert_select ".btn.btn-primary", text: "Employees"
+    assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Employees"
     assert_select "table.schedule-table thead tr th:first-child", text: "Sun 21"
     assert_select ".shift-pill", text: /Sam Server/
+    assert_select ".shift-pill-employee-view .shift-pill-secondary", text: "Server"
   end
 
   test "opening a schedule with both view parameter renders positions grouped by employee" do
@@ -884,13 +897,23 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "both")
 
     assert_response :success
-    assert_select ".btn.btn-primary", text: "Both"
+    assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Both"
     assert_select ".card-header h2", text: /Server/
     assert_select "table.schedule-table thead tr th:first-child", text: "Sun 21"
     assert_select ".shift-pill", text: /Sam Server/
     assert_select ".shift-pill", text: /4:00-10:00 PM/
     assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23']"
-    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}']", text: "+ Add Shift"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"
+  end
+
+  test "all section uses the putty body background class" do
+    sign_in users(:manager)
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "all")
+
+    assert_response :success
+    assert_select "body.app-background-section-all", count: 1
   end
 
   test "boh and foh schedule views stay separated" do
@@ -908,8 +931,10 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "boh")
 
     assert_response :success
-    assert_select "h1", "Week of Sunday June 21"
-    assert_select ".badge", text: "Back of House"
+    assert_select ".schedule-section-display", text: "BOH"
+    assert_select ".badge", text: "Back of House", count: 0
+    assert_select ".badge", text: "Draft", count: 0
+    assert_select ".badge", text: "Current Week", count: 0
     assert_select ".card-header h2", text: /Prep Cook/
     assert_select ".shift-pill", text: /9:00 AM-3:00 PM/
     assert_select ".shift-pill", text: /Bartender/, count: 0
@@ -917,7 +942,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")
 
     assert_response :success
-    assert_select ".badge", text: "Front of House"
+    assert_select ".schedule-section-display", text: "FOH"
+    assert_select ".badge", text: "Front of House", count: 0
     assert_select ".shift-pill", text: /Sam Server/
     assert_select ".shift-pill", text: /Prep Cook/, count: 0
   end

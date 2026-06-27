@@ -1,8 +1,4 @@
 <div class="d-grid gap-4">
-  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div class="badge text-bg-light border"><%= @section_label %></div>
-  </div>
-
   <% @positions.each do |position| %>
     <section class="card border-0 shadow-sm schedule-board">
       <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -36,7 +32,9 @@
                       <% shifts.each do |shift| %>
                         <%= render "shift_pill", shift: shift, title: shift.employee.display_name, secondary_text: shift_time_range(shift), view_mode: "positions" %>
                       <% end %>
-                      <%= link_to "+ Add #{position.name}", new_location_schedule_shift_path(@location, @schedule, position_id: position.id, shift_date: date, view: "positions", section: @section_mode), class: "schedule-add-link" %>
+                      <%= link_to new_location_schedule_shift_path(@location, @schedule, position_id: position.id, shift_date: date, view: "positions", section: @section_mode), class: "schedule-add-link" do %>
+                        <span class="schedule-add-link-label">+ Add <%= position.name %></span>
+                      <% end %>
                     </div>
                   </td>
                 <% end %>

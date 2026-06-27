@@ -126,7 +126,18 @@ class AuthenticationFlowTest < ActionDispatch::IntegrationTest
     get dashboard_path
 
     assert_response :success
-    assert_select "a[href='#{current_schedule_path}']", text: "Current Schedule"
+    assert_select "a[href='#{current_schedule_path}'].navbar-current-schedule-btn.current-menu-toggle[aria-label='Current Schedule'][data-bs-toggle='tooltip'][data-bs-title='Current Schedule'] .fa-solid.fa-clock", count: 1
+    assert_select ".navbar-current-schedule-control .cta-label", text: "CURRENT"
+    assert_select ".navbar-settings-control .navbar-settings-btn .fa-solid.fa-gear", count: 1
+    assert_select ".navbar-settings-control .cta-label", text: "SETTINGS"
+    assert_select ".navbar .navbar-cta-btn", count: 0
+    assert_select ".dropdown-menu a[href='#{positions_path}']", text: "Positions"
+    assert_select ".dropdown-menu a[href='#{employees_path}']", text: "Employees"
+    assert_select ".dropdown-menu a[href='#{schedules_path}']", text: "Schedules"
+    assert_select ".dropdown-menu a[href='#{dashboard_path}']", text: "Dashboard"
+    assert_select ".dropdown-menu a[href='#{locations_path}']", text: "Locations"
+    assert_select ".dropdown-menu a[href='#{edit_account_path}']", text: "Account"
+    assert_select ".dropdown-menu form[action='#{destroy_user_session_path}'] button", text: "Sign Out"
     assert_select "h1", "Welcome, Mae"
     assert_select "h2", "This Week's Schedule"
     assert_select "h2", "Next Week's Schedule"

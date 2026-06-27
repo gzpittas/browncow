@@ -23,21 +23,46 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-body-tertiary">
-    <nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm">
+  <body class="bg-body-tertiary <%= content_for(:body_class) %>">
+    <nav class="navbar navbar-expand-lg border-bottom shadow-sm">
       <div class="container py-2">
         <%= link_to "Schedule", root_path, class: "navbar-brand fw-semibold text-dark" %>
 
         <div class="ms-auto d-flex align-items-center flex-wrap justify-content-end gap-2">
           <% if user_signed_in? %>
-            <%= link_to "Current Schedule", current_schedule_path, class: "btn btn-primary btn-sm" %>
-            <%= link_to "Schedules", schedules_path, class: "nav-link text-secondary" %>
-            <%= link_to "Dashboard", dashboard_path, class: "nav-link text-secondary" %>
-            <%= link_to "Locations", locations_path, class: "nav-link text-secondary" %>
-            <%= link_to "Positions", positions_path, class: "nav-link text-secondary" %>
-            <%= link_to "Employees", employees_path, class: "nav-link text-secondary" %>
-            <%= link_to "Account", current_user.account.present? ? edit_account_path : new_account_path, class: "nav-link text-secondary" %>
-            <%= button_to "Sign Out", destroy_user_session_path, method: :delete, class: "nav-link btn btn-link text-secondary px-0", form_class: "d-inline" %>
+            <div class="cta-with-label navbar-current-schedule-control">
+              <%= link_to current_schedule_path,
+                    class: "btn btn-call-to-action-view current-menu-toggle navbar-current-schedule-btn shadow-sm",
+                    "aria-label": "Current Schedule",
+                    title: "Current Schedule",
+                    data: { bs_toggle: "tooltip", bs_title: "Current Schedule" } do %>
+                <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              <% end %>
+              <span class="cta-label">CURRENT</span>
+            </div>
+            <div class="cta-with-label navbar-settings-control dropdown">
+              <button class="btn btn-call-to-action-primary navbar-settings-btn shadow-sm dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      aria-label="Settings"
+                      title="Settings"
+                      data-bs-title="Settings">
+                <i class="fa-solid fa-gear" aria-hidden="true"></i>
+              </button>
+              <span class="cta-label">SETTINGS</span>
+              <div class="dropdown-menu dropdown-menu-end shadow-sm">
+                <%= link_to "Positions", positions_path, class: "dropdown-item" %>
+                <%= link_to "Employees", employees_path, class: "dropdown-item" %>
+                <div class="dropdown-divider"></div>
+                <%= link_to "Schedules", schedules_path, class: "dropdown-item" %>
+                <%= link_to "Dashboard", dashboard_path, class: "dropdown-item" %>
+                <%= link_to "Locations", locations_path, class: "dropdown-item" %>
+                <%= link_to "Account", current_user.account.present? ? edit_account_path : new_account_path, class: "dropdown-item" %>
+                <div class="dropdown-divider"></div>
+                <%= button_to "Sign Out", destroy_user_session_path, method: :delete, class: "dropdown-item", form_class: "mb-0" %>
+              </div>
+            </div>
           <% else %>
             <%= link_to "Sign In", new_user_session_path, class: "btn btn-outline-primary" %>
           <% end %>

@@ -1,7 +1,7 @@
 <% secondary_text = local_assigns[:secondary_text] %>
 <% tertiary_text = local_assigns[:tertiary_text] %>
 
-<div class="shift-pill shift-pill-with-actions <%= "shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank? %>"
+<div class="shift-pill shift-pill-with-actions <%= "shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank? %> <%= "shift-pill-employee-view" if view_mode == "employees" %>"
      draggable="true"
      style="--position-color: <%= shift.position.display_color %>"
      data-schedule-quick-edit-target="shift"

@@ -14,7 +14,12 @@
             <tr>
               <% @week_dates.each do |date| %>
                 <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
-                <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>"
+                <% cell_classes = ["schedule-cell"] %>
+                <% cell_classes << "schedule-today-column" if schedule_today?(date) %>
+                <% cell_classes << "schedule-cell-has-shift" if shifts.any? %>
+                <% cell_style = shifts.any? ? "--position-color: #{shifts.first.position.display_color}" : nil %>
+                <td class="<%= cell_classes.join(" ") %>"
+                    style="<%= cell_style %>"
                     data-schedule-quick-edit-target="cell"
                     data-action="click->schedule-quick-edit#cellClick dragenter->schedule-quick-edit#dragEnter dragover->schedule-quick-edit#dragOver dragleave->schedule-quick-edit#dragLeave drop->schedule-quick-edit#drop"
                     data-view-mode="employees"
@@ -24,7 +29,10 @@
                     <% shifts.each do |shift| %>
                       <%= render "shift_pill", shift: shift, title: shift.employee.display_name, secondary_text: shift.position.name, tertiary_text: shift_time_range(shift), view_mode: "employees" %>
                     <% end %>
-                    <%= link_to "+ Add Shift", new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, shift_date: date, view: "employees", section: @section_mode), class: "schedule-add-link" %>
+                    <%= link_to new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, shift_date: date, view: "employees", section: @section_mode), class: "schedule-add-link" do %>
+                      <span class="schedule-add-link-context"><%= employee.display_name %></span>
+                      <span class="schedule-add-link-label">+ Add Shift</span>
+                    <% end %>
                   </div>
                 </td>
               <% end %>

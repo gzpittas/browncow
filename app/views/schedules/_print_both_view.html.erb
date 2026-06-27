@@ -1,7 +1,7 @@
 <div class="print-position-schedule">
   <% @positions.each do |position| %>
     <% position_employees = @employees_by_position[position] || [] %>
-    <section class="print-position-section">
+    <section class="print-position-section" style="--print-position-color: <%= position.display_color %>;">
       <h2><%= position.name.pluralize %></h2>
 
       <% if position_employees.any? %>
@@ -27,8 +27,6 @@
                           <strong><%= shift_time_range(shift) %></strong>
                         </div>
                       <% end %>
-                    <% else %>
-                      <span class="print-off">Off</span>
                     <% end %>
                   </td>
                 <% end %>
