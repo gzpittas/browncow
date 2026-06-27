@@ -790,6 +790,19 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select "td.schedule-today-column", minimum: 1
   end
 
+  test "schedule show page uses eastern time when highlighting today near midnight utc" do
+    sign_in users(:manager)
+
+    travel_to Time.utc(2026, 6, 27, 0, 30, 0) do
+      get location_schedule_path(locations(:main), schedules(:main_week))
+    end
+
+    assert_response :success
+    assert_select ".schedule-week-card.is-today", count: 1
+    assert_select ".schedule-week-card.is-today .schedule-week-card-name", text: "FRI"
+    assert_select "th.schedule-today-column", text: "Fri 26"
+  end
+
   test "schedule management page allows notes to be updated" do
     sign_in users(:manager)
 
