@@ -316,6 +316,8 @@ export default class extends Controller {
         shift.classList.toggle("is-employee-highlighted", highlighted)
       }
     })
+
+    this.element.classList.toggle("has-employee-highlight", highlighted)
   }
 
   cleanupOptionPointerDrag() {

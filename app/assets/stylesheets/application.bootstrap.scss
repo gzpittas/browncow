@@ -558,11 +558,25 @@ body.app-background-section-all {
 }
 
 .shift-pill.is-employee-highlighted {
-  border-color: var(--menurooster-green-medium);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 18%, white),
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 24%, var(--menurooster-yellow-soft))
+    );
+  border-color: color-mix(in srgb, #f08a24 68%, white);
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--menurooster-green-soft) 75%, white),
-    0 0.35rem 0.85rem rgba(47, 42, 36, 0.12),
+    0 0 0 2.5px color-mix(in srgb, #f6b15d 82%, white),
+    0 0.5rem 1.05rem rgba(133, 82, 24, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+[data-controller~="schedule-quick-edit"].has-employee-highlight .shift-pill:not(.is-employee-highlighted):not(.is-dragging) {
+  box-shadow:
+    0 0.12rem 0.35rem rgba(47, 42, 36, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  filter: saturate(0.8);
+  opacity: 0.72;
 }
 
 .shift-pill.is-dragging {
