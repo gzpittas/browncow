@@ -214,7 +214,29 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     get location_employees_path(locations(:main))
 
     assert_response :success
-    assert_match(/Alex Zed.*Sam Server/m, response.body)
+    assert_match(/FOH.*Sam Server/m, response.body)
+    assert_match(/Unassigned.*Alex Zed/m, response.body)
+  end
+
+  test "employees index is split into foh and boh sections" do
+    sign_in users(:manager)
+    boh_position = locations(:main).positions.create!(name: "Prep Cook", section: "boh", color: Position::COLOR_PALETTE.first)
+    boh_employee = locations(:main).employees.create!(
+      first_name: "Casey",
+      last_name: "Cook",
+      email: "casey-cook@example.com"
+    )
+    boh_employee.positions << boh_position
+
+    get location_employees_path(locations(:main))
+
+    assert_response :success
+    assert_select ".employee-division-section .card-header h2", text: "FOH"
+    assert_select ".employee-division-section .card-header h2", text: "BOH"
+    assert_select ".employee-division-section", text: /Sam Server/
+    assert_select ".employee-division-section", text: /Casey Cook/
+    assert_match(/FOH.*Sam Server/m, response.body)
+    assert_match(/BOH.*Casey Cook/m, response.body)
   end
 
   test "a user cannot access another account location" do

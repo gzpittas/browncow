@@ -12,68 +12,28 @@
 
 <%= render "location_switcher" %>
 
-<div class="card border-0 shadow-sm">
-  <div class="card-body p-0">
-    <% if @location.blank? %>
-      <div class="p-4 p-md-5">
-        <h2 class="h4 fw-semibold mb-2">Add a location first</h2>
-        <p class="text-secondary mb-4">Employees belong to a restaurant location.</p>
-        <%= link_to "Add Location", new_location_path, class: "btn btn-primary" %>
-      </div>
-    <% elsif @employees.any? %>
-      <div class="table-responsive">
-        <table class="table align-middle mb-0">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Positions</th>
-              <th>Contact</th>
-              <th>Status</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @employees.each do |employee| %>
-              <tr>
-                <td class="fw-medium"><%= employee.display_name %></td>
-                <td>
-                  <% if employee.positions.any? %>
-                    <div class="d-flex flex-wrap gap-1">
-                      <% employee.positions.each do |position| %>
-                        <span class="badge text-bg-light border"><%= position.name %></span>
-                      <% end %>
-                    </div>
-                  <% else %>
-                    <span class="text-secondary">None assigned</span>
-                  <% end %>
-                </td>
-                <td class="text-secondary">
-                  <%= [ employee.phone_number, employee.email ].compact_blank.join(" / ").presence || "Not added" %>
-                </td>
-                <td>
-                  <span class="badge <%= employee.active? ? "text-bg-success" : "text-bg-secondary" %>">
-                    <%= employee.active? ? "Active" : "Inactive" %>
-                  </span>
-                </td>
-                <td class="text-end">
-                  <div class="d-inline-flex gap-2">
-                    <%= link_to "Edit", edit_location_employee_path(@location, employee), class: "btn btn-sm btn-outline-secondary" %>
-                    <% if employee.active? %>
-                      <%= button_to "Mark Inactive", deactivate_location_employee_path(@location, employee), method: :patch, class: "btn btn-sm btn-outline-secondary" %>
-                    <% end %>
-                  </div>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    <% else %>
-      <div class="p-4 p-md-5">
-        <h2 class="h4 fw-semibold mb-2">Add employees for <%= @location.name %></h2>
-        <p class="text-secondary mb-4">Employees can be assigned one or more positions for this location.</p>
-        <%= link_to "Add Employee", new_location_employee_path(@location), class: "btn btn-primary" %>
-      </div>
+<% if @location.blank? %>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4 p-md-5">
+      <h2 class="h4 fw-semibold mb-2">Add a location first</h2>
+      <p class="text-secondary mb-4">Employees belong to a restaurant location.</p>
+      <%= link_to "Add Location", new_location_path, class: "btn btn-primary" %>
+    </div>
+  </div>
+<% elsif @employees.any? %>
+  <div class="d-grid gap-4">
+    <%= render "employee_section", title: "FOH", employees: @employees_by_section["foh"], section_key: "foh" %>
+    <%= render "employee_section", title: "BOH", employees: @employees_by_section["boh"], section_key: "boh" %>
+    <% if @unassigned_employees.any? %>
+      <%= render "employee_section", title: "Unassigned", employees: @unassigned_employees, section_key: nil %>
     <% end %>
   </div>
-</div>
+<% else %>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4 p-md-5">
+      <h2 class="h4 fw-semibold mb-2">Add employees for <%= @location.name %></h2>
+      <p class="text-secondary mb-4">Employees can be assigned one or more positions for this location.</p>
+      <%= link_to "Add Employee", new_location_employee_path(@location), class: "btn btn-primary" %>
+    </div>
+  </div>
+<% end %>

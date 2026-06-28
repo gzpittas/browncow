@@ -867,6 +867,35 @@ body.app-background-section-all {
   margin: 0 0.15rem;
 }
 
+.navbar-employees-control {
+  margin: 0 0.15rem;
+}
+
+.navbar-employees-btn {
+  background-color: var(--menurooster-blue-medium) !important;
+  color: var(--menurooster-white) !important;
+  font-size: 1rem;
+  height: 2.85rem;
+  line-height: 1;
+  padding: 0;
+  width: 2.85rem;
+}
+
+.navbar-employees-btn:hover {
+  background-color: var(--menurooster-blue) !important;
+  color: var(--menurooster-white) !important;
+}
+
+.navbar-employees-btn:active {
+  background-color: var(--menurooster-blue-dark) !important;
+  color: var(--menurooster-white) !important;
+}
+
+.navbar-employees-btn:focus-visible {
+  outline: 2px solid var(--menurooster-blue-medium) !important;
+  outline-offset: 3px;
+}
+
 .navbar-settings-toggle {
   text-decoration: none;
 }
@@ -896,7 +925,7 @@ body.app-background-section-all {
 }
 
 .navbar-settings-btn {
-  background-color: var(--menurooster-french-grey-10) !important;
+  background-color: var(--menurooster-french-grey-20) !important;
   color: var(--menurooster-blue) !important;
   font-size: 1rem;
   height: 2.85rem;
@@ -906,12 +935,12 @@ body.app-background-section-all {
 }
 
 .navbar-settings-btn:hover {
-  background-color: var(--menurooster-french-grey-20) !important;
+  background-color: var(--menurooster-french-grey-30) !important;
   color: var(--menurooster-blue-medium) !important;
 }
 
 .navbar-settings-btn:active {
-  background-color: var(--menurooster-french-grey-30) !important;
+  background-color: var(--menurooster-french-grey-40) !important;
   color: var(--menurooster-blue) !important;
 }
 

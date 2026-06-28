@@ -40,6 +40,16 @@
               <% end %>
               <span class="cta-label">CURRENT</span>
             </div>
+            <div class="cta-with-label navbar-employees-control">
+              <%= link_to employees_path,
+                    class: "btn btn-call-to-action-view navbar-employees-btn shadow-sm",
+                    "aria-label": "Employees",
+                    title: "Employees",
+                    data: { bs_toggle: "tooltip", bs_title: "Employees" } do %>
+                <i class="fa-solid fa-users" aria-hidden="true"></i>
+              <% end %>
+              <span class="cta-label">EMPLOYEES</span>
+            </div>
             <div class="cta-with-label navbar-settings-control dropdown">
               <button class="btn btn-call-to-action-primary navbar-settings-btn shadow-sm dropdown-toggle"
                       type="button"

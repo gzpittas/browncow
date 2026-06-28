@@ -8,6 +8,8 @@ class EmployeesController < ApplicationController
 
   def index
     @employees = @location ? @location.employees.includes(:positions).order(active: :desc, first_name: :asc, last_name: :asc) : Employee.none
+    @employees_by_section = group_employees_by_section(@employees)
+    @unassigned_employees = @employees.select { |employee| employee.positions.empty? }
   end
 
   def new
@@ -73,5 +75,11 @@ class EmployeesController < ApplicationController
   def assign_positions
     ids = Array(employee_params[:position_ids]).reject(&:blank?)
     @employee.positions = @location.positions.where(id: ids)
+  end
+
+  def group_employees_by_section(employees)
+    Position::SECTIONS.keys.index_with do |section|
+      employees.select { |employee| employee.positions.any? { |position| position.section == section } }
+    end
   end
 end
