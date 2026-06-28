@@ -658,7 +658,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
 
     get location_schedule_path(locations(:main), schedules(:main_week), view: "employees")
     assert_response :success
-    assert_select "table.schedule-table thead tr th:first-child", text: "Sun 21"
+    assert_select "table.schedule-table.schedule-table-striped thead tr th:first-child", text: "Sun 21"
     assert_select ".shift-pill", text: /Server/
     assert_select ".shift-pill", text: /4:00-10:00 PM/
     assert_select ".shift-pill[style*='--position-color: #8A4F2A']"
@@ -967,7 +967,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Both"
     assert_select ".card-header h2", text: /Server/
-    assert_select "table.schedule-table thead tr th:first-child", text: "Sun 21"
+    assert_select "table.schedule-table.schedule-table-striped thead tr th:first-child", text: "Sun 21"
     assert_select ".shift-pill", text: /Sam Server/
     assert_select ".shift-pill", text: /4:00-10:00 PM/
     assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23']"

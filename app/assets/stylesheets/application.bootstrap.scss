@@ -495,8 +495,11 @@ body.app-background-section-all {
   width: calc(100% / 7);
 }
 
-.schedule-today-column {
-  background: var(--menurooster-yellow-soft) !important;
+.schedule-table th.schedule-today-column,
+.schedule-table td.schedule-today-column,
+.schedule-table-seven th.schedule-today-column,
+.schedule-table-seven td.schedule-today-column {
+  background-color: var(--menurooster-yellow-wisp) !important;
 }
 
 .schedule-name-column {
@@ -507,8 +510,26 @@ body.app-background-section-all {
   min-height: 7rem;
 }
 
+.schedule-table-striped tbody tr:nth-of-type(odd) > td.schedule-cell:not(.schedule-today-column) {
+  background: var(--menurooster-white);
+}
+
+.schedule-table-striped tbody tr:nth-of-type(even) > td.schedule-cell:not(.schedule-today-column) {
+  background: var(--menurooster-french-grey-02);
+}
+
+.schedule-table-striped tbody tr + tr > td.schedule-cell {
+  border-top: 2px solid rgba(47, 42, 36, 0.18);
+}
+
 .schedule-cell-has-shift {
-  background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 14%, white);
+  background:
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 14%, white),
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 14%, white)
+    ),
+    inherit;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--position-color, var(--hc-primary)) 22%, white);
 }
 
@@ -519,7 +540,7 @@ body.app-background-section-all {
       color-mix(in srgb, var(--position-color, var(--hc-primary)) 12%, white),
       color-mix(in srgb, var(--position-color, var(--hc-primary)) 12%, white)
     ),
-    var(--menurooster-yellow-soft);
+    var(--menurooster-yellow-wisp);
 }
 
 .shift-pill {
@@ -778,6 +799,7 @@ body.app-background-section-all {
 
 .schedule-add-link {
   align-items: center;
+  background: rgba(255, 255, 255, 0.5);
   display: block;
   border: 1px dashed rgba(47, 42, 36, 0.22);
   border-radius: 0.5rem;
