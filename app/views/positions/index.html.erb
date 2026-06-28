@@ -71,6 +71,10 @@
                             <% if position.active? %>
                               <%= button_to "Mark Inactive", deactivate_location_position_path(@location, position), method: :patch, class: "btn btn-sm btn-outline-secondary" %>
                             <% end %>
+                            <%= button_to "Delete", location_position_path(@location, position),
+                                  method: :delete,
+                                  class: "btn btn-sm btn-outline-danger",
+                                  form: { class: "d-inline", onsubmit: "return confirm('Delete this position? This will permanently delete its shifts too.')" } %>
                           </div>
                         </td>
                       </tr>

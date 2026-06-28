@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   resources :locations, except: [ :show, :destroy ] do
     patch :deactivate, on: :member
 
-    resources :positions, except: [ :show, :destroy ] do
+    resources :positions, except: [ :show ] do
       patch :deactivate, on: :member
       patch :reorder, on: :collection
     end

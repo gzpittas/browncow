@@ -802,7 +802,27 @@ body.app-background-section-all {
 }
 
 .schedule-quick-edit-message {
+  background: #fffaf4;
+  border: 1px solid rgba(47, 42, 36, 0.12);
+  border-radius: 0.65rem;
+  color: #3a332c;
   max-width: 54rem;
+  padding: 0.8rem 0.9rem;
+}
+
+.schedule-quick-edit-message.is-error {
+  background: #fff3f1;
+  border-color: rgba(139, 30, 30, 0.18);
+  color: #7a2b23;
+}
+
+.form-error-messages {
+  background: #fff3f1;
+  border: 1px solid rgba(139, 30, 30, 0.18);
+  border-radius: 0.65rem;
+  color: #7a2b23;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
 }
 
 .navbar-brand {

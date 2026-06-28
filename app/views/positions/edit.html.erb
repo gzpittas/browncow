@@ -6,5 +6,14 @@
     <p class="text-secondary mb-4">Update this position for <%= @location.name %>.</p>
 
     <%= render "form" %>
+
+    <div class="border-top mt-4 pt-4">
+      <h2 class="h5 fw-semibold mb-2">Delete position</h2>
+      <p class="text-secondary mb-3">This permanently removes the position and any shifts assigned to it.</p>
+      <%= button_to "Delete Position", location_position_path(@location, @position),
+            method: :delete,
+            class: "btn btn-outline-danger",
+            form: { onsubmit: "return confirm('Delete this position? This will permanently delete its shifts too.')" } %>
+    </div>
   </div>
 </div>

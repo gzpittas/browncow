@@ -377,15 +377,15 @@ export default class extends Controller {
   }
 
   showMessage(message, kind) {
-    this.alertTarget.classList.remove("d-none", "alert-info", "alert-danger")
-    this.alertTarget.classList.add("d-flex", `alert-${kind}`)
+    this.alertTarget.classList.remove("d-none", "is-error")
+    this.alertTarget.classList.add("d-flex")
+    if (kind === "danger") this.alertTarget.classList.add("is-error")
     this.messageTarget.textContent = message
   }
 
   hideMessage() {
     this.alertTarget.classList.add("d-none")
-    this.alertTarget.classList.remove("d-flex", "alert-danger")
-    this.alertTarget.classList.add("alert-info")
+    this.alertTarget.classList.remove("d-flex", "is-error")
     this.messageTarget.textContent = ""
   }
 }

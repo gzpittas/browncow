@@ -4,7 +4,8 @@ class ShiftsController < ApplicationController
   before_action :set_location
   before_action :set_schedule
   before_action :set_shift, only: [ :edit, :update, :destroy, :move, :copy ]
-  before_action :set_form_context, only: [ :new, :create, :edit, :update ]
+  before_action :set_form_context, only: [ :new, :create ]
+  before_action :set_form_context_from_shift, only: [ :edit, :update ]
 
   def new
     @shift = @schedule.shifts.build(
@@ -110,10 +111,10 @@ class ShiftsController < ApplicationController
 
   def set_form_context_from_shift
     @section_mode = store_schedule_section_mode!(params[:section].presence || session[:schedule_section_mode] || @shift.position.section)
-    @selected_employee = @shift.employee if params[:employee_id].present?
+    @selected_employee = @shift.employee
     @selected_position = @shift.position if params[:position_id].present?
     @employees = @selected_position ? @selected_position.employees.active.order(:first_name, :last_name) : employee_scope_for_section.distinct.order(:first_name, :last_name)
-    @positions = @selected_employee ? scoped_employee_positions.ordered : position_scope_for_section.ordered
+    @positions = @selected_employee ? employee_positions_for_form(@selected_employee, include_position: @shift.position).ordered : position_scope_for_section.ordered
   end
 
   def shift_params
@@ -218,5 +219,12 @@ class ShiftsController < ApplicationController
     return scope if @section_mode == "all"
 
     scope.where(section: @section_mode)
+  end
+
+  def employee_positions_for_form(employee, include_position: nil)
+    position_ids = employee.positions.active.ids
+    position_ids << include_position.id if include_position.present?
+
+    position_scope_for_section.where(id: position_ids.uniq)
   end
 end

@@ -103,6 +103,40 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     assert_equal "#3F8F5F", positions(:server).reload.color
   end
 
+  test "a signed-in user can delete a position and its shifts" do
+    sign_in users(:manager)
+    position_id = positions(:server).id
+    shift_id = shifts(:sam_monday).id
+
+    assert_difference -> { locations(:main).positions.count }, -1 do
+      assert_difference -> { schedules(:main_week).shifts.count }, -1 do
+        delete location_position_path(locations(:main), positions(:server))
+      end
+    end
+
+    assert_redirected_to location_positions_path(locations(:main))
+    assert_nil Position.find_by(id: position_id)
+    assert_nil Shift.find_by(id: shift_id)
+  end
+
+  test "positions list shows a delete button for each position" do
+    sign_in users(:manager)
+
+    get location_positions_path(locations(:main))
+
+    assert_response :success
+    assert_select "form[action='#{location_position_path(locations(:main), positions(:server))}'] button", text: "Delete"
+  end
+
+  test "edit position page includes a visible delete action" do
+    sign_in users(:manager)
+
+    get edit_location_position_path(locations(:main), positions(:server))
+
+    assert_response :success
+    assert_select "form[action='#{location_position_path(locations(:main), positions(:server))}'] button", text: "Delete Position"
+  end
+
   test "a signed-in user can reorder positions within a division" do
     sign_in users(:manager)
 
@@ -194,6 +228,16 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     sign_in users(:manager)
 
     get edit_location_position_path(locations(:other), positions(:other_server))
+    assert_response :not_found
+  end
+
+  test "a user cannot delete another account position" do
+    sign_in users(:manager)
+
+    assert_no_difference -> { Position.count } do
+      delete location_position_path(locations(:other), positions(:other_server))
+    end
+
     assert_response :not_found
   end
 

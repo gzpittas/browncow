@@ -3,7 +3,7 @@ class PositionsController < ApplicationController
   before_action :require_account!
   before_action :set_locations
   before_action :set_location
-  before_action :set_position, only: [ :edit, :update, :deactivate ]
+  before_action :set_position, only: [ :edit, :update, :destroy, :deactivate ]
 
   def index
     @boh_positions = @location ? @location.positions.boh.ordered : Position.none
@@ -34,6 +34,11 @@ class PositionsController < ApplicationController
     else
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    @position.destroy!
+    redirect_to location_positions_path(@location), notice: "Position deleted."
   end
 
   def deactivate

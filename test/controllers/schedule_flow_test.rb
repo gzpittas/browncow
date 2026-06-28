@@ -386,6 +386,34 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select "select[name='shift[ends_at]'] option[selected][value='22:00']", text: "10:00 PM"
   end
 
+  test "edit shift form limits position choices to the employee assignments" do
+    sign_in users(:manager)
+
+    get edit_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday))
+
+    assert_response :success
+    assert_select "select[name='shift[position_id]'] option", text: "Server"
+    assert_select "select[name='shift[position_id]'] option", text: "Bartender", count: 0
+  end
+
+  test "edit shift form preserves an existing override position choice" do
+    sign_in users(:manager)
+    override_shift = schedules(:main_week).shifts.create!(
+      employee: employees(:sam),
+      position: positions(:server),
+      shift_date: Date.new(2026, 6, 23),
+      starts_at: "16:00",
+      ends_at: "22:00"
+    )
+    override_shift.update_columns(position_id: positions(:bartender).id)
+
+    get edit_location_schedule_shift_path(locations(:main), schedules(:main_week), override_shift)
+
+    assert_response :success
+    assert_select "select[name='shift[position_id]'] option", text: "Server"
+    assert_select "select[name='shift[position_id]'] option[selected][value='#{positions(:bartender).id}']", text: "Bartender"
+  end
+
   test "a user can create a shift from the position view" do
     sign_in users(:manager)
 
@@ -458,7 +486,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_entity
-    assert_select ".alert", text: /End time must be after the start time/
+    assert_select ".form-error-messages", text: /End time must be after the start time/
   end
 
   test "a shift is rejected if its date is outside the schedule week" do
@@ -575,7 +603,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to location_schedules_path(location)
     follow_redirect!
-    assert_select ".alert", text: /No current weekly schedule yet/
+    assert_select ".form-error-messages", count: 0
   end
 
   test "a user cannot access shifts belonging to another account" do
