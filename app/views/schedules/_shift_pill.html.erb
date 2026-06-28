@@ -27,7 +27,8 @@
         <%= button_to location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode),
               method: :delete,
               class: "shift-pill-delete",
-              form_class: "shift-pill-delete-form" do %>
+              form_class: "shift-pill-delete-form",
+              form: { data: { action: "submit->schedule-quick-edit#rememberScheduleViewportSubmit", return_url: location_schedule_path(@location, @schedule, view: view_mode, section: @section_mode) } } do %>
           <span aria-hidden="true">&times;</span>
           <span class="visually-hidden">Delete shift</span>
         <% end %>

@@ -355,7 +355,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "employees")
 
     assert_response :success
-    assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'] button.shift-pill-delete"
+    assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'][data-action='submit->schedule-quick-edit#rememberScheduleViewportSubmit'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}'] button.shift-pill-delete"
     assert_select ".shift-pill-delete span[aria-hidden='true']", text: "×"
     assert_select ".shift-pill[draggable='true'][data-shift-id='#{shifts(:sam_monday).id}'][data-move-url='#{move_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'][data-copy-url='#{copy_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'][data-assigned-position-ids='#{positions(:server).id}']"
     assert_select ".shift-pill[data-action*='pointerdown->schedule-quick-edit#optionPointerDown'][data-action*='mouseenter->schedule-quick-edit#highlightEmployeeShifts'][data-action*='mouseleave->schedule-quick-edit#clearEmployeeShiftHighlights'][data-action*='focusin->schedule-quick-edit#highlightEmployeeShifts'][data-action*='focusout->schedule-quick-edit#clearEmployeeShiftHighlights']"
@@ -364,8 +364,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".shift-pill-time-link[draggable='false'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}']"
     assert_select ".schedule-quick-edit-message[data-schedule-quick-edit-target='alert']"
     assert_select "td.schedule-cell-has-shift[style*='--position-color: #{positions(:server).display_color}'][data-schedule-quick-edit-target='cell'][data-view-mode='employees'][data-employee-id='#{employees(:sam).id}'][data-shift-date='2026-06-22']"
-    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-23", view: "employees", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
-    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-23", view: "employees", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-23", view: "employees", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-23", view: "employees", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"
   end
 
   test "position view shift pills include an inline delete button" do
@@ -374,11 +374,11 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "positions")
 
     assert_response :success
-    assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "positions", section: "foh")}'] button.shift-pill-delete"
+    assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "positions", section: "foh")}'][data-action='submit->schedule-quick-edit#rememberScheduleViewportSubmit'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}'] button.shift-pill-delete"
     assert_select ".shift-pill-delete span[aria-hidden='true']", text: "×", minimum: 1
     assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='positions'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23']"
-    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), position_id: positions(:server).id, shift_date: "2026-06-23", view: "positions", section: "foh")}'] .schedule-add-link-context", count: 0
-    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), position_id: positions(:server).id, shift_date: "2026-06-23", view: "positions", section: "foh")}'] .schedule-add-link-label", text: "+ Add Server"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), position_id: positions(:server).id, shift_date: "2026-06-23", view: "positions", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}'] .schedule-add-link-context", count: 0
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), position_id: positions(:server).id, shift_date: "2026-06-23", view: "positions", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}'] .schedule-add-link-label", text: "+ Add Server"
   end
 
   test "a user can delete a shift from the position view and return to the calendar" do
@@ -971,8 +971,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".shift-pill", text: /Sam Server/
     assert_select ".shift-pill", text: /4:00-10:00 PM/
     assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23']"
-    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
-    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"
   end
 
   test "all section uses the putty body background class" do

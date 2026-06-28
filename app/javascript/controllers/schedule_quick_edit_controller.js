@@ -352,6 +352,12 @@ export default class extends Controller {
     this.storeViewport(event.currentTarget.dataset.returnUrl || event.currentTarget.href)
   }
 
+  rememberScheduleViewportSubmit(event) {
+    if (event.defaultPrevented) return
+
+    this.storeViewport(event.currentTarget.dataset.returnUrl || event.currentTarget.action)
+  }
+
   storeViewport(url) {
     try {
       const destination = new URL(url, window.location.href)
