@@ -19,12 +19,13 @@
               <tr>
                 <th><%= employee.display_name %></th>
                 <% @week_dates.each do |date| %>
-                  <% shifts = @shifts_by_employee_position_and_date[[ employee.id, position.id, date ]] || [] %>
+                  <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
                   <td>
                     <% if shifts.any? %>
                       <% shifts.each do |shift| %>
                         <div class="print-shift-line">
-                          <strong><%= shift_time_range(shift) %></strong>
+                          <strong><%= shift.position.name %></strong>
+                          <span><%= shift_time_range(shift) %></span>
                         </div>
                       <% end %>
                     <% end %>

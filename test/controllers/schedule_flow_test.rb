@@ -765,6 +765,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".print-meta strong", text: "Schedule by Position and Employee"
     assert_select ".print-position-section[style*='--print-position-color'] h2", text: "Servers"
     assert_select "table.print-employee-table tbody th", text: "Sam Server"
+    assert_select ".print-shift-line", text: /Server/
     assert_select ".print-shift-line", text: /4:00-10:00 PM/
     assert_select ".print-off", count: 0
   end
@@ -968,11 +969,38 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Both"
     assert_select ".card-header h2", text: /Server/
     assert_select "table.schedule-table.schedule-table-striped thead tr th:first-child", text: "Sun 21"
-    assert_select ".shift-pill", text: /Sam Server/
+    assert_select ".shift-pill .shift-pill-title", text: "Server"
     assert_select ".shift-pill", text: /4:00-10:00 PM/
     assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23']"
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"
+  end
+
+  test "both view repeats an employee's full daily schedule in each assigned position section" do
+    sign_in users(:manager)
+    employees(:sam).positions << positions(:bartender) unless employees(:sam).positions.exists?(positions(:bartender).id)
+    schedules(:main_week).shifts.create!(
+      employee: employees(:sam),
+      position: positions(:server),
+      shift_date: Date.new(2026, 6, 23),
+      starts_at: "16:00",
+      ends_at: "22:00"
+    )
+    schedules(:main_week).shifts.create!(
+      employee: employees(:sam),
+      position: positions(:bartender),
+      shift_date: Date.new(2026, 6, 23),
+      starts_at: "18:00",
+      ends_at: "23:00"
+    )
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")
+
+    assert_response :success
+    assert_select "td[data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23'] .shift-pill .shift-pill-title", text: "Server"
+    assert_select "td[data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23'] .shift-pill .shift-pill-title", text: "Bartender"
+    assert_select "td[data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:bartender).id}'][data-shift-date='2026-06-23'] .shift-pill .shift-pill-title", text: "Server"
+    assert_select "td[data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:bartender).id}'][data-shift-date='2026-06-23'] .shift-pill .shift-pill-title", text: "Bartender"
   end
 
   test "all section uses the putty body background class" do
