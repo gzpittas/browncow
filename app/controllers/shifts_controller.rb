@@ -45,11 +45,13 @@ class ShiftsController < ApplicationController
 
   def move
     original_date = @shift.shift_date
+    original_position = @shift.position
 
     if @shift.update(quick_edit_shift_params)
-      respond_to_quick_edit_success("Shift moved to #{shift_date_message(@shift.shift_date)}.", shift: @shift, action: "move")
+      respond_to_quick_edit_success(move_shift_message(@shift, original_date:, original_position:), shift: @shift, action: "move")
     else
       @shift.shift_date = original_date
+      @shift.position = original_position
       respond_to_quick_edit_failure(@shift.errors.full_messages.to_sentence)
     end
   end
@@ -67,7 +69,7 @@ class ShiftsController < ApplicationController
 
     copied_shift = @schedule.shifts.build(
       employee: @shift.employee,
-      position: @shift.position,
+      position: quick_edit_position || @shift.position,
       shift_date: destination_date,
       starts_at: @shift.starts_at,
       ends_at: @shift.ends_at,
@@ -122,7 +124,7 @@ class ShiftsController < ApplicationController
   end
 
   def quick_edit_shift_params
-    params.require(:shift).permit(:shift_date)
+    params.require(:shift).permit(:shift_date, :position_id)
   end
 
   def quick_edit_shift_date
@@ -130,6 +132,13 @@ class ShiftsController < ApplicationController
     Date.iso8601(value) if value.present?
   rescue ArgumentError
     nil
+  end
+
+  def quick_edit_position
+    position_id = quick_edit_shift_params[:position_id].presence
+    return if position_id.blank?
+
+    @location.positions.find_by(id: position_id)
   end
 
   def schedule_return_path
@@ -165,6 +174,19 @@ class ShiftsController < ApplicationController
 
   def shift_date_message(date)
     date.strftime("%A")
+  end
+
+  def move_shift_message(shift, original_date:, original_position:)
+    date_changed = shift.shift_date != original_date
+    position_changed = shift.position_id != original_position.id
+
+    if date_changed && position_changed
+      "Shift moved to #{shift.position.name} on #{shift_date_message(shift.shift_date)}."
+    elsif position_changed
+      "Shift moved to #{shift.position.name}."
+    else
+      "Shift moved to #{shift_date_message(shift.shift_date)}."
+    end
   end
 
   def rendered_shift_pill(shift)

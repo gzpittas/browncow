@@ -108,7 +108,7 @@ class SchedulesController < ApplicationController
       .includes(:positions)
       .distinct
       .order(:first_name, :last_name)
-    @shifts = shifts_for_section.includes(:employee, :position).ordered
+    @shifts = shifts_for_section.includes(:position, employee: :positions).ordered
     @shifts_by_employee_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.shift_date ] }
     @shifts_by_position_and_date = @shifts.group_by { |shift| [ shift.position_id, shift.shift_date ] }
     @shifts_by_employee_position_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.position_id, shift.shift_date ] }

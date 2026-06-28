@@ -5,11 +5,12 @@
      draggable="true"
      style="--position-color: <%= shift.position.display_color %>"
      data-schedule-quick-edit-target="shift"
-     data-action="pointerdown->schedule-quick-edit#optionPointerDown dragstart->schedule-quick-edit#dragStart dragend->schedule-quick-edit#dragEnd"
+     data-action="pointerdown->schedule-quick-edit#optionPointerDown dragstart->schedule-quick-edit#dragStart dragend->schedule-quick-edit#dragEnd mouseenter->schedule-quick-edit#highlightEmployeeShifts mouseleave->schedule-quick-edit#clearEmployeeShiftHighlights focusin->schedule-quick-edit#highlightEmployeeShifts focusout->schedule-quick-edit#clearEmployeeShiftHighlights"
      data-shift-id="<%= shift.id %>"
      data-shift-date="<%= shift.shift_date.iso8601 %>"
      data-employee-id="<%= shift.employee_id %>"
      data-position-id="<%= shift.position_id %>"
+     data-assigned-position-ids="<%= shift.employee.positions.active.ids.join(",") %>"
      data-shift-label="<%= "#{shift.employee.display_name}'s #{shift.position.name} shift" %>"
      data-move-url="<%= move_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode) %>"
      data-copy-url="<%= copy_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode) %>">

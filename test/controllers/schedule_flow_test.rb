@@ -220,6 +220,46 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_equal "Patio section", shift.notes
   end
 
+  test "a user can move their own shift to another assigned position in position view" do
+    sign_in users(:manager)
+    employees(:sam).positions << positions(:bartender) unless employees(:sam).positions.exists?(positions(:bartender).id)
+    shift = shifts(:sam_monday)
+
+    patch move_location_schedule_shift_path(locations(:main), schedules(:main_week), shift, view: "positions", section: "foh"),
+      params: { shift: { shift_date: "2026-06-22", position_id: positions(:bartender).id } },
+      as: :json
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_equal "move", payload["action"]
+    assert_includes payload["message"], "Bartender"
+    assert_includes payload["shift_html"], "data-position-id=\"#{positions(:bartender).id}\""
+
+    shift.reload
+    assert_equal positions(:bartender), shift.position
+    assert_equal Date.new(2026, 6, 22), shift.shift_date
+  end
+
+  test "a user can move their own shift to another assigned position in both view" do
+    sign_in users(:manager)
+    employees(:sam).positions << positions(:bartender) unless employees(:sam).positions.exists?(positions(:bartender).id)
+    shift = shifts(:sam_monday)
+
+    patch move_location_schedule_shift_path(locations(:main), schedules(:main_week), shift, view: "both", section: "foh"),
+      params: { shift: { shift_date: "2026-06-22", position_id: positions(:bartender).id } },
+      as: :json
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_equal "move", payload["action"]
+    assert_includes payload["message"], "Bartender"
+    assert_includes payload["shift_html"], "data-position-id=\"#{positions(:bartender).id}\""
+
+    shift.reload
+    assert_equal positions(:bartender), shift.position
+    assert_equal Date.new(2026, 6, 22), shift.shift_date
+  end
+
   test "moving a shift outside the schedule week is rejected" do
     sign_in users(:manager)
     shift = shifts(:sam_monday)
@@ -317,8 +357,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "form.shift-pill-delete-form[action='#{location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'] button.shift-pill-delete"
     assert_select ".shift-pill-delete span[aria-hidden='true']", text: "×"
-    assert_select ".shift-pill[draggable='true'][data-shift-id='#{shifts(:sam_monday).id}'][data-move-url='#{move_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'][data-copy-url='#{copy_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}']"
-    assert_select ".shift-pill[data-action*='pointerdown->schedule-quick-edit#optionPointerDown']"
+    assert_select ".shift-pill[draggable='true'][data-shift-id='#{shifts(:sam_monday).id}'][data-move-url='#{move_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'][data-copy-url='#{copy_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh")}'][data-assigned-position-ids='#{positions(:server).id}']"
+    assert_select ".shift-pill[data-action*='pointerdown->schedule-quick-edit#optionPointerDown'][data-action*='mouseenter->schedule-quick-edit#highlightEmployeeShifts'][data-action*='mouseleave->schedule-quick-edit#clearEmployeeShiftHighlights'][data-action*='focusin->schedule-quick-edit#highlightEmployeeShifts'][data-action*='focusout->schedule-quick-edit#clearEmployeeShiftHighlights']"
     assert_select ".shift-pill-title-link[draggable='false'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}']"
     assert_select ".shift-pill-secondary-link[draggable='false'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}']"
     assert_select ".shift-pill-time-link[draggable='false'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}']"

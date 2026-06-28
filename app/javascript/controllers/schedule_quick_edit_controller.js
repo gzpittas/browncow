@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["alert", "cell", "message"]
+  static targets = ["alert", "cell", "message", "shift"]
 
   connect() {
     this.copyShift = null
@@ -57,6 +57,16 @@ export default class extends Controller {
     document.addEventListener("pointerup", this.pointerUpHandler)
   }
 
+  highlightEmployeeShifts(event) {
+    this.setEmployeeShiftHighlight(event.currentTarget.dataset.employeeId, true)
+  }
+
+  clearEmployeeShiftHighlights(event) {
+    if (event?.relatedTarget && event.currentTarget.contains(event.relatedTarget)) return
+
+    this.setEmployeeShiftHighlight(event.currentTarget.dataset.employeeId, false)
+  }
+
   dragStart(event) {
     if (event.target.closest("button, form")) {
       event.preventDefault()
@@ -88,7 +98,7 @@ export default class extends Controller {
   dragOver(event) {
     if (!this.draggedShift) return
 
-    if (this.validCellForShift(event.currentTarget, this.draggedShift)) {
+    if (this.validCellForShift(event.currentTarget, this.draggedShift, this.dragAction(event))) {
       event.preventDefault()
       const action = this.dragAction(event)
       this.draggedShift.dragAction = action
@@ -107,15 +117,15 @@ export default class extends Controller {
 
     event.preventDefault()
     const cell = event.currentTarget
-    if (!this.validCellForShift(cell, this.draggedShift)) {
+    if (!this.validCellForShift(cell, this.draggedShift, this.dragAction(event))) {
       this.showError("Choose another valid day for this shift.")
       return
     }
 
     if (this.dragAction(event) === "copy") {
-      this.sendQuickEdit(this.draggedShift.copyUrl, "POST", cell.dataset.shiftDate, cell)
+      this.sendQuickEdit(this.draggedShift.copyUrl, "POST", cell, cell)
     } else {
-      this.sendQuickEdit(this.draggedShift.moveUrl, "PATCH", cell.dataset.shiftDate, cell)
+      this.sendQuickEdit(this.draggedShift.moveUrl, "PATCH", cell, cell)
     }
   }
 
@@ -147,12 +157,12 @@ export default class extends Controller {
 
     if (!didDrag) return
 
-    if (!cell || !this.validCellForShift(cell, shift)) {
+    if (!cell || !this.validCellForShift(cell, shift, "copy")) {
       this.showError("Choose another valid day for the copied shift.")
       return
     }
 
-    this.sendQuickEdit(shift.copyUrl, "POST", cell.dataset.shiftDate, cell)
+    this.sendQuickEdit(shift.copyUrl, "POST", cell, cell)
   }
 
   startCopy(event) {
@@ -176,16 +186,16 @@ export default class extends Controller {
     if (event.target.closest("a, button, form")) return
 
     const cell = event.currentTarget
-    if (!this.validCellForShift(cell, this.copyShift)) {
+    if (!this.validCellForShift(cell, this.copyShift, "copy")) {
       this.showError("Choose another valid day for the copied shift.")
       this.markTargets(this.copyShift)
       return
     }
 
-    this.sendQuickEdit(this.copyShift.copyUrl, "POST", cell.dataset.shiftDate, cell)
+    this.sendQuickEdit(this.copyShift.copyUrl, "POST", cell, cell)
   }
 
-  async sendQuickEdit(url, method, shiftDate, targetCell) {
+  async sendQuickEdit(url, method, cell, targetCell) {
     const csrfToken = document.querySelector("meta[name='csrf-token']")?.content
 
     try {
@@ -198,7 +208,8 @@ export default class extends Controller {
         },
         body: JSON.stringify({
           shift: {
-            shift_date: shiftDate
+            shift_date: cell.dataset.shiftDate,
+            position_id: cell.dataset.positionId
           }
         })
       })
@@ -225,6 +236,7 @@ export default class extends Controller {
       date: element.dataset.shiftDate,
       employeeId: element.dataset.employeeId,
       positionId: element.dataset.positionId,
+      assignedPositionIds: (element.dataset.assignedPositionIds || "").split(",").filter(Boolean),
       label: element.dataset.shiftLabel,
       moveUrl: element.dataset.moveUrl,
       copyUrl: element.dataset.copyUrl
@@ -256,18 +268,25 @@ export default class extends Controller {
     this.optionPointerDrag.ghost.style.top = `${event.clientY - ghostRect.height / 2}px`
   }
 
-  validCellForShift(cell, shift) {
-    if (!cell.dataset.shiftDate || cell.dataset.shiftDate === shift.date) return false
+  validCellForShift(cell, shift, action = "move") {
+    if (!cell.dataset.shiftDate) return false
+
+    const sameDate = cell.dataset.shiftDate === shift.date
+    const samePosition = cell.dataset.positionId === shift.positionId
+    const sameEmployee = !cell.dataset.employeeId || cell.dataset.employeeId === shift.employeeId
+
+    if (action === "copy" && sameDate) return false
+    if (action === "move" && sameDate && samePosition && sameEmployee) return false
 
     if (cell.dataset.viewMode === "employees") {
       return cell.dataset.employeeId === shift.employeeId
     }
 
     if (cell.dataset.viewMode === "positions") {
-      return cell.dataset.positionId === shift.positionId
+      return shift.assignedPositionIds.includes(cell.dataset.positionId)
     }
 
-    return cell.dataset.employeeId === shift.employeeId && cell.dataset.positionId === shift.positionId
+    return cell.dataset.employeeId === shift.employeeId && shift.assignedPositionIds.includes(cell.dataset.positionId)
   }
 
   markTargets(shift) {
@@ -286,6 +305,16 @@ export default class extends Controller {
   clearTargetMarks() {
     this.cellTargets.forEach((cell) => {
       cell.classList.remove("is-valid-shift-target", "is-invalid-shift-target", "is-drop-hover")
+    })
+  }
+
+  setEmployeeShiftHighlight(employeeId, highlighted) {
+    if (!employeeId) return
+
+    this.shiftTargets.forEach((shift) => {
+      if (shift.dataset.employeeId === employeeId) {
+        shift.classList.toggle("is-employee-highlighted", highlighted)
+      }
     })
   }
 
