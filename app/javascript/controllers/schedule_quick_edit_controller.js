@@ -313,6 +313,14 @@ export default class extends Controller {
     this.storeViewport(event.currentTarget.href)
   }
 
+  rememberScheduleViewport(event) {
+    if (event.defaultPrevented) return
+    if (event.button !== 0) return
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+
+    this.storeViewport(event.currentTarget.dataset.returnUrl || event.currentTarget.href)
+  }
+
   storeViewport(url) {
     try {
       const destination = new URL(url, window.location.href)

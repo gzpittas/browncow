@@ -16,7 +16,10 @@
   <div class="shift-pill-main">
     <div class="shift-pill-title-row">
       <span class="shift-pill-color-mark" aria-hidden="true"></span>
-      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode), class: "shift-pill-title-link text-decoration-none", draggable: false do %>
+      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode),
+            class: "shift-pill-title-link text-decoration-none",
+            draggable: false,
+            data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: location_schedule_path(@location, @schedule, view: view_mode, section: @section_mode) } do %>
         <span class="shift-pill-title fw-semibold"><%= title %></span>
       <% end %>
       <div class="shift-pill-action-row">
@@ -32,12 +35,18 @@
     <% if secondary_text.present? || tertiary_text.present? %>
       <div class="shift-pill-detail-row">
         <% if secondary_text.present? %>
-          <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode), class: "shift-pill-secondary-link text-decoration-none", draggable: false do %>
+          <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode),
+                class: "shift-pill-secondary-link text-decoration-none",
+                draggable: false,
+                data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: location_schedule_path(@location, @schedule, view: view_mode, section: @section_mode) } do %>
             <span class="shift-pill-secondary"><%= secondary_text %></span>
           <% end %>
         <% end %>
         <% if tertiary_text.present? %>
-          <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode), class: "shift-pill-time-link text-decoration-none", draggable: false do %>
+          <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode),
+                class: "shift-pill-time-link text-decoration-none",
+                draggable: false,
+                data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: location_schedule_path(@location, @schedule, view: view_mode, section: @section_mode) } do %>
             <span class="shift-pill-time text-nowrap"><%= tertiary_text %></span>
           <% end %>
         <% end %>
