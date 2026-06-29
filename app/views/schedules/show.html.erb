@@ -116,7 +116,7 @@
 
     <div class="schedule-schedule-actions">
       <%= link_to "Copy Schedule", new_location_schedule_path(@location, copy_from_schedule_id: @schedule.id), class: "btn btn-outline-primary" %>
-      <%= link_to "Print Schedule", print_location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode), class: "btn btn-primary", target: "_blank", rel: "noopener" %>
+      <%= link_to "Print Schedule", print_location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode), class: "btn btn-primary" %>
     </div>
   </div>
 

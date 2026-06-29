@@ -9,7 +9,7 @@
           <div class="print-day-block">
             <h3><%= schedule_print_position_day_label(date) %></h3>
             <% shifts.each do |shift| %>
-              <div class="print-shift-line">
+              <div class="print-shift-line print-position-shift-line">
                 <strong><%= shift.employee.display_name %></strong>
                 <span><%= shift_time_range(shift) %></span>
               </div>

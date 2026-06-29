@@ -407,6 +407,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-23")
 
     assert_response :success
+    assert_select "input[type=submit][value='Create Shift']", count: 2
+    assert_select "a.btn.btn-outline-secondary", text: "Cancel", count: 2
     assert_select "input[type=time]", count: 0
     assert_select "select[name='shift[starts_at]']"
     assert_select "select[name='shift[ends_at]']"
@@ -710,8 +712,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".print-meta strong", text: "Schedule by Position"
     assert_select ".print-position-section[style*='--print-position-color'] h2", text: "Servers"
-    assert_select ".print-shift-line", text: /Sam Server/
-    assert_select ".print-shift-line", text: /4:00-10:00 PM/
+    assert_select ".print-shift-line.print-position-shift-line", text: /Sam Server/
+    assert_select ".print-shift-line.print-position-shift-line", text: /4:00-10:00 PM/
   end
 
   test "printing can be scoped to back of house or front of house" do
@@ -811,7 +813,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "employees")
 
     assert_response :success
-    assert_select ".schedule-schedule-actions a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}'][target='_blank']", text: "Print Schedule"
+    assert_select ".schedule-schedule-actions a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}']", text: "Print Schedule"
+    assert_select ".schedule-schedule-actions a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}'][target='_blank']", count: 0
   end
 
   test "regular schedule page includes a visible copy schedule action" do
@@ -834,7 +837,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule section'] .btn.btn-primary", text: "FOH"
     assert_select ".schedule-schedule-actions", count: 1
     assert_select ".schedule-schedule-actions a[href='#{new_location_schedule_path(locations(:main), copy_from_schedule_id: schedules(:main_week).id)}']", text: "Copy Schedule"
-    assert_select ".schedule-schedule-actions a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}'][target='_blank']", text: "Print Schedule"
+    assert_select ".schedule-schedule-actions a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}']", text: "Print Schedule"
+    assert_select ".schedule-schedule-actions a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}'][target='_blank']", count: 0
     assert_select ".schedule-week-title", count: 1
     assert_select ".schedule-week-title .schedule-hero-date-prefix", text: "Week of"
     assert_select ".schedule-week-title .schedule-hero-date-month", text: schedules(:main_week).week_start_date.strftime("%b").upcase
