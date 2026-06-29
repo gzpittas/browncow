@@ -29,8 +29,13 @@
         <%= f.label :public_schedule_slug, "Schedule link slug", class: "form-label" %>
         <div class="input-group">
           <span class="input-group-text">/schedule/</span>
-          <%= f.text_field :public_schedule_slug, class: "form-control", placeholder: "athens" %>
+          <%= f.text_field :public_schedule_slug,
+                class: ["form-control", ("is-invalid" if @account.errors[:public_schedule_slug].present?)].compact.join(" "),
+                placeholder: "athens" %>
         </div>
+        <% if @account.errors[:public_schedule_slug].present? %>
+          <div class="invalid-feedback d-block"><%= @account.errors[:public_schedule_slug].to_sentence %></div>
+        <% end %>
         <div class="form-text">Use lowercase letters, numbers, and hyphens. Example: <%= public_schedule_url("athens") %></div>
       </div>
 

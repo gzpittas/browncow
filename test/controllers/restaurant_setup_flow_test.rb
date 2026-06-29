@@ -71,6 +71,25 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     assert account.public_schedule_password_authenticated?("staff-only")
   end
 
+  test "public schedule cannot be enabled without a slug" do
+    sign_in users(:manager)
+
+    patch account_path, params: {
+      account: {
+        name: accounts(:main).name,
+        phone_number: accounts(:main).phone_number,
+        email: accounts(:main).email,
+        public_schedule_enabled: "1",
+        public_schedule_slug: "",
+        public_schedule_password: "staff-only"
+      }
+    }
+
+    assert_response :unprocessable_entity
+    assert_select ".invalid-feedback", text: /can't be blank/i
+    assert_not accounts(:main).reload.public_schedule_enabled?
+  end
+
   test "a signed-in user can create a location" do
     sign_in users(:manager)
 

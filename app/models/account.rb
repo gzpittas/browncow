@@ -5,6 +5,7 @@ class Account < ApplicationRecord
   has_many :locations, dependent: :destroy
 
   validates :name, presence: true
+  validates :public_schedule_slug, presence: true, if: :public_schedule_enabled?
   validates :public_schedule_slug, uniqueness: true, allow_blank: true
   validates :public_schedule_slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/ }, allow_blank: true
 
