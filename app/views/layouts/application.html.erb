@@ -68,7 +68,8 @@
                 <%= link_to "Schedules", schedules_path, class: "dropdown-item" %>
                 <%= link_to "Dashboard", dashboard_path, class: "dropdown-item" %>
                 <%= link_to "Locations", locations_path, class: "dropdown-item" %>
-                <%= link_to "Account", current_user.account.present? ? edit_account_path : new_account_path, class: "dropdown-item" %>
+                <%= link_to "Profile", edit_user_registration_path, class: "dropdown-item" %>
+                <%= link_to "Restaurant", current_user.account.present? ? edit_account_path : new_account_path, class: "dropdown-item" %>
                 <div class="dropdown-divider"></div>
                 <%= button_to "Sign Out", destroy_user_session_path, method: :delete, class: "dropdown-item", form_class: "mb-0" %>
               </div>
