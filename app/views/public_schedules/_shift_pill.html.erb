@@ -1,8 +1,14 @@
 <% secondary_text = local_assigns[:secondary_text] %>
 <% tertiary_text = local_assigns[:tertiary_text] %>
-
-<div class="shift-pill public-shift-pill <%= "shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank? %> <%= "shift-pill-employee-view" if local_assigns[:view_mode] == "employees" %>"
-     style="--position-color: <%= shift.position.display_color %>">
+<% href = local_assigns[:href] %>
+<% pill_classes = [
+  "shift-pill",
+  "public-shift-pill",
+  ("public-shift-pill-link" if href.present?),
+  ("shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank?),
+  ("shift-pill-employee-view" if local_assigns[:view_mode] == "employees")
+].compact.join(" ") %>
+<% pill_content = capture do %>
   <div class="shift-pill-main">
     <div class="shift-pill-title-row">
       <span class="shift-pill-color-mark" aria-hidden="true"></span>
@@ -19,4 +25,17 @@
       </div>
     <% end %>
   </div>
-</div>
+<% end %>
+
+<% if href.present? %>
+  <%= link_to href,
+        class: pill_classes,
+        style: "--position-color: #{shift.position.display_color}",
+        aria: { label: "View #{shift.employee.display_name}'s weekly schedule" } do %>
+    <%= pill_content %>
+  <% end %>
+<% else %>
+  <%= tag.div class: pill_classes, style: "--position-color: #{shift.position.display_color}" do %>
+    <%= pill_content %>
+  <% end %>
+<% end %>

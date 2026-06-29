@@ -26,7 +26,12 @@
                     <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>">
                       <div class="d-grid gap-2">
                         <% shifts.each do |shift| %>
-                          <%= render "public_schedules/shift_pill", shift: shift, title: shift.position.name, secondary_text: shift_time_range(shift), view_mode: "both" %>
+                          <%= render "public_schedules/shift_pill",
+                                shift: shift,
+                                title: shift.position.name,
+                                secondary_text: shift_time_range(shift),
+                                view_mode: "both",
+                                href: public_schedule_path(@account.public_schedule_slug, public_schedule_params(employee_id: shift.employee_id)) %>
                         <% end %>
                       </div>
                     </td>

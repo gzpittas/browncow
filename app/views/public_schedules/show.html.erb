@@ -15,7 +15,7 @@
         <div class="btn-group" role="group" aria-label="Schedule week">
           <% @available_schedules.each do |schedule| %>
             <%= link_to schedule.current_week? ? "This Week" : "Next Week",
-                  public_schedule_path(@account.public_schedule_slug, schedule_id: schedule.id, view: @view_mode, section: @section_mode),
+                  public_schedule_path(@account.public_schedule_slug, public_schedule_params(schedule_id: schedule.id, employee_id: @selected_employee&.id)),
                   class: "btn #{schedule == @schedule ? "btn-primary" : "btn-outline-primary"}" %>
           <% end %>
         </div>
@@ -42,7 +42,9 @@
       </div>
     </div>
 
-    <% if @view_mode == "positions" %>
+    <% if @selected_employee.present? %>
+      <%= render "public_schedules/employee_week" %>
+    <% elsif @view_mode == "positions" %>
       <%= render "public_schedules/position_view" %>
     <% elsif @view_mode == "employees" %>
       <%= render "public_schedules/employee_view" %>

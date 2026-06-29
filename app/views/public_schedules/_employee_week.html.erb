@@ -1,0 +1,37 @@
+<section class="public-employee-week">
+  <div class="public-employee-week-header">
+    <div>
+      <p class="text-secondary fw-semibold mb-1">Weekly schedule</p>
+      <h2 class="h3 fw-semibold mb-0"><%= @selected_employee.display_name %></h2>
+    </div>
+    <%= link_to "Back to full schedule",
+          public_schedule_path(@account.public_schedule_slug, public_schedule_params(employee_id: nil)),
+          class: "btn btn-outline-primary" %>
+  </div>
+
+  <div class="public-employee-week-list">
+    <% @week_dates.each do |date| %>
+      <% shifts = @selected_employee_shifts_by_date[date] || [] %>
+      <section class="public-employee-day <%= "public-employee-day-today" if schedule_today?(date) %>">
+        <div class="public-employee-day-heading">
+          <span class="public-employee-day-name"><%= date.strftime("%A") %></span>
+          <span class="public-employee-day-date"><%= date.strftime("%b %-d") %></span>
+        </div>
+
+        <% if shifts.any? %>
+          <div class="public-employee-shifts">
+            <% shifts.each do |shift| %>
+              <%= render "public_schedules/shift_pill",
+                    shift: shift,
+                    title: shift.position.name,
+                    secondary_text: shift_time_range(shift),
+                    view_mode: "employee_week" %>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="public-employee-off-day mb-0">No shift scheduled</p>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+</section>

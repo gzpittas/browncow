@@ -67,6 +67,39 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".shift-pill", text: /12:00-6:00 PM/
   end
 
+  test "public shift pills link to a mobile friendly employee week view" do
+    enable_public_schedule!
+    schedules(:main_week).shifts.create!(
+      employee: employees(:sam),
+      position: positions(:server),
+      shift_date: Date.new(2026, 6, 24),
+      starts_at: "10:00",
+      ends_at: "14:00"
+    )
+
+    travel_to Date.new(2026, 6, 25) do
+      post unlock_public_schedule_path("athens"), params: { password: "staff-only" }
+      get public_schedule_path("athens", view: "employees", section: "all")
+    end
+
+    assert_response :success
+    assert_select "a.public-shift-pill[href*='employee_id=#{employees(:sam).id}']", minimum: 1
+
+    travel_to Date.new(2026, 6, 25) do
+      get public_schedule_path("athens", view: "employees", section: "all", employee_id: employees(:sam).id)
+    end
+
+    assert_response :success
+    assert_select ".public-employee-week"
+    assert_select ".public-employee-week h2", text: "Sam Server"
+    assert_select ".public-employee-day", minimum: 7
+    assert_select ".public-employee-shifts .shift-pill", text: /4:00-10:00 PM/
+    assert_select ".public-employee-shifts .shift-pill", text: /10:00 AM-2:00 PM/
+    assert_select "a", text: "Back to full schedule"
+    assert_select "a[href*='/shifts/new']", count: 0
+    assert_select "form[action*='/shifts/']", count: 0
+  end
+
   test "public schedule rejects an incorrect password" do
     enable_public_schedule!
 

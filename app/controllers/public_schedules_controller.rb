@@ -5,6 +5,7 @@ class PublicSchedulesController < ApplicationController
   before_action :ensure_public_schedule_enabled!
   before_action :set_location
   before_action :set_public_schedule_context, only: :show
+  helper_method :public_schedule_params
 
   def show
     render :locked unless public_schedule_unlocked?
@@ -56,6 +57,20 @@ class PublicSchedulesController < ApplicationController
     @employees_by_position = @positions.index_with do |position|
       position.employees.select(&:active?).sort_by { |employee| [ employee.first_name.to_s.downcase, employee.last_name.to_s.downcase ] }
     end
+    set_selected_employee_context
+  end
+
+  def set_selected_employee_context
+    return if params[:employee_id].blank?
+
+    @selected_employee = @location.employees.active.find_by(id: params[:employee_id])
+    return if @selected_employee.blank?
+
+    @selected_employee_shifts = @schedule.shifts
+      .where(employee: @selected_employee)
+      .includes(:position)
+      .ordered
+    @selected_employee_shifts_by_date = @selected_employee_shifts.group_by(&:shift_date)
   end
 
   def public_available_schedules
@@ -98,5 +113,13 @@ class PublicSchedulesController < ApplicationController
 
   def public_schedule_session_key
     "public_schedule_account_#{@account.id}"
+  end
+
+  def public_schedule_params(overrides = {})
+    {
+      schedule_id: @schedule&.id,
+      view: @view_mode,
+      section: @section_mode
+    }.merge(overrides).compact
   end
 end

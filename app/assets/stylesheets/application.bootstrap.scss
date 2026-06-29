@@ -60,6 +60,10 @@ body {
   max-width: 760px;
 }
 
+.form-control::placeholder {
+  color: rgba(47, 42, 36, 0.4);
+}
+
 .schedule-card-disabled {
   opacity: 0.76;
 }
@@ -1084,8 +1088,96 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
   cursor: default;
 }
 
+.public-shift-pill-link {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.public-shift-pill-link:focus-visible {
+  outline: 2px solid var(--hc-primary);
+  outline-offset: 2px;
+}
+
 .public-shift-pill .shift-pill-title-row {
   padding-right: 0.5rem;
+}
+
+.public-employee-week {
+  max-width: 42rem;
+}
+
+.public-employee-week-header {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.public-employee-week-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.public-employee-day {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(47, 42, 36, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.8rem;
+}
+
+.public-employee-day-today {
+  background:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.68)),
+    var(--menurooster-yellow-wisp);
+  border-color: color-mix(in srgb, var(--menurooster-yellow) 32%, white);
+}
+
+.public-employee-day-heading {
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.public-employee-day-name {
+  font-weight: 700;
+}
+
+.public-employee-day-date,
+.public-employee-off-day {
+  color: #6d6258;
+}
+
+.public-employee-shifts {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.public-employee-shifts .shift-pill {
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.public-employee-shifts .shift-pill-color-mark {
+  height: 0.7rem;
+  width: 0.7rem;
+}
+
+.public-employee-shifts .shift-pill-title-row {
+  padding: 0.75rem 0.85rem 0.15rem 0;
+}
+
+.public-employee-shifts .shift-pill-detail-row {
+  padding: 0.15rem 0.9rem 0.85rem 1.65rem;
+}
+
+.public-employee-shifts .shift-pill-secondary,
+.public-employee-shifts .shift-pill-time {
+  font-size: 0.9rem;
 }
 
 .print-body {
