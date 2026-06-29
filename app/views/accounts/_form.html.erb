@@ -16,6 +16,32 @@
     <%= f.email_field :email, class: "form-control" %>
   </div>
 
+  <% if @account.persisted? %>
+    <div class="border rounded p-3 mb-4 bg-light">
+      <h2 class="h6 fw-semibold mb-3">Employee schedule link</h2>
+
+      <div class="form-check form-switch mb-3">
+        <%= f.check_box :public_schedule_enabled, class: "form-check-input" %>
+        <%= f.label :public_schedule_enabled, "Enable public employee schedule", class: "form-check-label" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :public_schedule_slug, "Schedule link slug", class: "form-label" %>
+        <div class="input-group">
+          <span class="input-group-text">/schedule/</span>
+          <%= f.text_field :public_schedule_slug, class: "form-control", placeholder: "athens" %>
+        </div>
+        <div class="form-text">Use lowercase letters, numbers, and hyphens. Example: <%= public_schedule_url("athens") %></div>
+      </div>
+
+      <div>
+        <%= f.label :public_schedule_password, "Schedule password", class: "form-label" %>
+        <%= f.password_field :public_schedule_password, class: "form-control", autocomplete: "new-password" %>
+        <div class="form-text">Leave blank to keep the current password.</div>
+      </div>
+    </div>
+  <% end %>
+
   <div class="d-flex justify-content-end gap-2">
     <% if @account.persisted? %>
       <%= link_to "Cancel", dashboard_path, class: "btn btn-outline-secondary" %>

@@ -1,0 +1,54 @@
+<div class="d-grid gap-4">
+  <% @positions.each do |position| %>
+    <% position_employees = @employees_by_position[position] || [] %>
+    <section class="card border-0 shadow-sm schedule-board">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h2 class="h5 fw-semibold mb-0 d-flex align-items-center gap-2">
+          <span class="position-heading-swatch" style="--position-color: <%= position.display_color %>"></span>
+          <%= position.name %>
+        </h2>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-bordered align-top mb-0 schedule-table schedule-table-seven schedule-table-striped">
+            <thead>
+              <tr>
+                <% @week_dates.each do |date| %>
+                  <th class="text-center bg-white <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <% position_employees.each do |employee| %>
+                <tr>
+                  <% @week_dates.each do |date| %>
+                    <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
+                    <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>">
+                      <div class="d-grid gap-2">
+                        <% shifts.each do |shift| %>
+                          <%= render "public_schedules/shift_pill", shift: shift, title: shift.position.name, secondary_text: shift_time_range(shift), view_mode: "both" %>
+                        <% end %>
+                      </div>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+
+              <% if position_employees.empty? %>
+                <tr>
+                  <td colspan="7" class="p-4 text-center text-secondary">No active employees are assigned to this position yet.</td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  <% end %>
+
+  <% if @positions.empty? %>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4 text-center text-secondary">No positions are available for this schedule view.</div>
+    </div>
+  <% end %>
+</div>

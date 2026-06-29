@@ -1064,6 +1064,30 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
   opacity: 0.55;
 }
 
+.public-schedule-body {
+  background: var(--menurooster-putty);
+  color: #2f2a24;
+}
+
+.public-schedule-lock {
+  max-width: 32rem;
+}
+
+.public-schedule-header {
+  align-items: flex-end;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.public-shift-pill {
+  cursor: default;
+}
+
+.public-shift-pill .shift-pill-title-row {
+  padding-right: 0.5rem;
+}
+
 .print-body {
   background: #f6f6f6;
   color: #111;

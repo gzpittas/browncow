@@ -1,0 +1,60 @@
+<% content_for :title, "#{@account.name} Schedule" %>
+
+<div class="public-schedule-page">
+  <header class="public-schedule-header mb-4">
+    <div>
+      <p class="text-secondary fw-semibold mb-1"><%= @account.name %></p>
+      <h1 class="h2 fw-semibold mb-1">Employee schedule</h1>
+      <p class="text-secondary mb-0"><%= @location.name %></p>
+    </div>
+  </header>
+
+  <% if @schedule.present? %>
+    <div class="schedule-schedule-controls mb-3">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="btn-group" role="group" aria-label="Schedule week">
+          <% @available_schedules.each do |schedule| %>
+            <%= link_to schedule.current_week? ? "This Week" : "Next Week",
+                  public_schedule_path(@account.public_schedule_slug, schedule_id: schedule.id, view: @view_mode, section: @section_mode),
+                  class: "btn #{schedule == @schedule ? "btn-primary" : "btn-outline-primary"}" %>
+          <% end %>
+        </div>
+
+        <div class="btn-group" role="group" aria-label="Schedule view">
+          <%= link_to "Positions", public_schedule_path(@account.public_schedule_slug, schedule_id: @schedule.id, view: "positions", section: @section_mode), class: "btn #{@view_mode == "positions" ? "btn-primary" : "btn-outline-primary"}" %>
+          <%= link_to "Employees", public_schedule_path(@account.public_schedule_slug, schedule_id: @schedule.id, view: "employees", section: @section_mode), class: "btn #{@view_mode == "employees" ? "btn-primary" : "btn-outline-primary"}" %>
+          <%= link_to "Both", public_schedule_path(@account.public_schedule_slug, schedule_id: @schedule.id, view: "both", section: @section_mode), class: "btn #{@view_mode == "both" ? "btn-primary" : "btn-outline-primary"}" %>
+        </div>
+
+        <div class="btn-group" role="group" aria-label="Schedule section">
+          <%= link_to "BOH", public_schedule_path(@account.public_schedule_slug, schedule_id: @schedule.id, view: @view_mode, section: "boh"), class: "btn #{@section_mode == "boh" ? "btn-primary" : "btn-outline-primary"}" %>
+          <%= link_to "FOH", public_schedule_path(@account.public_schedule_slug, schedule_id: @schedule.id, view: @view_mode, section: "foh"), class: "btn #{@section_mode == "foh" ? "btn-primary" : "btn-outline-primary"}" %>
+          <%= link_to "Both", public_schedule_path(@account.public_schedule_slug, schedule_id: @schedule.id, view: @view_mode, section: "all"), class: "btn #{@section_mode == "all" ? "btn-primary" : "btn-outline-primary"}" %>
+        </div>
+      </div>
+    </div>
+
+    <div class="schedule-header-left mb-3">
+      <div class="schedule-hero-date schedule-week-title" aria-label="<%= schedule_header_title(@schedule) %>">
+        <span class="schedule-hero-date-prefix">Week of</span>
+        <span class="schedule-hero-date-month"><%= @schedule.week_start_date.strftime("%b").upcase %></span>
+        <span class="schedule-hero-date-day"><%= @schedule.week_start_date.day %></span>
+      </div>
+    </div>
+
+    <% if @view_mode == "positions" %>
+      <%= render "public_schedules/position_view" %>
+    <% elsif @view_mode == "employees" %>
+      <%= render "public_schedules/employee_view" %>
+    <% else %>
+      <%= render "public_schedules/both_view" %>
+    <% end %>
+  <% else %>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4 p-md-5 text-center">
+        <h2 class="h5 fw-semibold mb-2">No schedule posted yet</h2>
+        <p class="text-secondary mb-0">Please check back after the weekly schedule has been posted.</p>
+      </div>
+    </div>
+  <% end %>
+</div>

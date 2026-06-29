@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   root "welcome#index"
   get "dashboard", to: "dashboard#show"
   get "current-schedule", to: "schedules#current", as: :current_schedule
+  get "schedule/:account_slug", to: "public_schedules#show", as: :public_schedule
+  post "schedule/:account_slug", to: "public_schedules#unlock", as: :unlock_public_schedule
 
   resource :account, only: [ :new, :create, :edit, :update ]
 

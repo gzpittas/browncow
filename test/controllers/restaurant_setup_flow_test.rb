@@ -42,6 +42,35 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     assert_equal "Corner Bistro", user.reload.account.name
   end
 
+  test "a signed-in user can configure the public schedule link" do
+    sign_in users(:manager)
+
+    get edit_account_path
+
+    assert_response :success
+    assert_select "input[name='account[public_schedule_enabled]']"
+    assert_select "input[name='account[public_schedule_slug]']"
+    assert_select "input[name='account[public_schedule_password]'][type=password]"
+
+    patch account_path, params: {
+      account: {
+        name: accounts(:main).name,
+        phone_number: accounts(:main).phone_number,
+        email: accounts(:main).email,
+        public_schedule_enabled: "1",
+        public_schedule_slug: "athens",
+        public_schedule_password: "staff-only"
+      }
+    }
+
+    account = accounts(:main).reload
+
+    assert_redirected_to dashboard_path
+    assert account.public_schedule_enabled?
+    assert_equal "athens", account.public_schedule_slug
+    assert account.public_schedule_password_authenticated?("staff-only")
+  end
+
   test "a signed-in user can create a location" do
     sign_in users(:manager)
 

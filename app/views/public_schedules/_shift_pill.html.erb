@@ -1,0 +1,22 @@
+<% secondary_text = local_assigns[:secondary_text] %>
+<% tertiary_text = local_assigns[:tertiary_text] %>
+
+<div class="shift-pill public-shift-pill <%= "shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank? %> <%= "shift-pill-employee-view" if local_assigns[:view_mode] == "employees" %>"
+     style="--position-color: <%= shift.position.display_color %>">
+  <div class="shift-pill-main">
+    <div class="shift-pill-title-row">
+      <span class="shift-pill-color-mark" aria-hidden="true"></span>
+      <span class="shift-pill-title fw-semibold"><%= title %></span>
+    </div>
+    <% if secondary_text.present? || tertiary_text.present? %>
+      <div class="shift-pill-detail-row">
+        <% if secondary_text.present? %>
+          <span class="shift-pill-secondary"><%= secondary_text %></span>
+        <% end %>
+        <% if tertiary_text.present? %>
+          <span class="shift-pill-time text-nowrap"><%= tertiary_text %></span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

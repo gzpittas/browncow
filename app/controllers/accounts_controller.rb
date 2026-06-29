@@ -37,7 +37,14 @@ class AccountsController < ApplicationController
   private
 
   def account_params
-    params.require(:account).permit(:name, :phone_number, :email)
+    params.require(:account).permit(
+      :name,
+      :phone_number,
+      :email,
+      :public_schedule_enabled,
+      :public_schedule_slug,
+      :public_schedule_password
+    )
   end
 
   def redirect_existing_account
