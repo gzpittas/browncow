@@ -1,3 +1,5 @@
+require "bcrypt"
+
 class Account < ApplicationRecord
   has_many :users, dependent: :nullify
   has_many :locations, dependent: :destroy
