@@ -92,12 +92,15 @@ module ApplicationHelper
     value.respond_to?(:strftime) ? value.strftime("%H:%M") : Time.zone.parse(value.to_s).strftime("%H:%M")
   end
 
-  def schedule_week_options(location, _selected_date = nil)
+  def schedule_week_options(location, selected_date = nil)
     first_week = Schedule.week_start_for(Date.current) - 4.weeks
     existing_week_starts = location.schedules.pluck(:week_start_date)
+    selected_week = selected_date&.to_date
 
-    (0..16).filter_map do |week_offset|
-      week_start = first_week + week_offset.weeks
+    week_starts = (0..16).map { |week_offset| first_week + week_offset.weeks }
+    week_starts << selected_week if selected_week.present?
+
+    week_starts.uniq.sort.filter_map do |week_start|
       next if existing_week_starts.include?(week_start)
 
       [ "Week of #{week_start.strftime("%A, %B %-d")}", week_start.iso8601 ]
@@ -117,6 +120,14 @@ module ApplicationHelper
 
       [ label, schedule.id ]
     end
+  end
+
+  def schedule_copy_section_options
+    [
+      [ "BOH only", "boh" ],
+      [ "FOH only", "foh" ],
+      [ "BOH + FOH", "all" ]
+    ]
   end
 
   def position_section_options

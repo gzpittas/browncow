@@ -40,8 +40,11 @@ class Schedule < ApplicationRecord
     week_start_date == self.class.week_start_for(date)
   end
 
-  def copy_shifts_to!(target_schedule)
-    shifts.ordered.each do |shift|
+  def copy_shifts_to!(target_schedule, section: "all")
+    source_shifts = shifts.joins(:position).ordered
+    source_shifts = source_shifts.where(positions: { section: section }) unless section == "all"
+
+    source_shifts.each do |shift|
       day_offset = (shift.shift_date - week_start_date).to_i
 
       target_schedule.shifts.create!(

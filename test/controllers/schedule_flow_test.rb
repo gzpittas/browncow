@@ -27,11 +27,15 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "input[type=date][name='schedule[week_start_date]']", count: 0
+    assert_select "label[for='schedule_source_schedule_id']", text: "Copy schedule from"
+    assert_select "label[for='schedule_week_start_date']", text: "Create new schedule for"
+    assert_match(/Copy schedule from.*Create new schedule for/m, response.body)
     assert_select "select[name='schedule[week_start_date]']"
     assert_select "select[name='schedule[week_start_date]'] option[selected][value='2026-06-28']", text: "Week of Sunday, June 28"
     assert_select "select[name='schedule[week_start_date]'] option", text: "Week of Sunday, July 5"
-    assert_select "select[name='schedule[source_schedule_id]'] option", text: "Blank schedule"
+    assert_select "select[name='schedule[source_schedule_id]'] option", text: "Start with a blank schedule"
     assert_select "select[name='schedule[source_schedule_id]'] option", text: /Week of Sunday June 21/
+    assert_select "select[name='schedule[copy_section]'] option[selected][value='all']", text: "BOH + FOH"
   end
 
   test "new schedule form does not offer an existing schedule week" do
@@ -48,10 +52,12 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
   test "copy schedule link preselects the source schedule" do
     sign_in users(:manager)
 
-    get new_location_schedule_path(locations(:main), copy_from_schedule_id: schedules(:main_week).id)
+    get new_location_schedule_path(locations(:main), copy_from_schedule_id: schedules(:main_week).id, section: "boh", view: "positions")
 
     assert_response :success
     assert_select "select[name='schedule[source_schedule_id]'] option[selected][value='#{schedules(:main_week).id}']"
+    assert_select "select[name='schedule[week_start_date]'] option[selected][value='2026-06-28']"
+    assert_select "select[name='schedule[copy_section]'] option[selected][value='boh']", text: "BOH only"
   end
 
   test "new schedule form honors a selected week start" do
@@ -98,6 +104,37 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_equal "16:00", copied_shift.starts_at.strftime("%H:%M")
     assert_equal "22:00", copied_shift.ends_at.strftime("%H:%M")
     assert_redirected_to location_schedule_path(locations(:main), schedule)
+  end
+
+  test "a user can copy only one schedule division into a new week" do
+    sign_in users(:manager)
+    boh_position = locations(:main).positions.create!(name: "Prep Cook", section: "boh", color: Position::COLOR_PALETTE.first)
+    employees(:sam).positions << boh_position
+    schedules(:main_week).shifts.create!(
+      employee: employees(:sam),
+      position: boh_position,
+      shift_date: Date.new(2026, 6, 23),
+      starts_at: "09:00",
+      ends_at: "15:00"
+    )
+
+    assert_difference -> { locations(:main).schedules.count }, 1 do
+      assert_difference -> { Shift.count }, 1 do
+        post location_schedules_path(locations(:main), view: "positions", section: "boh"), params: {
+          schedule: {
+            week_start_date: "2026-06-28",
+            source_schedule_id: schedules(:main_week).id,
+            copy_section: "boh"
+          }
+        }
+      end
+    end
+
+    schedule = locations(:main).schedules.find_by!(week_start_date: Date.new(2026, 6, 28))
+
+    assert schedule.shifts.exists?(position: boh_position)
+    assert_not schedule.shifts.exists?(position: positions(:server))
+    assert_redirected_to location_schedule_path(locations(:main), schedule, view: "positions", section: "boh")
   end
 
   test "duplicate schedules for the same location and week are blocked" do
@@ -823,7 +860,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     get location_schedule_path(locations(:main), schedules(:main_week), view: "employees")
 
     assert_response :success
-    assert_select ".schedule-schedule-actions a[href='#{new_location_schedule_path(locations(:main), copy_from_schedule_id: schedules(:main_week).id)}']", text: "Copy Schedule"
+    assert_select ".schedule-schedule-actions a[href='#{new_location_schedule_path(locations(:main), copy_from_schedule_id: schedules(:main_week).id, view: "employees", section: "foh")}']", text: "Copy Schedule"
   end
 
   test "schedule show page contains visible schedule actions" do
@@ -836,7 +873,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Positions"
     assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule section'] .btn.btn-primary", text: "FOH"
     assert_select ".schedule-schedule-actions", count: 1
-    assert_select ".schedule-schedule-actions a[href='#{new_location_schedule_path(locations(:main), copy_from_schedule_id: schedules(:main_week).id)}']", text: "Copy Schedule"
+    assert_select ".schedule-schedule-actions a[href='#{new_location_schedule_path(locations(:main), copy_from_schedule_id: schedules(:main_week).id, view: "positions", section: "foh")}']", text: "Copy Schedule"
     assert_select ".schedule-schedule-actions a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}']", text: "Print Schedule"
     assert_select ".schedule-schedule-actions a[href='#{print_location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")}'][target='_blank']", count: 0
     assert_select ".schedule-week-title", count: 1

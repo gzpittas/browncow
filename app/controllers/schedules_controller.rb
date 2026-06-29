@@ -12,21 +12,23 @@ class SchedulesController < ApplicationController
   end
 
   def new
-    selected_week = params[:week_start_date].presence || Schedule.week_start_for(Date.current)
-    @schedule = @location.schedules.build(week_start_date: selected_week)
     @selected_source_schedule = selected_source_schedule
+    @copy_section = selected_copy_section
+    selected_week = params[:week_start_date].presence || default_new_schedule_week_start(@selected_source_schedule)
+    @schedule = @location.schedules.build(week_start_date: selected_week)
   end
 
   def create
     week_start_date = schedule_params[:week_start_date].presence || Schedule.week_start_for(Date.current)
     @selected_source_schedule = selected_source_schedule
+    @copy_section = selected_copy_section
     @schedule = @location.schedules.build(
       schedule_params.slice(:notes).merge(week_start_date: week_start_date, status: "draft")
     )
 
     if create_schedule_with_optional_copy
       notice = @selected_source_schedule.present? ? "Weekly schedule created and shifts copied." : "Weekly schedule created."
-      redirect_to location_schedule_path(@location, @schedule), notice: notice
+      redirect_to created_schedule_path, notice: notice
     else
       existing_schedule = @location.schedules.find_by(week_start_date: @schedule.week_start_date)
 
@@ -120,9 +122,9 @@ class SchedulesController < ApplicationController
   end
 
   def schedule_params
-    return ActionController::Parameters.new.permit(:week_start_date, :notes, :source_schedule_id) if params[:schedule].blank?
+    return ActionController::Parameters.new.permit(:week_start_date, :notes, :source_schedule_id, :copy_section) if params[:schedule].blank?
 
-    params.require(:schedule).permit(:week_start_date, :notes, :source_schedule_id)
+    params.require(:schedule).permit(:week_start_date, :notes, :source_schedule_id, :copy_section)
   end
 
   def selected_source_schedule
@@ -132,10 +134,35 @@ class SchedulesController < ApplicationController
     @location.schedules.find(source_schedule_id)
   end
 
+  def selected_copy_section
+    requested_section = schedule_params[:copy_section].presence || params[:copy_section].presence || params[:section].presence
+
+    normalized_schedule_section_mode(requested_section) || "all"
+  end
+
+  def default_new_schedule_week_start(source_schedule)
+    return Schedule.week_start_for(Date.current) if source_schedule.blank?
+
+    week_start = source_schedule.week_start_date + 1.week
+    week_start += 1.week while @location.schedules.exists?(week_start_date: week_start)
+    week_start
+  end
+
+  def created_schedule_path
+    return location_schedule_path(@location, @schedule) if params[:view].blank? && params[:section].blank?
+
+    location_schedule_path(
+      @location,
+      @schedule,
+      view: normalized_schedule_view_mode(params[:view]),
+      section: normalized_schedule_section_mode(params[:section]) || @copy_section
+    )
+  end
+
   def create_schedule_with_optional_copy
     Schedule.transaction do
       @schedule.save!
-      @selected_source_schedule&.copy_shifts_to!(@schedule)
+      @selected_source_schedule&.copy_shifts_to!(@schedule, section: @copy_section)
     end
 
     true

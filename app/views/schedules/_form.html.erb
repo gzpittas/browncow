@@ -1,19 +1,29 @@
-<%= form_with model: [ @location, @schedule ] do |f| %>
+<%= form_with model: [ @location, @schedule ], url: @schedule.persisted? ? location_schedule_path(@location, @schedule) : location_schedules_path(@location, view: params[:view], section: params[:section]) do |f| %>
   <%= render "devise/shared/error_messages", resource: @schedule %>
 
   <% unless @schedule.persisted? %>
     <div class="mb-3">
-      <%= f.label :week_start_date, "Schedule week", class: "form-label" %>
+      <%= f.label :source_schedule_id, "Copy schedule from", class: "form-label" %>
+      <%= f.select :source_schedule_id,
+            options_for_select(schedule_copy_source_options(@location), @selected_source_schedule&.id),
+            { include_blank: "Start with a blank schedule" },
+            class: "form-select" %>
+      <div class="form-text">Choose the existing week whose shifts should be copied.</div>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :week_start_date, "Create new schedule for", class: "form-label" %>
       <%= f.select :week_start_date, schedule_week_options(@location, @schedule.week_start_date), { selected: @schedule.week_start_date&.iso8601 }, class: "form-select" %>
+      <div class="form-text">This is the new week that will receive the copied shifts.</div>
     </div>
 
     <div class="mb-4">
-      <%= f.label :source_schedule_id, "Start from", class: "form-label" %>
-      <%= f.select :source_schedule_id,
-            options_for_select(schedule_copy_source_options(@location), @selected_source_schedule&.id),
-            { include_blank: "Blank schedule" },
+      <%= f.label :copy_section, "Copy which division?", class: "form-label" %>
+      <%= f.select :copy_section,
+            options_for_select(schedule_copy_section_options, @copy_section),
+            {},
             class: "form-select" %>
-      <div class="form-text">Choose an existing week to copy its shifts into the new schedule, or leave this blank to start fresh.</div>
+      <div class="form-text">Use BOH or FOH to copy only the schedule you are working on, or BOH + FOH to copy the full week.</div>
     </div>
   <% else %>
     <div class="mb-3">
