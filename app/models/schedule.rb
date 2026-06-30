@@ -1,15 +1,18 @@
 class Schedule < ApplicationRecord
   DAYS_IN_WEEK = 7
+  STATUSES = %w[draft published].freeze
 
   belongs_to :location
 
   has_many :shifts, dependent: :destroy
 
   validates :week_start_date, :status, presence: true
+  validates :status, inclusion: { in: STATUSES }
   validates :week_start_date, uniqueness: { scope: :location_id }
   validate :week_start_date_is_sunday
 
   scope :ordered, -> { order(week_start_date: :desc) }
+  scope :published, -> { where(status: "published") }
 
   def self.week_start_for(date)
     date = date.to_date
@@ -34,6 +37,14 @@ class Schedule < ApplicationRecord
 
   def draft?
     status == "draft"
+  end
+
+  def published?
+    status == "published"
+  end
+
+  def editable?
+    draft?
   end
 
   def current_week?(date = Date.current)

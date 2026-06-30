@@ -115,6 +115,20 @@
     </div>
 
     <div class="schedule-schedule-actions">
+      <span class="schedule-publication-state text-secondary small fw-semibold text-uppercase">
+        <%= @schedule.published? ? "Published" : "Draft" %>
+      </span>
+      <% if @schedule.published? %>
+        <%= button_to "Unpublish", unpublish_location_schedule_path(@location, @schedule),
+              method: :patch,
+              class: "btn btn-menurooster-green",
+              form: { class: "d-inline", onsubmit: "return confirm('Unpublish this schedule? It will be removed from the public employee schedule until you publish it again.')" } %>
+      <% else %>
+        <%= button_to "Publish", publish_location_schedule_path(@location, @schedule),
+              method: :patch,
+              class: "btn btn-menurooster-red",
+              form: { class: "d-inline" } %>
+      <% end %>
       <%= link_to "Copy Schedule", new_location_schedule_path(@location, copy_from_schedule_id: @schedule.id, view: @view_mode, section: @section_mode), class: "btn btn-outline-primary" %>
       <%= link_to "Print Schedule", print_location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode), class: "btn btn-primary" %>
     </div>

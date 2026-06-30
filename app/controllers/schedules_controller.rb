@@ -3,7 +3,8 @@ class SchedulesController < ApplicationController
   before_action :require_account!
   before_action :set_locations, except: [ :current ]
   before_action :set_location, except: [ :current ]
-  before_action :set_schedule, only: [ :show, :edit, :update, :destroy, :print ]
+  before_action :set_schedule, only: [ :show, :edit, :update, :destroy, :print, :publish, :unpublish ]
+  before_action :ensure_schedule_editable!, only: [ :edit, :update, :destroy ]
 
   def index
     @schedules = @location ? @location.schedules.ordered : Schedule.none
@@ -69,6 +70,18 @@ class SchedulesController < ApplicationController
     redirect_to location_schedules_path(@location), notice: "Schedule deleted. All shifts for that week were also deleted."
   end
 
+  def publish
+    @schedule.update!(status: "published")
+
+    redirect_to location_schedule_path(@location, @schedule), notice: "Schedule published."
+  end
+
+  def unpublish
+    @schedule.update!(status: "draft")
+
+    redirect_to location_schedule_path(@location, @schedule), notice: "Schedule unpublished. It is no longer visible publicly."
+  end
+
   def current
     destination = current_schedule_destination_for(current_user, view: params[:view], section: params[:section])
 
@@ -97,6 +110,12 @@ class SchedulesController < ApplicationController
 
   def set_schedule
     @schedule = @location.schedules.find(params[:id])
+  end
+
+  def ensure_schedule_editable!
+    return if @schedule.editable?
+
+    redirect_to location_schedule_path(@location, @schedule), alert: "Unpublish this schedule before making changes."
   end
 
   def prepare_schedule_view

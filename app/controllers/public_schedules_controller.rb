@@ -77,7 +77,7 @@ class PublicSchedulesController < ApplicationController
     current_week_start = Schedule.week_start_for(Date.current)
     week_starts = [ current_week_start, current_week_start + 1.week ]
 
-    @location.schedules.where(week_start_date: week_starts).order(:week_start_date).to_a
+    @location.schedules.published.where(week_start_date: week_starts).order(:week_start_date).to_a
   end
 
   def selected_public_schedule

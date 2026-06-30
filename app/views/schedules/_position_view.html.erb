@@ -32,10 +32,12 @@
                       <% shifts.each do |shift| %>
                         <%= render "shift_pill", shift: shift, title: shift.employee.display_name, secondary_text: shift_time_range(shift), view_mode: "positions" %>
                       <% end %>
-                      <%= link_to new_location_schedule_shift_path(@location, @schedule, position_id: position.id, shift_date: date, view: "positions", section: @section_mode),
-                            class: "schedule-add-link",
-                            data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: location_schedule_path(@location, @schedule, view: "positions", section: @section_mode) } do %>
-                        <span class="schedule-add-link-label">+ Add <%= position.name %></span>
+                      <% if @schedule.editable? %>
+                        <%= link_to new_location_schedule_shift_path(@location, @schedule, position_id: position.id, shift_date: date, view: "positions", section: @section_mode),
+                              class: "schedule-add-link",
+                              data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: location_schedule_path(@location, @schedule, view: "positions", section: @section_mode) } do %>
+                          <span class="schedule-add-link-label">+ Add <%= position.name %></span>
+                        <% end %>
                       <% end %>
                     </div>
                   </td>

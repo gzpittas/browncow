@@ -3,6 +3,7 @@ class ShiftsController < ApplicationController
   before_action :require_account!
   before_action :set_location
   before_action :set_schedule
+  before_action :ensure_schedule_editable!
   before_action :set_shift, only: [ :edit, :update, :destroy, :move, :copy ]
   before_action :set_form_context, only: [ :new, :create ]
   before_action :set_form_context_from_shift, only: [ :edit, :update ]
@@ -91,6 +92,17 @@ class ShiftsController < ApplicationController
 
   def set_schedule
     @schedule = @location.schedules.find(params[:schedule_id])
+  end
+
+  def ensure_schedule_editable!
+    return if @schedule.editable?
+
+    message = "Unpublish this schedule before making changes."
+
+    respond_to do |format|
+      format.html { redirect_to schedule_return_path, alert: message }
+      format.json { render json: { error: message }, status: :unprocessable_entity }
+    end
   end
 
   def set_shift

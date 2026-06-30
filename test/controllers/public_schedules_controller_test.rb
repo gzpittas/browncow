@@ -45,7 +45,7 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
 
   test "public schedule exposes next week only when it exists" do
     enable_public_schedule!
-    next_schedule = locations(:main).schedules.create!(week_start_date: Date.new(2026, 6, 28), status: "draft")
+    next_schedule = locations(:main).schedules.create!(week_start_date: Date.new(2026, 6, 28), status: "published")
     next_schedule.shifts.create!(
       employee: employees(:sam),
       position: positions(:server),
@@ -65,6 +65,28 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Employees"
     assert_select ".btn-group[aria-label='Schedule section'] .btn.btn-primary", text: "Both"
     assert_select ".shift-pill", text: /12:00-6:00 PM/
+  end
+
+  test "public schedule does not expose draft schedules" do
+    enable_public_schedule!
+    draft_schedule = locations(:main).schedules.create!(week_start_date: Date.new(2026, 6, 28), status: "draft")
+    draft_schedule.shifts.create!(
+      employee: employees(:sam),
+      position: positions(:server),
+      shift_date: Date.new(2026, 6, 29),
+      starts_at: "12:00",
+      ends_at: "18:00"
+    )
+
+    travel_to Date.new(2026, 6, 25) do
+      post unlock_public_schedule_path("athens"), params: { password: "staff-only" }
+      get public_schedule_path("athens", schedule_id: draft_schedule.id, view: "employees", section: "all")
+    end
+
+    assert_response :success
+    assert_select ".btn-group[aria-label='Schedule week'] a", text: "Next Week", count: 0
+    assert_select ".shift-pill", text: /12:00-6:00 PM/, count: 0
+    assert_select ".shift-pill", text: /4:00-10:00 PM/
   end
 
   test "public shift pills link to a mobile friendly employee week view" do
@@ -117,5 +139,6 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
       public_schedule_slug: "athens",
       public_schedule_password: "staff-only"
     )
+    schedules(:main_week).update!(status: "published")
   end
 end

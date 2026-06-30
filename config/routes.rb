@@ -23,6 +23,8 @@ Rails.application.routes.draw do
 
     resources :schedules do
       get :print, on: :member
+      patch :publish, on: :member
+      patch :unpublish, on: :member
 
       resources :shifts, except: [ :index, :show ] do
         patch :move, on: :member

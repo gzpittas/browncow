@@ -950,6 +950,81 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select "form[onsubmit*='permanently delete all shifts']"
   end
 
+  test "a user can publish and unpublish a weekly schedule" do
+    sign_in users(:manager)
+
+    patch publish_location_schedule_path(locations(:main), schedules(:main_week))
+
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week))
+    assert schedules(:main_week).reload.published?
+
+    patch unpublish_location_schedule_path(locations(:main), schedules(:main_week))
+
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week))
+    assert schedules(:main_week).reload.draft?
+  end
+
+  test "published schedule renders read only shift controls" do
+    sign_in users(:manager)
+    schedules(:main_week).update!(status: "published")
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "employees")
+
+    assert_response :success
+    assert_select ".schedule-publication-state", text: "Published"
+    assert_select "form[action='#{unpublish_location_schedule_path(locations(:main), schedules(:main_week))}'] button", text: "Unpublish"
+    assert_select "a[href*='/shifts/new']", count: 0
+    assert_select "form.shift-pill-delete-form", count: 0
+    assert_select "a.shift-pill-title-link", count: 0
+    assert_select ".shift-pill[draggable='false'][data-shift-id='#{shifts(:sam_monday).id}']"
+  end
+
+  test "published schedule blocks schedule edits and deletes until unpublished" do
+    sign_in users(:manager)
+    schedules(:main_week).update!(status: "published")
+
+    patch location_schedule_path(locations(:main), schedules(:main_week)), params: {
+      schedule: {
+        notes: "Changed after publishing"
+      }
+    }
+
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week))
+    assert_equal "Main schedule", schedules(:main_week).reload.notes
+
+    assert_no_difference -> { Schedule.count } do
+      delete location_schedule_path(locations(:main), schedules(:main_week))
+    end
+
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week))
+  end
+
+  test "published schedule blocks shift edits until unpublished" do
+    sign_in users(:manager)
+    schedules(:main_week).update!(status: "published")
+
+    assert_no_difference -> { schedules(:main_week).shifts.count } do
+      post location_schedule_shifts_path(locations(:main), schedules(:main_week), view: "employees", employee_id: employees(:sam).id), params: {
+        shift: {
+          employee_id: employees(:sam).id,
+          position_id: positions(:server).id,
+          shift_date: "2026-06-23",
+          starts_at: "16:00",
+          ends_at: "22:00"
+        }
+      }
+    end
+
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")
+
+    patch move_location_schedule_shift_path(locations(:main), schedules(:main_week), shifts(:sam_monday), view: "employees", section: "foh"),
+      params: { shift: { shift_date: "2026-06-25" } },
+      as: :json
+
+    assert_response :unprocessable_entity
+    assert_equal Date.new(2026, 6, 22), shifts(:sam_monday).reload.shift_date
+  end
+
   test "opening a schedule without a view parameter defaults to position view" do
     sign_in users(:manager)
 

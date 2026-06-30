@@ -39,6 +39,30 @@ body {
   --bs-btn-hover-border-color: var(--hc-primary);
 }
 
+.btn-menurooster-red {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--menurooster-red-medium);
+  --bs-btn-border-color: var(--menurooster-red-medium);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--menurooster-red-dark);
+  --bs-btn-hover-border-color: var(--menurooster-red-dark);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--menurooster-red-dark);
+  --bs-btn-active-border-color: var(--menurooster-red-dark);
+}
+
+.btn-menurooster-green {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--menurooster-green-medium);
+  --bs-btn-border-color: var(--menurooster-green-medium);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--menurooster-green-dark);
+  --bs-btn-hover-border-color: var(--menurooster-green-dark);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--menurooster-green-dark);
+  --bs-btn-active-border-color: var(--menurooster-green-dark);
+}
+
 .welcome-panel {
   max-width: 1120px;
   background: var(--hc-warm-bg);
