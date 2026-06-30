@@ -5,7 +5,7 @@
         <thead>
           <tr>
             <% @week_dates.each do |date| %>
-              <th class="text-center bg-white <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
+              <th class="text-center bg-white <%= "schedule-weekend-column" if schedule_weekend?(date) %> <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
             <% end %>
           </tr>
         </thead>
@@ -15,6 +15,7 @@
               <% @week_dates.each do |date| %>
                 <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
                 <% cell_classes = ["schedule-cell"] %>
+                <% cell_classes << "schedule-weekend-column" if schedule_weekend?(date) %>
                 <% cell_classes << "schedule-today-column" if schedule_today?(date) %>
                 <% cell_classes << "schedule-cell-has-shift" if shifts.any? %>
                 <% cell_style = shifts.any? ? "--position-color: #{shifts.first.position.display_color}" : nil %>

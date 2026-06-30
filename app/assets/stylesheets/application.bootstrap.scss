@@ -523,6 +523,13 @@ body.app-background-section-all {
   width: calc(100% / 7);
 }
 
+.schedule-table th.schedule-weekend-column,
+.schedule-table td.schedule-weekend-column,
+.schedule-table-seven th.schedule-weekend-column,
+.schedule-table-seven td.schedule-weekend-column {
+  background-color: var(--menurooster-french-grey-03) !important;
+}
+
 .schedule-table th.schedule-today-column,
 .schedule-table td.schedule-today-column,
 .schedule-table-seven th.schedule-today-column,

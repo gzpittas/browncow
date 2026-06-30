@@ -1085,6 +1085,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Both"
     assert_select ".card-header h2", text: /Server/
     assert_select "table.schedule-table.schedule-table-striped thead tr th:first-child", text: "Sun 21"
+    assert_select "table.schedule-table.schedule-table-striped thead tr th.schedule-weekend-column:first-child", text: "Sun 21"
+    assert_select "table.schedule-table.schedule-table-striped thead tr th.schedule-weekend-column:last-child", text: "Sat 27"
     assert_select ".shift-pill .shift-pill-title", text: "Sam Server"
     assert_select ".shift-pill .shift-pill-secondary", text: "Server"
     assert_select ".shift-pill .shift-pill-time", text: "4:00-10:00 PM"

@@ -15,7 +15,7 @@
             <thead>
               <tr>
                 <% @week_dates.each do |date| %>
-                  <th class="text-center bg-white <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
+                  <th class="text-center bg-white <%= "schedule-weekend-column" if schedule_weekend?(date) %> <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
                 <% end %>
               </tr>
             </thead>
@@ -24,7 +24,7 @@
                 <tr>
                   <% @week_dates.each do |date| %>
                     <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
-                    <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>"
+                    <td class="schedule-cell <%= "schedule-weekend-column" if schedule_weekend?(date) %> <%= "schedule-today-column" if schedule_today?(date) %>"
                         data-schedule-quick-edit-target="cell"
                         data-action="click->schedule-quick-edit#cellClick dragenter->schedule-quick-edit#dragEnter dragover->schedule-quick-edit#dragOver dragleave->schedule-quick-edit#dragLeave drop->schedule-quick-edit#drop"
                         data-view-mode="both"

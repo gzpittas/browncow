@@ -27,6 +27,10 @@ module ApplicationHelper
     date == Date.current
   end
 
+  def schedule_weekend?(date)
+    date.sunday? || date.saturday?
+  end
+
   def schedule_mini_month_weeks(date)
     month_start = date.beginning_of_month
     month_end = date.end_of_month
