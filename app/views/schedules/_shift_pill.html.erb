@@ -2,7 +2,7 @@
 <% tertiary_text = local_assigns[:tertiary_text] %>
 <% schedule_read_only = !@schedule.editable? %>
 
-<div class="shift-pill shift-pill-with-actions <%= "shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank? %> <%= "shift-pill-employee-view" if view_mode == "employees" %>"
+<div class="shift-pill shift-pill-with-actions <%= "shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank? %> <%= "shift-pill-employee-view" if %w[employees both].include?(view_mode) %>"
      draggable="<%= schedule_read_only ? "false" : "true" %>"
      style="--position-color: <%= shift.position.display_color %>"
      data-schedule-quick-edit-target="shift"

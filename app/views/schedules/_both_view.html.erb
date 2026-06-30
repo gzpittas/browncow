@@ -33,7 +33,12 @@
                         data-position-id="<%= position.id %>">
                     <div class="d-grid gap-2">
                       <% shifts.each do |shift| %>
-                          <%= render "shift_pill", shift: shift, title: shift.position.name, secondary_text: shift_time_range(shift), view_mode: "both" %>
+                          <%= render "shift_pill",
+                                shift: shift,
+                                title: shift.employee.display_name,
+                                secondary_text: shift.position.name,
+                                tertiary_text: shift_time_range(shift),
+                                view_mode: "both" %>
                       <% end %>
                       <% if @schedule.editable? %>
                         <%= link_to new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, position_id: position.id, shift_date: date, view: "both", section: @section_mode),

@@ -122,6 +122,20 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action*='/shifts/']", count: 0
   end
 
+  test "public both view shows employee name above position and time on shift pills" do
+    enable_public_schedule!
+
+    travel_to Date.new(2026, 6, 25) do
+      post unlock_public_schedule_path("athens"), params: { password: "staff-only" }
+      get public_schedule_path("athens", schedule_id: schedules(:main_week).id, view: "both", section: "foh")
+    end
+
+    assert_response :success
+    assert_select ".public-shift-pill .shift-pill-title", text: "Sam Server"
+    assert_select ".public-shift-pill .shift-pill-secondary", text: "Server"
+    assert_select ".public-shift-pill .shift-pill-time", text: "4:00-10:00 PM"
+  end
+
   test "public schedule rejects an incorrect password" do
     enable_public_schedule!
 

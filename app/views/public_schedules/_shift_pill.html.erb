@@ -6,7 +6,7 @@
   "public-shift-pill",
   ("public-shift-pill-link" if href.present?),
   ("shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank?),
-  ("shift-pill-employee-view" if local_assigns[:view_mode] == "employees")
+  ("shift-pill-employee-view" if %w[employees both].include?(local_assigns[:view_mode]))
 ].compact.join(" ") %>
 <% pill_content = capture do %>
   <div class="shift-pill-main">
