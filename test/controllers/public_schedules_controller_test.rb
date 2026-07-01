@@ -38,7 +38,8 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".btn-group[aria-label='Schedule view'] a", text: "Positions"
     assert_select ".btn-group[aria-label='Schedule section'] a", text: "FOH"
     assert_select ".shift-pill", text: /Sam Server/
-    assert_select ".shift-pill", text: /4:00-10:00 PM/
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
     assert_select "a[href*='/shifts/new']", count: 0
     assert_select "form[action*='/shifts/']", count: 0
   end
@@ -64,7 +65,8 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".btn-group[aria-label='Schedule week'] a", text: "Next Week"
     assert_select ".btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Employees"
     assert_select ".btn-group[aria-label='Schedule section'] .btn.btn-primary", text: "Both"
-    assert_select ".shift-pill", text: /12:00-6:00 PM/
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "12:00 PM"
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "6:00 PM"
   end
 
   test "public schedule does not expose draft schedules" do
@@ -85,8 +87,9 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".btn-group[aria-label='Schedule week'] a", text: "Next Week", count: 0
-    assert_select ".shift-pill", text: /12:00-6:00 PM/, count: 0
-    assert_select ".shift-pill", text: /4:00-10:00 PM/
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "12:00 PM", count: 0
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
   end
 
   test "public shift pills link to a mobile friendly employee week view" do
@@ -115,8 +118,10 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".public-employee-week"
     assert_select ".public-employee-week h2", text: "Sam Server"
     assert_select ".public-employee-day", minimum: 7
-    assert_select ".public-employee-shifts .shift-pill", text: /4:00-10:00 PM/
-    assert_select ".public-employee-shifts .shift-pill", text: /10:00 AM-2:00 PM/
+    assert_select ".public-employee-shifts .shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
+    assert_select ".public-employee-shifts .shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
+    assert_select ".public-employee-shifts .shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 AM"
+    assert_select ".public-employee-shifts .shift-pill .shift-pill-time-stack .shift-pill-time", text: "2:00 PM"
     assert_select "a", text: "Back to full schedule"
     assert_select "a[href*='/shifts/new']", count: 0
     assert_select "form[action*='/shifts/']", count: 0
@@ -133,7 +138,8 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".public-shift-pill .shift-pill-title", text: "Sam Server"
     assert_select ".public-shift-pill .shift-pill-secondary", text: "Server"
-    assert_select ".public-shift-pill .shift-pill-time", text: "4:00-10:00 PM"
+    assert_select ".public-shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
+    assert_select ".public-shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
   end
 
   test "public schedule rejects an incorrect password" do

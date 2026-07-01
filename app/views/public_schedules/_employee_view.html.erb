@@ -26,7 +26,7 @@
                             shift: shift,
                             title: shift.employee.display_name,
                             secondary_text: shift.position.name,
-                            tertiary_text: shift_time_range(shift),
+                            time_lines: shift_time_range_lines(shift),
                             view_mode: "employees",
                             href: public_schedule_path(@account.public_schedule_slug, public_schedule_params(employee_id: shift.employee_id)) %>
                     <% end %>

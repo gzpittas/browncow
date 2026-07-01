@@ -24,7 +24,7 @@
               <%= render "public_schedules/shift_pill",
                     shift: shift,
                     title: shift.position.name,
-                    secondary_text: shift_time_range(shift),
+                    time_lines: shift_time_range_lines(shift),
                     view_mode: "employee_week" %>
             <% end %>
           </div>

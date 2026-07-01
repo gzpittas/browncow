@@ -25,7 +25,10 @@
                       <% shifts.each do |shift| %>
                         <div class="print-shift-line">
                           <strong><%= shift.position.name %></strong>
-                          <span><%= shift_time_range(shift) %></span>
+                          <span class="print-shift-time-stack">
+                            <span><%= shift_time_range_lines(shift).first %></span>
+                            <span><%= shift_time_range_lines(shift).last %></span>
+                          </span>
                         </div>
                       <% end %>
                     <% end %>

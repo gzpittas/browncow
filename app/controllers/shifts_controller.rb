@@ -216,13 +216,16 @@ class ShiftsController < ApplicationController
     locals = {
       shift: shift,
       title: shift.employee.display_name,
-      view_mode: view_mode
+      view_mode: view_mode,
+      time_lines: helpers.shift_time_range_lines(shift)
     }
 
     if view_mode == "employees"
-      locals.merge(secondary_text: shift.position.name, tertiary_text: helpers.shift_time_range(shift))
+      locals.merge(secondary_text: shift.position.name)
+    elsif view_mode == "both"
+      locals.merge(secondary_text: shift.position.name)
     else
-      locals.merge(secondary_text: helpers.shift_time_range(shift))
+      locals
     end
   end
 

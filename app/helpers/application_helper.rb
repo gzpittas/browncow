@@ -81,6 +81,13 @@ module ApplicationHelper
     end
   end
 
+  def shift_time_range_lines(shift)
+    [
+      shift.starts_at.strftime("%-l:%M %p"),
+      shift.ends_at.strftime("%-l:%M %p")
+    ]
+  end
+
   def half_hour_time_options
     (14...48).map do |offset|
       minutes = offset * 30

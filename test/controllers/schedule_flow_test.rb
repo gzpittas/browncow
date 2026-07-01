@@ -699,7 +699,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "table.schedule-table.schedule-table-striped thead tr th:first-child", text: "Sun 21"
     assert_select ".shift-pill", text: /Server/
-    assert_select ".shift-pill", text: /4:00-10:00 PM/
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
     assert_select ".shift-pill[style*='--position-color: #8A4F2A']"
 
     get location_schedule_path(locations(:main), schedules(:main_week), view: "positions")
@@ -707,7 +708,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select "table.schedule-table thead tr th:first-child", text: "Sun 21"
     assert_select ".position-heading-swatch[style*='--position-color: #8A4F2A']"
     assert_select ".shift-pill", text: /Sam Server/
-    assert_select ".shift-pill", text: /4:00-10:00 PM/
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
     assert_select ".shift-pill[style*='--position-color: #8A4F2A']"
   end
 
@@ -750,7 +752,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".print-meta strong", text: "Schedule by Position"
     assert_select ".print-position-section[style*='--print-position-color'] h2", text: "Servers"
     assert_select ".print-shift-line.print-position-shift-line", text: /Sam Server/
-    assert_select ".print-shift-line.print-position-shift-line", text: /4:00-10:00 PM/
+    assert_select ".print-shift-line.print-position-shift-line .print-shift-time-stack span", text: "4:00 PM"
+    assert_select ".print-shift-line.print-position-shift-line .print-shift-time-stack span", text: "10:00 PM"
   end
 
   test "printing can be scoped to back of house or front of house" do
@@ -771,7 +774,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".print-meta", text: /Back of House/
     assert_select ".print-position-section h2", text: "Prep Cooks"
     assert_select ".print-shift-line", text: /Sam Server/
-    assert_select ".print-shift-line", text: /9:00 AM-3:00 PM/
+    assert_select ".print-shift-line .print-shift-time-stack span", text: "9:00 AM"
+    assert_select ".print-shift-line .print-shift-time-stack span", text: "3:00 PM"
     assert_select ".print-position-section h2", text: "Servers", count: 0
 
     get print_location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")
@@ -791,7 +795,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".print-meta strong", text: "Schedule by Employee"
     assert_select "table.print-employee-table tbody th", text: "Sam Server"
     assert_select ".print-shift-line", text: /Server/
-    assert_select ".print-shift-line", text: /4:00-10:00 PM/
+    assert_select ".print-shift-line .print-shift-time-stack span", text: "4:00 PM"
+    assert_select ".print-shift-line .print-shift-time-stack span", text: "10:00 PM"
     assert_select ".print-off", count: 0
   end
 
@@ -805,7 +810,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".print-position-section[style*='--print-position-color'] h2", text: "Servers"
     assert_select "table.print-employee-table tbody th", text: "Sam Server"
     assert_select ".print-shift-line", text: /Server/
-    assert_select ".print-shift-line", text: /4:00-10:00 PM/
+    assert_select ".print-shift-line .print-shift-time-stack span", text: "4:00 PM"
+    assert_select ".print-shift-line .print-shift-time-stack span", text: "10:00 PM"
     assert_select ".print-off", count: 0
   end
 
@@ -1089,7 +1095,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select "table.schedule-table.schedule-table-striped thead tr th.schedule-weekend-column:last-child", text: "Sat 27"
     assert_select ".shift-pill .shift-pill-title", text: "Sam Server"
     assert_select ".shift-pill .shift-pill-secondary", text: "Server"
-    assert_select ".shift-pill .shift-pill-time", text: "4:00-10:00 PM"
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
     assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23']"
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"
@@ -1153,7 +1160,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".badge", text: "Draft", count: 0
     assert_select ".badge", text: "Current Week", count: 0
     assert_select ".card-header h2", text: /Prep Cook/
-    assert_select ".shift-pill", text: /9:00 AM-3:00 PM/
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "9:00 AM"
+    assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "3:00 PM"
     assert_select ".shift-pill", text: /Bartender/, count: 0
 
     get location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")

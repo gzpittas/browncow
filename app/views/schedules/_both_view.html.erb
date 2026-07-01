@@ -37,7 +37,7 @@
                                 shift: shift,
                                 title: shift.employee.display_name,
                                 secondary_text: shift.position.name,
-                                tertiary_text: shift_time_range(shift),
+                                time_lines: shift_time_range_lines(shift),
                                 view_mode: "both" %>
                       <% end %>
                       <% if @schedule.editable? %>

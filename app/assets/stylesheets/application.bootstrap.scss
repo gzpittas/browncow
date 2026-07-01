@@ -754,6 +754,21 @@ body.app-background-section-all {
   margin-left: auto;
 }
 
+.shift-pill-time-stack,
+.print-shift-time-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+  text-align: right;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.shift-pill-time-stack-link {
+  margin-left: auto;
+}
+
 .shift-pill-employee-view .shift-pill-detail-row {
   align-items: flex-start;
   flex-direction: column;
@@ -771,8 +786,8 @@ body.app-background-section-all {
   width: 100%;
 }
 
-.shift-pill-employee-view .shift-pill-time {
-  text-align: left;
+.shift-pill-employee-view .shift-pill-time-stack {
+  width: fit-content;
 }
 
 .shift-pill-delete-form {

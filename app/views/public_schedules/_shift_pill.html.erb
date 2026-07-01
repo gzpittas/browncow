@@ -1,11 +1,12 @@
 <% secondary_text = local_assigns[:secondary_text] %>
 <% tertiary_text = local_assigns[:tertiary_text] %>
+<% time_lines = local_assigns[:time_lines] %>
 <% href = local_assigns[:href] %>
 <% pill_classes = [
   "shift-pill",
   "public-shift-pill",
   ("public-shift-pill-link" if href.present?),
-  ("shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank?),
+  ("shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank? && time_lines.blank?),
   ("shift-pill-employee-view" if %w[employees both].include?(local_assigns[:view_mode]))
 ].compact.join(" ") %>
 <% pill_content = capture do %>
@@ -14,13 +15,18 @@
       <span class="shift-pill-color-mark" aria-hidden="true"></span>
       <span class="shift-pill-title fw-semibold"><%= title %></span>
     </div>
-    <% if secondary_text.present? || tertiary_text.present? %>
+    <% if secondary_text.present? || tertiary_text.present? || time_lines.present? %>
       <div class="shift-pill-detail-row">
         <% if secondary_text.present? %>
           <span class="shift-pill-secondary"><%= secondary_text %></span>
         <% end %>
-        <% if tertiary_text.present? %>
-          <span class="shift-pill-time text-nowrap"><%= tertiary_text %></span>
+        <% if time_lines.present? %>
+          <span class="shift-pill-time-stack">
+            <span class="shift-pill-time"><%= time_lines.first %></span>
+            <span class="shift-pill-time"><%= time_lines.last %></span>
+          </span>
+        <% elsif tertiary_text.present? %>
+          <span class="shift-pill-time"><%= tertiary_text %></span>
         <% end %>
       </div>
     <% end %>
