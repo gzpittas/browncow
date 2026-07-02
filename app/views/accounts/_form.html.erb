@@ -18,6 +18,22 @@
 
   <% if @account.persisted? %>
     <div class="border rounded p-3 mb-4 bg-light">
+      <h2 class="h6 fw-semibold mb-3">Appearance</h2>
+
+      <div class="mb-2">
+        <div class="form-check mb-2">
+          <%= f.radio_button :schedule_time_display, "stacked", class: "form-check-input" %>
+          <%= f.label :schedule_time_display_stacked, "Original stacked time view", class: "form-check-label" %>
+        </div>
+        <div class="form-check">
+          <%= f.radio_button :schedule_time_display, "large", class: "form-check-input" %>
+          <%= f.label :schedule_time_display_large, "Large number time view", class: "form-check-label" %>
+        </div>
+        <div class="form-text">Controls how shift times appear on schedule pills across private and public schedules.</div>
+      </div>
+    </div>
+
+    <div class="border rounded p-3 mb-4 bg-light">
       <h2 class="h6 fw-semibold mb-3">Employee schedule link</h2>
 
       <div class="form-check form-switch mb-3">

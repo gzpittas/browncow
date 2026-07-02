@@ -1,6 +1,8 @@
 <% secondary_text = local_assigns[:secondary_text] %>
 <% tertiary_text = local_assigns[:tertiary_text] %>
 <% time_lines = local_assigns[:time_lines] %>
+<% compact_time_range = local_assigns[:compact_time_range] || shift_compact_time_range(shift) %>
+<% time_display = local_assigns[:time_display] || schedule_time_display_for(@location.account) %>
 <% schedule_read_only = !@schedule.editable? %>
 
 <div class="shift-pill shift-pill-with-actions <%= "shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank? && time_lines.blank? %> <%= "shift-pill-employee-view" if %w[employees both].include?(view_mode) %>"
@@ -58,19 +60,31 @@
         <% end %>
         <% if time_lines.present? %>
           <% if schedule_read_only %>
-            <span class="shift-pill-time-stack">
-              <span class="shift-pill-time"><%= time_lines.first %></span>
-              <span class="shift-pill-time"><%= time_lines.last %></span>
-            </span>
+            <% if time_display == "large" %>
+              <span class="shift-pill-time-cluster shift-pill-time-cluster-large">
+                <span class="shift-pill-time-compact"><%= compact_time_range %></span>
+              </span>
+            <% else %>
+              <span class="shift-pill-time-stack">
+                <span class="shift-pill-time"><%= time_lines.first %></span>
+                <span class="shift-pill-time"><%= time_lines.last %></span>
+              </span>
+            <% end %>
           <% else %>
             <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode),
                   class: "shift-pill-time-link shift-pill-time-stack-link text-decoration-none",
                   draggable: false,
                   data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: location_schedule_path(@location, @schedule, view: view_mode, section: @section_mode) } do %>
-              <span class="shift-pill-time-stack">
-                <span class="shift-pill-time"><%= time_lines.first %></span>
-                <span class="shift-pill-time"><%= time_lines.last %></span>
-              </span>
+              <% if time_display == "large" %>
+                <span class="shift-pill-time-cluster shift-pill-time-cluster-large">
+                  <span class="shift-pill-time-compact"><%= compact_time_range %></span>
+                </span>
+              <% else %>
+                <span class="shift-pill-time-stack">
+                  <span class="shift-pill-time"><%= time_lines.first %></span>
+                  <span class="shift-pill-time"><%= time_lines.last %></span>
+                </span>
+              <% end %>
             <% end %>
           <% end %>
         <% elsif tertiary_text.present? %>

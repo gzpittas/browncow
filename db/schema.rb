@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_29_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_02_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -22,6 +22,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_29_120000) do
     t.boolean "public_schedule_enabled", default: false, null: false
     t.string "public_schedule_password_digest"
     t.string "public_schedule_slug"
+    t.string "schedule_time_display", default: "stacked", null: false
     t.datetime "updated_at", null: false
     t.index ["public_schedule_slug"], name: "index_accounts_on_public_schedule_slug", unique: true
   end

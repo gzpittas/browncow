@@ -48,6 +48,8 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     get edit_account_path
 
     assert_response :success
+    assert_select "input[name='account[schedule_time_display]'][value='stacked']"
+    assert_select "input[name='account[schedule_time_display]'][value='large']"
     assert_select "input[name='account[public_schedule_enabled]']"
     assert_select "input[name='account[public_schedule_slug]']"
     assert_select "input[name='account[public_schedule_password]'][type=password]"
@@ -57,6 +59,7 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
         name: accounts(:main).name,
         phone_number: accounts(:main).phone_number,
         email: accounts(:main).email,
+        schedule_time_display: "large",
         public_schedule_enabled: "1",
         public_schedule_slug: "athens",
         public_schedule_password: "staff-only"
@@ -66,6 +69,7 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     account = accounts(:main).reload
 
     assert_redirected_to dashboard_path
+    assert_equal "large", account.schedule_time_display
     assert account.public_schedule_enabled?
     assert_equal "athens", account.public_schedule_slug
     assert account.public_schedule_password_authenticated?("staff-only")

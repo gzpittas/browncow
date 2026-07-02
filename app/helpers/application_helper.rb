@@ -88,6 +88,23 @@ module ApplicationHelper
     ]
   end
 
+  def shift_compact_time_range(shift)
+    "#{compact_shift_time_value(shift.starts_at)}-#{compact_shift_time_value(shift.ends_at)}"
+  end
+
+  def schedule_time_display_for(account)
+    return "stacked" if account.blank?
+
+    account.schedule_time_display.presence_in(Account::SCHEDULE_TIME_DISPLAY_OPTIONS) || "stacked"
+  end
+
+  def compact_shift_time_value(time)
+    hour = time.hour % 12
+    hour = 12 if hour.zero?
+
+    time.min == 30 ? "#{hour}.5" : hour.to_s
+  end
+
   def half_hour_time_options
     (14...48).map do |offset|
       minutes = offset * 30

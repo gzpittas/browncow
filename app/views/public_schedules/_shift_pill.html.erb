@@ -1,6 +1,8 @@
 <% secondary_text = local_assigns[:secondary_text] %>
 <% tertiary_text = local_assigns[:tertiary_text] %>
 <% time_lines = local_assigns[:time_lines] %>
+<% compact_time_range = local_assigns[:compact_time_range] || shift_compact_time_range(shift) %>
+<% time_display = local_assigns[:time_display] || schedule_time_display_for(@account) %>
 <% href = local_assigns[:href] %>
 <% pill_classes = [
   "shift-pill",
@@ -21,10 +23,16 @@
           <span class="shift-pill-secondary"><%= secondary_text %></span>
         <% end %>
         <% if time_lines.present? %>
-          <span class="shift-pill-time-stack">
-            <span class="shift-pill-time"><%= time_lines.first %></span>
-            <span class="shift-pill-time"><%= time_lines.last %></span>
-          </span>
+          <% if time_display == "large" %>
+            <span class="shift-pill-time-cluster shift-pill-time-cluster-large">
+              <span class="shift-pill-time-compact"><%= compact_time_range %></span>
+            </span>
+          <% else %>
+            <span class="shift-pill-time-stack">
+              <span class="shift-pill-time"><%= time_lines.first %></span>
+              <span class="shift-pill-time"><%= time_lines.last %></span>
+            </span>
+          <% end %>
         <% elsif tertiary_text.present? %>
           <span class="shift-pill-time"><%= tertiary_text %></span>
         <% end %>

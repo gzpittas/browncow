@@ -754,6 +754,32 @@ body.app-background-section-all {
   margin-left: auto;
 }
 
+.shift-pill-time-cluster {
+  align-items: center;
+  display: flex;
+  gap: 0.45rem;
+  justify-content: flex-start;
+  max-width: 100%;
+}
+
+.shift-pill-time-cluster-large {
+  justify-content: flex-end;
+  margin-left: auto;
+  text-align: right;
+  width: 100%;
+}
+
+.shift-pill-time-compact {
+  color: #2f2a24;
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .shift-pill-time-stack,
 .print-shift-time-stack {
   display: flex;
@@ -784,6 +810,14 @@ body.app-background-section-all {
 .shift-pill-employee-view .shift-pill-time-link {
   margin-left: 0;
   width: 100%;
+}
+
+.shift-pill-employee-view .shift-pill-time-cluster {
+  justify-content: flex-start;
+}
+
+.shift-pill-employee-view .shift-pill-time-cluster-large {
+  justify-content: flex-end;
 }
 
 .shift-pill-employee-view .shift-pill-time-stack {
@@ -1148,6 +1182,10 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
   padding-right: 0.5rem;
 }
 
+.public-shift-pill .shift-pill-time-cluster {
+  margin-left: auto;
+}
+
 .public-employee-week {
   max-width: 42rem;
 }
@@ -1224,6 +1262,10 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
 .public-employee-shifts .shift-pill-secondary,
 .public-employee-shifts .shift-pill-time {
   font-size: 0.9rem;
+}
+
+.public-employee-shifts .shift-pill-time-compact {
+  font-size: 2rem;
 }
 
 .print-body {

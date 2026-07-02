@@ -41,6 +41,7 @@ class AccountsController < ApplicationController
       :name,
       :phone_number,
       :email,
+      :schedule_time_display,
       :public_schedule_enabled,
       :public_schedule_slug,
       :public_schedule_password
