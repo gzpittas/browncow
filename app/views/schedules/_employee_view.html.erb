@@ -30,7 +30,7 @@
                     <% shifts.each do |shift| %>
                       <%= render "shift_pill", shift: shift, title: shift.employee.display_name, secondary_text: shift.position.name, time_lines: shift_time_range_lines(shift), view_mode: "employees" %>
                     <% end %>
-                    <% if @schedule.editable? %>
+                    <% if @schedule.editable? && shifts.empty? %>
                       <%= link_to new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, shift_date: date, view: "employees", section: @section_mode),
                             class: "schedule-add-link",
                             data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: location_schedule_path(@location, @schedule, view: "employees", section: @section_mode) } do %>

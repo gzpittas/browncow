@@ -8,6 +8,7 @@ class Employee < ApplicationRecord
   validates :first_name, :last_name, presence: true
 
   scope :active, -> { where(active: true) }
+  scope :alphabetical, -> { order(active: :desc, first_name: :asc, last_name: :asc) }
 
   def display_name
     [ first_name, last_name ].compact_blank.join(" ")

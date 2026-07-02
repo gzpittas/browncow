@@ -3,7 +3,7 @@ class PositionsController < ApplicationController
   before_action :require_account!
   before_action :set_locations
   before_action :set_location
-  before_action :set_position, only: [ :edit, :update, :destroy, :deactivate ]
+  before_action :set_position, only: [ :edit, :update, :destroy, :deactivate, :reorder_employees ]
 
   def index
     @boh_positions = @location ? @location.positions.boh.ordered : Position.none
@@ -59,6 +59,24 @@ class PositionsController < ApplicationController
     Position.transaction do
       ordered_ids.each_with_index do |id, index|
         positions.find { |position| position.id == id }&.update_columns(position_order: index + 1)
+      end
+    end
+
+    head :ok
+  end
+
+  def reorder_employees
+    ordered_ids = Array(params.dig(:employee_position, :ordered_ids)).map(&:to_i)
+    employee_positions = @position.employee_positions.joins(:employee).merge(Employee.active)
+    expected_ids = employee_positions.pluck(:employee_id)
+
+    if ordered_ids.blank? || ordered_ids.sort != expected_ids.sort
+      return render json: { error: "Employee rank order is invalid." }, status: :unprocessable_entity
+    end
+
+    EmployeePosition.transaction do
+      ordered_ids.each_with_index do |employee_id, index|
+        employee_positions.find_by(employee_id: employee_id)&.update_columns(employee_position_order: index + 1)
       end
     end
 

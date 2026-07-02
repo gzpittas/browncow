@@ -7,9 +7,10 @@ class EmployeesController < ApplicationController
   before_action :set_positions, only: [ :index, :new, :create, :edit, :update ]
 
   def index
-    @employees = @location ? @location.employees.includes(:positions).order(active: :desc, first_name: :asc, last_name: :asc) : Employee.none
+    @employees = @location ? @location.employees.includes(:positions).alphabetical : Employee.none
     @employees_by_section = group_employees_by_section(@employees)
     @unassigned_employees = @employees.select { |employee| employee.positions.empty? }
+    @sortable_positions = @location ? @location.positions.active.includes(employee_positions: :employee).ordered : Position.none
   end
 
   def new

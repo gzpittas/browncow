@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
 
   before_action :configure_permitted_parameters, if: :devise_controller?
 
-  helper_method :current_schedule_location, :current_schedule_record, :current_schedule_destination_for, :current_schedule_section_mode, :current_schedule_view_mode
+  helper_method :current_schedule_location, :current_schedule_record, :current_schedule_destination_for, :current_schedule_section_mode, :current_schedule_view_mode, :current_both_view_employee_sort_mode
 
   protected
 
@@ -88,6 +88,10 @@ class ApplicationController < ActionController::Base
     normalized_schedule_view_mode(session[:schedule_view_mode])
   end
 
+  def current_both_view_employee_sort_mode
+    normalized_both_view_employee_sort_mode(session[:both_view_employee_sort_mode]) || "alphabetical"
+  end
+
   def store_schedule_section_mode!(value)
     normalized_value = normalized_schedule_section_mode(value) || "foh"
     session[:schedule_section_mode] = normalized_value
@@ -107,6 +111,12 @@ class ApplicationController < ActionController::Base
     store_schedule_section_mode!(section)
   end
 
+  def store_both_view_employee_sort_mode!(value)
+    normalized_value = normalized_both_view_employee_sort_mode(value) || "alphabetical"
+    session[:both_view_employee_sort_mode] = normalized_value
+    normalized_value
+  end
+
   def normalized_schedule_section_mode(value)
     normalized_value = value.to_s
     return normalized_value if SCHEDULE_SECTION_MODES.include?(normalized_value)
@@ -119,6 +129,13 @@ class ApplicationController < ActionController::Base
     return normalized_value if SCHEDULE_VIEW_MODES.include?(normalized_value)
 
     "positions"
+  end
+
+  def normalized_both_view_employee_sort_mode(value)
+    normalized_value = value.to_s
+    return normalized_value if %w[alphabetical ranked].include?(normalized_value)
+
+    nil
   end
 
   def remembered_schedule_for(user)

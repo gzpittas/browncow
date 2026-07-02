@@ -15,6 +15,7 @@ Rails.application.routes.draw do
     resources :positions, except: [ :show ] do
       patch :deactivate, on: :member
       patch :reorder, on: :collection
+      patch :reorder_employees, on: :member
     end
 
     resources :employees, except: [ :show, :destroy ] do

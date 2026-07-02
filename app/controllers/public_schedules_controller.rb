@@ -55,7 +55,7 @@ class PublicSchedulesController < ApplicationController
     @shifts_by_employee_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.shift_date ] }
     @shifts_by_position_and_date = @shifts.group_by { |shift| [ shift.position_id, shift.shift_date ] }
     @employees_by_position = @positions.index_with do |position|
-      position.employees.select(&:active?).sort_by { |employee| [ employee.first_name.to_s.downcase, employee.last_name.to_s.downcase ] }
+      position.alphabetical_active_employees
     end
     set_selected_employee_context
   end

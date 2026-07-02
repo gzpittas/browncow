@@ -70,6 +70,19 @@ class Position < ApplicationRecord
     color.presence || COLOR_PALETTE.first
   end
 
+  def alphabetical_active_employees
+    employees.active.order(:first_name, :last_name).to_a
+  end
+
+  def ranked_active_employees
+    employee_positions
+      .joins(:employee)
+      .merge(Employee.active)
+      .includes(:employee)
+      .ordered
+      .map(&:employee)
+  end
+
   def section_label
     SECTIONS.fetch(section)
   end

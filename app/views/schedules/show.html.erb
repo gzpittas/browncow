@@ -112,6 +112,13 @@
         <%= link_to "FOH", location_schedule_path(@location, @schedule, view: @view_mode, section: "foh"), class: "btn #{@section_mode == "foh" ? "btn-primary" : "btn-outline-primary"}" %>
         <%= link_to "Both", location_schedule_path(@location, @schedule, view: @view_mode, section: "all"), class: "btn #{@section_mode == "all" ? "btn-primary" : "btn-outline-primary"}" %>
       </div>
+
+      <% if @view_mode == "both" %>
+        <div class="btn-group" role="group" aria-label="Employee order">
+          <%= link_to "Alphabetical", location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode, employee_order: "alphabetical"), class: "btn #{@both_view_employee_sort_mode == "alphabetical" ? "btn-primary" : "btn-outline-primary"}" %>
+          <%= link_to "Rank Order", location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode, employee_order: "ranked"), class: "btn #{@both_view_employee_sort_mode == "ranked" ? "btn-primary" : "btn-outline-primary"}" %>
+        </div>
+      <% end %>
     </div>
 
     <div class="schedule-schedule-actions">

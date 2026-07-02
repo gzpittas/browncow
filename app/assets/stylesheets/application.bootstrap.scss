@@ -1402,6 +1402,15 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
   display: block;
 }
 
+.print-shift-time-compact {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .print-employee-table {
   border-collapse: collapse;
   font-size: 0.76rem;

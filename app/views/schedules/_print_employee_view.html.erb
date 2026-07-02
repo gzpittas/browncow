@@ -1,3 +1,4 @@
+<% time_display = schedule_time_display_for(@location.account) %>
 <table class="print-employee-table">
   <thead>
     <tr>
@@ -18,10 +19,14 @@
               <% shifts.each do |shift| %>
                 <div class="print-shift-line">
                   <strong><%= shift.position.name %></strong>
-                  <span class="print-shift-time-stack">
-                    <span><%= shift_time_range_lines(shift).first %></span>
-                    <span><%= shift_time_range_lines(shift).last %></span>
-                  </span>
+                  <% if time_display == "large" %>
+                    <span class="print-shift-time-compact"><%= shift_compact_time_range(shift) %></span>
+                  <% else %>
+                    <span class="print-shift-time-stack">
+                      <span><%= shift_time_range_lines(shift).first %></span>
+                      <span><%= shift_time_range_lines(shift).last %></span>
+                    </span>
+                  <% end %>
                 </div>
               <% end %>
             <% end %>

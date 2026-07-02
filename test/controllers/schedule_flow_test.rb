@@ -401,6 +401,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".shift-pill-time-link[draggable='false'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}']"
     assert_select ".schedule-quick-edit-message[data-schedule-quick-edit-target='alert']"
     assert_select "td.schedule-cell-has-shift[style*='--position-color: #{positions(:server).display_color}'][data-schedule-quick-edit-target='cell'][data-view-mode='employees'][data-employee-id='#{employees(:sam).id}'][data-shift-date='2026-06-22']"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-22", view: "employees", section: "foh")}']", count: 0
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-23", view: "employees", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, shift_date: "2026-06-23", view: "employees", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"
   end
@@ -713,7 +714,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".shift-pill[style*='--position-color: #8A4F2A']"
   end
 
-  test "employee schedules list employees in first-name order" do
+  test "employee schedules list employees alphabetically" do
     sign_in users(:manager)
     employee = locations(:main).employees.create!(
       first_name: "Alex",
@@ -731,6 +732,34 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_not_nil alex_index
     assert_not_nil sam_index
     assert_operator alex_index, :<, sam_index
+  end
+
+  test "both view can switch between alphabetical and ranked employee order within a position" do
+    sign_in users(:manager)
+    zack = locations(:main).employees.create!(
+      first_name: "Zack",
+      last_name: "Assistant",
+      email: "zack-both@example.com"
+    )
+    zack.positions << positions(:server)
+    positions(:server).employee_positions.find_by!(employee: zack).insert_at!(1)
+    positions(:server).employee_positions.find_by!(employee: employees(:sam)).insert_at!(2)
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh", employee_order: "ranked")
+
+    assert_response :success
+    assert_select ".schedule-schedule-controls .btn-group[aria-label='Employee order'] .btn.btn-primary", text: "Rank Order"
+    ranked_alex_index = response.body.index(%(data-employee-id="#{zack.id}"))
+    ranked_sam_index = response.body.index(%(data-employee-id="#{employees(:sam).id}"))
+    assert_operator ranked_alex_index, :<, ranked_sam_index
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh", employee_order: "alphabetical")
+
+    assert_response :success
+    assert_select ".schedule-schedule-controls .btn-group[aria-label='Employee order'] .btn.btn-primary", text: "Alphabetical"
+    alphabetical_alex_index = response.body.index(%(data-employee-id="#{zack.id}"))
+    alphabetical_sam_index = response.body.index(%(data-employee-id="#{employees(:sam).id}"))
+    assert_operator alphabetical_sam_index, :<, alphabetical_alex_index
   end
 
   test "position schedules follow the saved position order" do
@@ -1082,6 +1111,24 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".shift-pill-employee-view .shift-pill-secondary", text: "Server"
   end
 
+  test "both view can use the saved ranked employee order" do
+    sign_in users(:manager)
+    alex = locations(:main).employees.create!(
+      first_name: "Alex",
+      last_name: "Assistant",
+      phone_number: "555-3333",
+      email: "alex@example.com"
+    )
+    alex.positions << positions(:server)
+    positions(:server).employee_positions.find_by!(employee: alex).insert_at!(1)
+    positions(:server).employee_positions.find_by!(employee: employees(:sam)).insert_at!(2)
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh", employee_order: "ranked")
+
+    assert_response :success
+    assert_operator response.body.index("Alex Assistant"), :<, response.body.index("Sam Server")
+  end
+
   test "opening a schedule with both view parameter renders positions grouped by employee" do
     sign_in users(:manager)
 
@@ -1098,6 +1145,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
     assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
     assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23']"
+    assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-22", view: "both", section: "foh")}']", count: 0
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"
   end

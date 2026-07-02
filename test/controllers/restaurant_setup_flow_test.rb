@@ -209,6 +209,37 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     assert_equal [ "Bartender", "Server" ], locations(:main).positions.foh.ordered.pluck(:name)
   end
 
+  test "employees page includes per-position drag-and-drop rank lists" do
+    sign_in users(:manager)
+
+    get location_employees_path(locations(:main))
+
+    assert_response :success
+    assert_select "tbody[data-controller='employee-sort'][data-employee-sort-url-value='#{reorder_employees_location_position_path(locations(:main), positions(:server))}']", minimum: 1
+    assert_select "tr[data-employee-sort-target='row'][data-employee-id='#{employees(:sam).id}']"
+    assert_select ".position-drag-handle", minimum: 1
+  end
+
+  test "a signed-in user can reorder employees within a position rank list" do
+    sign_in users(:manager)
+    alex = locations(:main).employees.create!(
+      first_name: "Alex",
+      last_name: "Assistant",
+      phone_number: "555-3333",
+      email: "alex@example.com"
+    )
+    alex.positions << positions(:server)
+
+    patch reorder_employees_location_position_path(locations(:main), positions(:server)), params: {
+      employee_position: {
+        ordered_ids: [ alex.id, employees(:sam).id ]
+      }
+    }, as: :json
+
+    assert_response :success
+    assert_equal [ "Alex Assistant", "Sam Server" ], positions(:server).reload.ranked_active_employees.map(&:display_name)
+  end
+
   test "a position cannot be reordered into a different division" do
     sign_in users(:manager)
 

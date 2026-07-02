@@ -121,6 +121,7 @@ class SchedulesController < ApplicationController
   def prepare_schedule_view
     @view_mode = store_schedule_view_mode!(params[:view].presence || session[:schedule_view_mode])
     @section_mode = store_schedule_section_mode!(params[:section].presence || session[:schedule_section_mode])
+    @both_view_employee_sort_mode = store_both_view_employee_sort_mode!(params[:employee_order].presence || session[:both_view_employee_sort_mode])
     @section_label = schedule_section_label(@section_mode)
     @week_dates = @schedule.week_dates
     @mini_calendar_date = mini_calendar_date
@@ -134,7 +135,7 @@ class SchedulesController < ApplicationController
     @shifts_by_position_and_date = @shifts.group_by { |shift| [ shift.position_id, shift.shift_date ] }
     @shifts_by_employee_position_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.position_id, shift.shift_date ] }
     @employees_by_position = @positions.index_with do |position|
-      position.employees.select(&:active?).sort_by { |employee| [ employee.first_name.to_s.downcase, employee.last_name.to_s.downcase ] }
+      employees_for_position(position)
     end
     @current_week_schedule = Schedule.current_for(@location)
     remember_schedule_context!(location: @location, schedule: @schedule, view: @view_mode, section: @section_mode)
@@ -194,6 +195,12 @@ class SchedulesController < ApplicationController
     return scope if @section_mode == "all"
 
     scope.where(section: @section_mode)
+  end
+
+  def employees_for_position(position)
+    return position.ranked_active_employees if @view_mode == "both" && @both_view_employee_sort_mode == "ranked"
+
+    position.alphabetical_active_employees
   end
 
   def employees_for_section
