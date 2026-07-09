@@ -324,7 +324,8 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     payload = JSON.parse(response.body)
     assert_equal "move", payload["action"]
     assert_includes payload["message"], "Aaron Mays"
-    assert_nil payload["shift_html"]
+    assert_includes payload["shift_html"], "data-shift-id=\"#{shift.id}\""
+    assert_includes payload["shift_html"], "data-employee-id=\"#{aaron.id}\""
     assert_equal location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "boh"), payload["redirect_url"]
 
     shift.reload
@@ -1178,7 +1179,7 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_select ".shift-pill .shift-pill-secondary", text: "Server"
     assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
     assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
-    assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23'][data-assigned-position-ids='#{positions(:server).id}']"
+    assert_select "td[data-schedule-quick-edit-target='cell'][data-view-mode='both'][data-employee-id='#{employees(:sam).id}'][data-position-id='#{positions(:server).id}'][data-shift-date='2026-06-23'][data-assigned-position-ids='#{positions(:server).id}'][data-add-url='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-add-context='#{employees(:sam).display_name}'][data-add-label='+ Add Shift'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}']"
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-22", view: "both", section: "foh")}']", count: 0
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}'] .schedule-add-link-context", text: "Sam Server"
     assert_select "a.schedule-add-link[href='#{new_location_schedule_shift_path(locations(:main), schedules(:main_week), employee_id: employees(:sam).id, position_id: positions(:server).id, shift_date: "2026-06-23", view: "both", section: "foh")}'][data-action='click->schedule-quick-edit#rememberScheduleViewport'][data-return-url='#{location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")}'] .schedule-add-link-label", text: "+ Add Shift"

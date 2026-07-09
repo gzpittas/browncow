@@ -667,11 +667,20 @@ body.app-background-section-all {
 
 .shift-pill-with-actions {
   padding: 0;
+  position: relative;
 }
 
 .shift-pill-main {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.shift-pill-link {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-right: 1.85rem;
 }
 
 .shift-pill-color-mark {
@@ -694,18 +703,13 @@ body.app-background-section-all {
 }
 
 .shift-pill-action-row {
+  position: absolute;
+  right: 0.32rem;
+  top: 0.38rem;
+  align-items: flex-start;
   display: flex;
-  flex: 0 0 auto;
   justify-content: flex-end;
-  margin-left: auto;
-}
-
-.shift-pill-title-link {
-  display: block;
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 0;
-  text-align: left;
+  z-index: 1;
 }
 
 .shift-pill-detail-row {
@@ -714,13 +718,6 @@ body.app-background-section-all {
   gap: 0.45rem;
   min-width: 0;
   padding: 0.05rem 0.5rem 0.5rem 1.4rem;
-}
-
-.shift-pill-secondary-link,
-.shift-pill-time-link {
-  display: block;
-  padding: 0;
-  text-align: left;
 }
 
 .shift-pill-title,
@@ -742,16 +739,6 @@ body.app-background-section-all {
   color: #6d6258;
   font-size: 0.75rem;
   padding: 0;
-}
-
-.shift-pill-secondary-link {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.shift-pill-time-link {
-  flex: 0 0 auto;
-  margin-left: auto;
 }
 
 .shift-pill-time-cluster {
@@ -791,10 +778,6 @@ body.app-background-section-all {
   max-width: 100%;
 }
 
-.shift-pill-time-stack-link {
-  margin-left: auto;
-}
-
 .shift-pill-employee-view .shift-pill-detail-row {
   align-items: flex-start;
   flex-direction: column;
@@ -804,12 +787,6 @@ body.app-background-section-all {
 
 .shift-pill-employee-view .shift-pill-title-row {
   padding-bottom: 0;
-}
-
-.shift-pill-employee-view .shift-pill-secondary-link,
-.shift-pill-employee-view .shift-pill-time-link {
-  margin-left: 0;
-  width: 100%;
 }
 
 .shift-pill-employee-view .shift-pill-time-cluster {
@@ -875,10 +852,6 @@ body.app-background-section-all {
 .shift-pill-delete:hover {
   background: #fff1f1;
   color: #8b1e1e;
-}
-
-.shift-pill-single-row .shift-pill-title-link {
-  padding-bottom: 0;
 }
 
 .schedule-add-link {

@@ -21,6 +21,50 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <style>
+      html.schedule-restoring-viewport body {
+        visibility: hidden;
+      }
+    </style>
+    <script>
+      (() => {
+        const restoringClass = "schedule-restoring-viewport"
+
+        const cleanup = () => {
+          document.documentElement.classList.remove(restoringClass)
+          sessionStorage.removeItem("scheduleViewport")
+        }
+
+        try {
+          const storedViewport = sessionStorage.getItem("scheduleViewport")
+          if (!storedViewport) return
+
+          const viewport = JSON.parse(storedViewport)
+          if (viewport.path !== window.location.pathname || viewport.search !== window.location.search) {
+            sessionStorage.removeItem("scheduleViewport")
+            return
+          }
+
+          document.documentElement.classList.add(restoringClass)
+
+          const restore = () => {
+            window.scrollTo(viewport.x || 0, viewport.y || 0)
+            requestAnimationFrame(() => {
+              window.scrollTo(viewport.x || 0, viewport.y || 0)
+              cleanup()
+            })
+          }
+
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", restore, { once: true })
+          } else {
+            restore()
+          }
+        } catch (_error) {
+          cleanup()
+        }
+      })()
+    </script>
   </head>
 
   <body class="bg-body-tertiary <%= content_for(:body_class) %>">

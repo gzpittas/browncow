@@ -50,12 +50,10 @@ class ShiftsController < ApplicationController
     original_employee = @shift.employee
 
     if @shift.update(quick_edit_shift_params)
-      employee_changed = @shift.employee_id != original_employee.id
       respond_to_quick_edit_success(
         move_shift_message(@shift, original_date:, original_position:, original_employee:),
         shift: @shift,
-        action: "move",
-        include_shift_html: !employee_changed
+        action: "move"
       )
     else
       @shift.shift_date = original_date

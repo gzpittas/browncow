@@ -122,10 +122,12 @@ export default class extends Controller {
       return
     }
 
+    const sourceShift = { ...this.draggedShift }
+
     if (this.dragAction(event) === "copy") {
-      this.sendQuickEdit(this.draggedShift.copyUrl, "POST", cell, cell)
+      this.sendQuickEdit(this.draggedShift.copyUrl, "POST", cell, cell, sourceShift)
     } else {
-      this.sendQuickEdit(this.draggedShift.moveUrl, "PATCH", cell, cell)
+      this.sendQuickEdit(this.draggedShift.moveUrl, "PATCH", cell, cell, sourceShift)
     }
   }
 
@@ -162,7 +164,7 @@ export default class extends Controller {
       return
     }
 
-    this.sendQuickEdit(shift.copyUrl, "POST", cell, cell)
+    this.sendQuickEdit(shift.copyUrl, "POST", cell, cell, { ...shift })
   }
 
   startCopy(event) {
@@ -192,10 +194,10 @@ export default class extends Controller {
       return
     }
 
-    this.sendQuickEdit(this.copyShift.copyUrl, "POST", cell, cell)
+    this.sendQuickEdit(this.copyShift.copyUrl, "POST", cell, cell, { ...this.copyShift })
   }
 
-  async sendQuickEdit(url, method, cell, targetCell) {
+  async sendQuickEdit(url, method, cell, targetCell, sourceShift = null) {
     const csrfToken = document.querySelector("meta[name='csrf-token']")?.content
 
     try {
@@ -218,7 +220,7 @@ export default class extends Controller {
       const payload = await response.json()
       if (response.ok) {
         if (payload.shift_html && targetCell) {
-          this.applyQuickEdit(payload, targetCell)
+          this.applyQuickEdit(payload, targetCell, sourceShift)
         } else {
           const redirectUrl = payload.redirect_url || window.location.href
           window.location.href = redirectUrl
@@ -392,11 +394,20 @@ export default class extends Controller {
     }
   }
 
-  applyQuickEdit(payload, targetCell) {
+  applyQuickEdit(payload, targetCell, sourceShift = null) {
     const template = document.createElement("template")
     template.innerHTML = payload.shift_html.trim()
     const updatedShift = template.content.firstElementChild
     if (!updatedShift) return
+
+    if (targetCell.dataset.viewMode === "both") {
+      this.applyQuickEditBoth(payload, updatedShift, sourceShift)
+      this.copyShift = null
+      this.draggedShift = null
+      this.clearTargetMarks()
+      this.showInfo(payload.message)
+      return
+    }
 
     if (payload.action === "move") {
       this.element.querySelector(`[data-shift-id="${CSS.escape(String(payload.shift_id))}"]`)?.remove()
@@ -413,6 +424,71 @@ export default class extends Controller {
     this.draggedShift = null
     this.clearTargetMarks()
     this.showInfo(payload.message)
+  }
+
+  applyQuickEditBoth(payload, updatedShift, sourceShift = null) {
+    if (payload.action === "move" && sourceShift) {
+      this.bothViewCellsFor(sourceShift.employeeId, sourceShift.date).forEach((cell) => {
+        cell.querySelectorAll(`[data-shift-id="${CSS.escape(String(payload.shift_id))}"]`).forEach((shift) => shift.remove())
+        this.syncBothViewCell(cell)
+      })
+    }
+
+    this.bothViewCellsFor(updatedShift.dataset.employeeId, updatedShift.dataset.shiftDate).forEach((cell) => {
+      cell.querySelectorAll(`[data-shift-id="${CSS.escape(String(payload.shift_id))}"]`).forEach((shift) => shift.remove())
+      const addLink = cell.querySelector(".schedule-add-link")
+      const nextShift = updatedShift.cloneNode(true)
+
+      if (addLink) {
+        addLink.before(nextShift)
+      } else {
+        cell.querySelector(".d-grid")?.append(nextShift)
+      }
+
+      this.syncBothViewCell(cell)
+    })
+  }
+
+  bothViewCellsFor(employeeId, shiftDate) {
+    if (!employeeId || !shiftDate) return []
+
+    return Array.from(this.element.querySelectorAll(
+      `[data-schedule-quick-edit-target~="cell"][data-view-mode="both"][data-employee-id="${CSS.escape(String(employeeId))}"][data-shift-date="${CSS.escape(String(shiftDate))}"]`
+    ))
+  }
+
+  syncBothViewCell(cell) {
+    const grid = cell.querySelector(".d-grid")
+    if (!grid) return
+
+    const hasShift = grid.querySelector(".shift-pill") !== null
+    const addLink = grid.querySelector(".schedule-add-link")
+
+    cell.classList.toggle("schedule-cell-has-shift", hasShift)
+
+    if (hasShift) {
+      addLink?.remove()
+      return
+    }
+
+    if (addLink || !cell.dataset.addUrl) return
+
+    const link = document.createElement("a")
+    link.href = cell.dataset.addUrl
+    link.className = "schedule-add-link"
+    link.dataset.action = "click->schedule-quick-edit#rememberScheduleViewport"
+    if (cell.dataset.returnUrl) link.dataset.returnUrl = cell.dataset.returnUrl
+
+    const context = document.createElement("span")
+    context.className = "schedule-add-link-context"
+    context.textContent = cell.dataset.addContext || ""
+
+    const label = document.createElement("span")
+    label.className = "schedule-add-link-label"
+    label.textContent = cell.dataset.addLabel || "+ Add Shift"
+
+    link.append(context, label)
+    grid.append(link)
   }
 
   showInfo(message) {
