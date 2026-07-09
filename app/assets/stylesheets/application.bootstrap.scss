@@ -639,6 +639,50 @@ body.app-background-section-all {
   opacity: 0.55;
 }
 
+.shift-pill.is-just-moved {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 22%, white),
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 30%, #efe6f7)
+    );
+  border-color: color-mix(in srgb, #6e4d8f 72%, white);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, #a16faf 76%, white),
+    0 0.6rem 1.25rem rgba(94, 59, 132, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  animation: shift-pill-arrival 3.6s ease-out;
+}
+
+.shift-pill-move-ghost {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, #5e3b84 38%, white),
+      color-mix(in srgb, #8c5a97 52%, white)
+    );
+  border-color: color-mix(in srgb, #6e4d8f 54%, white);
+  border-style: dashed;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, #a16faf 34%, white),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  opacity: 0.92;
+  pointer-events: none;
+  animation: shift-pill-ghost-fade 2.6s ease-out forwards;
+}
+
+.shift-pill-move-ghost .shift-pill-link,
+.shift-pill-move-ghost .shift-pill-main,
+.shift-pill-move-ghost .shift-pill-detail-row,
+.shift-pill-move-ghost .shift-pill-title-row {
+  pointer-events: none;
+}
+
+.shift-pill-move-ghost .shift-pill-secondary,
+.shift-pill-move-ghost .shift-pill-time {
+  color: #765f8b;
+}
+
 .shift-pill-drag-ghost {
   box-shadow: 0 0.45rem 1rem rgba(47, 42, 36, 0.2);
   left: 0;
@@ -765,6 +809,34 @@ body.app-background-section-all {
   line-height: 0.9;
   text-align: right;
   white-space: nowrap;
+}
+
+@keyframes shift-pill-arrival {
+  0% {
+    transform: translateY(-2px) scale(1.01);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shift-pill-ghost-fade {
+  0% {
+    opacity: 0.92;
+  }
+
+  38% {
+    opacity: 0.92;
+  }
+
+  72% {
+    opacity: 0.36;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 .shift-pill-time-stack,

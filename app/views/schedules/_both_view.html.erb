@@ -35,6 +35,7 @@
                         data-add-url="<%= new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, position_id: position.id, shift_date: date, view: "both", section: @section_mode) %>"
                         data-add-context="<%= employee.display_name %>"
                         data-add-label="+ Add Shift"
+                        data-add-mode="empty_only"
                         data-return-url="<%= location_schedule_path(@location, @schedule, view: "both", section: @section_mode) %>">
                     <div class="d-grid gap-2">
                       <% shifts.each do |shift| %>

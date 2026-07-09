@@ -400,7 +400,8 @@ export default class extends Controller {
     const updatedShift = template.content.firstElementChild
     if (!updatedShift) return
 
-    if (targetCell.dataset.viewMode === "both") {
+    const viewMode = targetCell.dataset.viewMode
+    if (viewMode === "both") {
       this.applyQuickEditBoth(payload, updatedShift, sourceShift)
       this.copyShift = null
       this.draggedShift = null
@@ -409,16 +410,15 @@ export default class extends Controller {
       return
     }
 
-    if (payload.action === "move") {
-      this.element.querySelector(`[data-shift-id="${CSS.escape(String(payload.shift_id))}"]`)?.remove()
+    const targetCells = [ targetCell ]
+    if (payload.action === "move" && sourceShift) {
+      const sourceCells = this.cellsForShift(sourceShift, viewMode)
+      this.removeShiftFromCells(sourceCells, payload.shift_id, targetCells, { showGhost: true })
     }
 
-    const addLink = targetCell.querySelector(".schedule-add-link")
-    if (addLink) {
-      addLink.before(updatedShift)
-    } else {
-      targetCell.querySelector(".d-grid")?.append(updatedShift)
-    }
+    this.insertShiftIntoCell(targetCell, updatedShift)
+    this.emphasizeShift(updatedShift)
+    this.syncCell(targetCell)
 
     this.copyShift = null
     this.draggedShift = null
@@ -427,51 +427,123 @@ export default class extends Controller {
   }
 
   applyQuickEditBoth(payload, updatedShift, sourceShift = null) {
+    const targetCells = this.cellsForShift({
+      employeeId: updatedShift.dataset.employeeId,
+      date: updatedShift.dataset.shiftDate
+    }, "both")
+
     if (payload.action === "move" && sourceShift) {
-      this.bothViewCellsFor(sourceShift.employeeId, sourceShift.date).forEach((cell) => {
-        cell.querySelectorAll(`[data-shift-id="${CSS.escape(String(payload.shift_id))}"]`).forEach((shift) => shift.remove())
-        this.syncBothViewCell(cell)
-      })
+      const sourceCells = this.cellsForShift(sourceShift, "both")
+      this.removeShiftFromCells(sourceCells, payload.shift_id, targetCells, { showGhost: true })
     }
 
-    this.bothViewCellsFor(updatedShift.dataset.employeeId, updatedShift.dataset.shiftDate).forEach((cell) => {
+    targetCells.forEach((cell) => {
       cell.querySelectorAll(`[data-shift-id="${CSS.escape(String(payload.shift_id))}"]`).forEach((shift) => shift.remove())
-      const addLink = cell.querySelector(".schedule-add-link")
       const nextShift = updatedShift.cloneNode(true)
-
-      if (addLink) {
-        addLink.before(nextShift)
-      } else {
-        cell.querySelector(".d-grid")?.append(nextShift)
-      }
-
-      this.syncBothViewCell(cell)
+      this.insertShiftIntoCell(cell, nextShift)
+      this.emphasizeShift(nextShift)
+      this.syncCell(cell)
     })
   }
 
-  bothViewCellsFor(employeeId, shiftDate) {
-    if (!employeeId || !shiftDate) return []
+  cellsForShift(shift, viewMode) {
+    if (!shift?.date) return []
+
+    if (viewMode === "positions") {
+      if (!shift.positionId) return []
+
+      return Array.from(this.element.querySelectorAll(
+        `[data-schedule-quick-edit-target~="cell"][data-view-mode="positions"][data-position-id="${CSS.escape(String(shift.positionId))}"][data-shift-date="${CSS.escape(String(shift.date))}"]`
+      ))
+    }
+
+    if (!shift.employeeId) return []
 
     return Array.from(this.element.querySelectorAll(
-      `[data-schedule-quick-edit-target~="cell"][data-view-mode="both"][data-employee-id="${CSS.escape(String(employeeId))}"][data-shift-date="${CSS.escape(String(shiftDate))}"]`
+      `[data-schedule-quick-edit-target~="cell"][data-view-mode="${CSS.escape(String(viewMode))}"][data-employee-id="${CSS.escape(String(shift.employeeId))}"][data-shift-date="${CSS.escape(String(shift.date))}"]`
     ))
   }
 
-  syncBothViewCell(cell) {
+  removeShiftFromCells(cells, shiftId, targetCells = [], options = {}) {
+    const targetCellSet = new Set(targetCells)
+
+    cells.forEach((cell) => {
+      cell.querySelectorAll(`[data-shift-id="${CSS.escape(String(shiftId))}"]`).forEach((shift) => {
+        const shouldShowGhost = options.showGhost && !targetCellSet.has(cell)
+        if (shouldShowGhost) {
+          this.leaveMoveGhost(cell, shift)
+        }
+        shift.remove()
+      })
+
+      this.syncCell(cell)
+    })
+  }
+
+  insertShiftIntoCell(cell, shiftElement) {
+    const addLink = cell.querySelector(".schedule-add-link")
+    if (addLink) {
+      addLink.before(shiftElement)
+    } else {
+      cell.querySelector(".d-grid")?.append(shiftElement)
+    }
+  }
+
+  leaveMoveGhost(cell, sourceElement) {
     const grid = cell.querySelector(".d-grid")
     if (!grid) return
 
-    const hasShift = grid.querySelector(".shift-pill") !== null
+    grid.querySelector(".shift-pill-move-ghost")?.remove()
+
+    const ghost = sourceElement.cloneNode(true)
+    ghost.classList.remove("is-dragging", "is-employee-highlighted")
+    ghost.classList.add("shift-pill-move-ghost")
+    ghost.setAttribute("draggable", "false")
+    ghost.querySelector(".shift-pill-action-row")?.remove()
+
     const addLink = grid.querySelector(".schedule-add-link")
+    if (addLink) {
+      addLink.before(ghost)
+    } else {
+      grid.append(ghost)
+    }
+
+    window.setTimeout(() => {
+      ghost.remove()
+      this.syncCell(cell)
+    }, 4200)
+  }
+
+  emphasizeShift(shiftElement) {
+    shiftElement.classList.add("is-just-moved")
+    window.setTimeout(() => {
+      shiftElement.classList.remove("is-just-moved")
+    }, 3600)
+  }
+
+  syncCell(cell) {
+    const grid = cell.querySelector(".d-grid")
+    if (!grid) return
+
+    const hasShift = grid.querySelector(".shift-pill:not(.shift-pill-move-ghost)") !== null
+    const addLink = grid.querySelector(".schedule-add-link")
+    const addMode = cell.dataset.addMode || "none"
 
     cell.classList.toggle("schedule-cell-has-shift", hasShift)
+
+    if (addMode === "always") return
 
     if (hasShift) {
       addLink?.remove()
       return
     }
 
-    if (addLink || !cell.dataset.addUrl) return
+    if (grid.querySelector(".shift-pill-move-ghost")) {
+      addLink?.remove()
+      return
+    }
+
+    if (addMode !== "empty_only" || addLink || !cell.dataset.addUrl) return
 
     const link = document.createElement("a")
     link.href = cell.dataset.addUrl
