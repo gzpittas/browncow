@@ -1,0 +1,64 @@
+<% section_positions_for = ->(employee) { section_key.present? ? employee.positions.select { |position| position.section == section_key } : employee.positions } %>
+
+<div class="card border-0 shadow-sm employee-division-section">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h2 class="h5 fw-semibold mb-0"><%= title %></h2>
+    <span class="badge text-bg-light border"><%= pluralize(employees.count, "employee") %></span>
+  </div>
+  <div class="card-body p-0">
+    <% if employees.any? %>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Positions</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% employees.each do |employee| %>
+              <tr>
+                <td class="fw-medium"><%= employee.display_name %></td>
+                <td>
+                  <% positions = section_positions_for.call(employee) %>
+                  <% if positions.any? %>
+                    <div class="d-flex flex-wrap gap-1">
+                      <% positions.each do |position| %>
+                        <span class="badge text-bg-light border"><%= position.name %></span>
+                      <% end %>
+                    </div>
+                  <% else %>
+                    <span class="text-secondary">None assigned</span>
+                  <% end %>
+                </td>
+                <td class="text-secondary">
+                  <%= [ employee.phone_number, employee.email ].compact_blank.join(" / ").presence || "Not added" %>
+                </td>
+                <td>
+                  <span class="badge <%= employee.active? ? "text-bg-success" : "text-bg-secondary" %>">
+                    <%= employee.active? ? "Active" : "Inactive" %>
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex gap-2">
+                    <%= link_to "Edit", edit_location_employee_path(@location, employee), class: "btn btn-sm btn-outline-secondary" %>
+                    <% if employee.active? %>
+                      <%= button_to "Mark Inactive", deactivate_location_employee_path(@location, employee), method: :patch, class: "btn btn-sm btn-outline-secondary" %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-4 text-secondary">
+        No employees assigned to this division yet.
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,6 +1,32 @@
+require "bcrypt"
+
 class Account < ApplicationRecord
+  SCHEDULE_TIME_DISPLAY_OPTIONS = %w[stacked large].freeze
+
   has_many :users, dependent: :nullify
   has_many :locations, dependent: :destroy
 
   validates :name, presence: true
+  validates :public_schedule_slug, presence: true, if: :public_schedule_enabled?
+  validates :public_schedule_slug, uniqueness: true, allow_blank: true
+  validates :public_schedule_slug, format: { with: /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/ }, allow_blank: true
+  validates :schedule_time_display, inclusion: { in: SCHEDULE_TIME_DISPLAY_OPTIONS }
+
+  def stacked_schedule_time_display?
+    schedule_time_display == "stacked"
+  end
+
+  def large_schedule_time_display?
+    schedule_time_display == "large"
+  end
+
+  def public_schedule_password=(password)
+    self.public_schedule_password_digest = BCrypt::Password.create(password) if password.present?
+  end
+
+  def public_schedule_password_authenticated?(password)
+    return false if public_schedule_password_digest.blank? || password.blank?
+
+    BCrypt::Password.new(public_schedule_password_digest).is_password?(password)
+  end
 end

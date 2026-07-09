@@ -23,7 +23,7 @@ class AuthenticationFlowTest < ActionDispatch::IntegrationTest
         }
       }
 
-      assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), section: "foh")
+      assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")
     end
   end
 
@@ -34,7 +34,7 @@ class AuthenticationFlowTest < ActionDispatch::IntegrationTest
       get root_path
     end
 
-    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), section: "foh")
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")
   end
 
   test "a user with a location but no current schedule signs in to the schedule list" do
@@ -126,7 +126,21 @@ class AuthenticationFlowTest < ActionDispatch::IntegrationTest
     get dashboard_path
 
     assert_response :success
-    assert_select "a[href='#{current_schedule_path}']", text: "Current Schedule"
+    assert_select "a[href='#{current_schedule_path}'].navbar-current-schedule-btn.current-menu-toggle[aria-label='Current Schedule'][data-bs-toggle='tooltip'][data-bs-title='Current Schedule'] .fa-solid.fa-clock", count: 1
+    assert_select ".navbar-current-schedule-control .cta-label", text: "CURRENT"
+    assert_select "a[href='#{employees_path}'].navbar-employees-btn[aria-label='Employees'][data-bs-toggle='tooltip'][data-bs-title='Employees'] .fa-solid.fa-users", count: 1
+    assert_select ".navbar-employees-control .cta-label", text: "EMPLOYEES"
+    assert_select ".navbar-settings-control .navbar-settings-btn .fa-solid.fa-gear", count: 1
+    assert_select ".navbar-settings-control .cta-label", text: "SETTINGS"
+    assert_select ".navbar .navbar-cta-btn", count: 0
+    assert_select ".dropdown-menu a[href='#{positions_path}']", text: "Positions"
+    assert_select ".dropdown-menu a[href='#{employees_path}']", text: "Employees"
+    assert_select ".dropdown-menu a[href='#{schedules_path}']", text: "Schedules"
+    assert_select ".dropdown-menu a[href='#{dashboard_path}']", text: "Dashboard"
+    assert_select ".dropdown-menu a[href='#{locations_path}']", text: "Locations"
+    assert_select ".dropdown-menu a[href='#{edit_user_registration_path}']", text: "Profile"
+    assert_select ".dropdown-menu a[href='#{edit_account_path}']", text: "Restaurant"
+    assert_select ".dropdown-menu form[action='#{destroy_user_session_path}'] button", text: "Sign Out"
     assert_select "h1", "Welcome, Mae"
     assert_select "h2", "This Week's Schedule"
     assert_select "h2", "Next Week's Schedule"

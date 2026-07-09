@@ -4,15 +4,18 @@ Rails.application.routes.draw do
   root "welcome#index"
   get "dashboard", to: "dashboard#show"
   get "current-schedule", to: "schedules#current", as: :current_schedule
+  get "schedule/:account_slug", to: "public_schedules#show", as: :public_schedule
+  post "schedule/:account_slug", to: "public_schedules#unlock", as: :unlock_public_schedule
 
   resource :account, only: [ :new, :create, :edit, :update ]
 
   resources :locations, except: [ :show, :destroy ] do
     patch :deactivate, on: :member
 
-    resources :positions, except: [ :show, :destroy ] do
+    resources :positions, except: [ :show ] do
       patch :deactivate, on: :member
       patch :reorder, on: :collection
+      patch :reorder_employees, on: :member
     end
 
     resources :employees, except: [ :show, :destroy ] do
@@ -21,6 +24,8 @@ Rails.application.routes.draw do
 
     resources :schedules do
       get :print, on: :member
+      patch :publish, on: :member
+      patch :unpublish, on: :member
 
       resources :shifts, except: [ :index, :show ] do
         patch :move, on: :member

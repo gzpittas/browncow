@@ -1,40 +1,74 @@
 <% secondary_text = local_assigns[:secondary_text] %>
 <% tertiary_text = local_assigns[:tertiary_text] %>
+<% time_lines = local_assigns[:time_lines] %>
+<% compact_time_range = local_assigns[:compact_time_range] || shift_compact_time_range(shift) %>
+<% time_display = local_assigns[:time_display] || schedule_time_display_for(@location.account) %>
+<% schedule_read_only = !@schedule.editable? %>
+<% edit_url = edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode) unless schedule_read_only %>
+<% return_url = location_schedule_path(@location, @schedule, view: view_mode, section: @section_mode) %>
 
-<div class="shift-pill shift-pill-with-actions <%= "shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank? %>"
-     draggable="true"
+<div class="shift-pill shift-pill-with-actions <%= "shift-pill-single-row" if secondary_text.blank? && tertiary_text.blank? && time_lines.blank? %> <%= "shift-pill-employee-view" if %w[employees both].include?(view_mode) %>"
+     draggable="<%= schedule_read_only ? "false" : "true" %>"
      style="--position-color: <%= shift.position.display_color %>"
      data-schedule-quick-edit-target="shift"
-     data-action="pointerdown->schedule-quick-edit#optionPointerDown dragstart->schedule-quick-edit#dragStart dragend->schedule-quick-edit#dragEnd"
+     data-action="pointerdown->schedule-quick-edit#optionPointerDown dragstart->schedule-quick-edit#dragStart dragend->schedule-quick-edit#dragEnd mouseenter->schedule-quick-edit#highlightEmployeeShifts mouseleave->schedule-quick-edit#clearEmployeeShiftHighlights focusin->schedule-quick-edit#highlightEmployeeShifts focusout->schedule-quick-edit#clearEmployeeShiftHighlights"
      data-shift-id="<%= shift.id %>"
      data-shift-date="<%= shift.shift_date.iso8601 %>"
      data-employee-id="<%= shift.employee_id %>"
      data-position-id="<%= shift.position_id %>"
+     data-assigned-position-ids="<%= shift.employee.positions.active.ids.join(",") %>"
      data-shift-label="<%= "#{shift.employee.display_name}'s #{shift.position.name} shift" %>"
      data-move-url="<%= move_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode) %>"
      data-copy-url="<%= copy_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode) %>">
-  <div class="shift-pill-main">
+  <% pill_main = capture do %>
+    <div class="shift-pill-title-row">
+      <span class="shift-pill-color-mark" aria-hidden="true"></span>
+      <span class="shift-pill-title fw-semibold"><%= title %></span>
+    </div>
+    <% if secondary_text.present? || tertiary_text.present? || time_lines.present? %>
+      <div class="shift-pill-detail-row">
+        <% if secondary_text.present? %>
+          <span class="shift-pill-secondary"><%= secondary_text %></span>
+        <% end %>
+        <% if time_lines.present? %>
+          <% if time_display == "large" %>
+            <span class="shift-pill-time-cluster shift-pill-time-cluster-large">
+              <span class="shift-pill-time-compact"><%= compact_time_range %></span>
+            </span>
+          <% else %>
+            <span class="shift-pill-time-stack">
+              <span class="shift-pill-time"><%= time_lines.first %></span>
+              <span class="shift-pill-time"><%= time_lines.last %></span>
+            </span>
+          <% end %>
+        <% elsif tertiary_text.present? %>
+          <span class="shift-pill-time"><%= tertiary_text %></span>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+
+  <% if schedule_read_only %>
+    <div class="shift-pill-main">
+      <%= pill_main %>
+    </div>
+  <% else %>
+    <%= link_to edit_url,
+          class: "shift-pill-main shift-pill-link text-decoration-none",
+          draggable: false,
+          data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: return_url } do %>
+      <%= pill_main %>
+    <% end %>
+
     <div class="shift-pill-action-row">
       <%= button_to location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode),
             method: :delete,
             class: "shift-pill-delete",
-            form_class: "shift-pill-delete-form" do %>
+            form_class: "shift-pill-delete-form",
+            form: { data: { action: "submit->schedule-quick-edit#rememberScheduleViewportSubmit", return_url: return_url } } do %>
         <span aria-hidden="true">&times;</span>
         <span class="visually-hidden">Delete shift</span>
       <% end %>
     </div>
-    <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode), class: "shift-pill-title-link text-decoration-none", draggable: false do %>
-      <span class="shift-pill-title fw-semibold"><%= title %></span>
-    <% end %>
-    <% if secondary_text.present? %>
-      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode), class: "shift-pill-secondary-link text-decoration-none", draggable: false do %>
-        <span class="shift-pill-secondary"><%= secondary_text %></span>
-      <% end %>
-    <% end %>
-    <% if tertiary_text.present? %>
-      <%= link_to edit_location_schedule_shift_path(@location, @schedule, shift, view: view_mode, section: @section_mode), class: "shift-pill-time-link text-decoration-none", draggable: false do %>
-        <span class="shift-pill-time text-nowrap"><%= tertiary_text %></span>
-      <% end %>
-    <% end %>
-  </div>
+  <% end %>
 </div>

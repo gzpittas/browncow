@@ -42,6 +42,58 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     assert_equal "Corner Bistro", user.reload.account.name
   end
 
+  test "a signed-in user can configure the public schedule link" do
+    sign_in users(:manager)
+
+    get edit_account_path
+
+    assert_response :success
+    assert_select "input[name='account[schedule_time_display]'][value='stacked']"
+    assert_select "input[name='account[schedule_time_display]'][value='large']"
+    assert_select "input[name='account[public_schedule_enabled]']"
+    assert_select "input[name='account[public_schedule_slug]']"
+    assert_select "input[name='account[public_schedule_password]'][type=password]"
+
+    patch account_path, params: {
+      account: {
+        name: accounts(:main).name,
+        phone_number: accounts(:main).phone_number,
+        email: accounts(:main).email,
+        schedule_time_display: "large",
+        public_schedule_enabled: "1",
+        public_schedule_slug: "athens",
+        public_schedule_password: "staff-only"
+      }
+    }
+
+    account = accounts(:main).reload
+
+    assert_redirected_to dashboard_path
+    assert_equal "large", account.schedule_time_display
+    assert account.public_schedule_enabled?
+    assert_equal "athens", account.public_schedule_slug
+    assert account.public_schedule_password_authenticated?("staff-only")
+  end
+
+  test "public schedule cannot be enabled without a slug" do
+    sign_in users(:manager)
+
+    patch account_path, params: {
+      account: {
+        name: accounts(:main).name,
+        phone_number: accounts(:main).phone_number,
+        email: accounts(:main).email,
+        public_schedule_enabled: "1",
+        public_schedule_slug: "",
+        public_schedule_password: "staff-only"
+      }
+    }
+
+    assert_response :unprocessable_entity
+    assert_select ".invalid-feedback", text: /can't be blank/i
+    assert_not accounts(:main).reload.public_schedule_enabled?
+  end
+
   test "a signed-in user can create a location" do
     sign_in users(:manager)
 
@@ -103,6 +155,40 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     assert_equal "#3F8F5F", positions(:server).reload.color
   end
 
+  test "a signed-in user can delete a position and its shifts" do
+    sign_in users(:manager)
+    position_id = positions(:server).id
+    shift_id = shifts(:sam_monday).id
+
+    assert_difference -> { locations(:main).positions.count }, -1 do
+      assert_difference -> { schedules(:main_week).shifts.count }, -1 do
+        delete location_position_path(locations(:main), positions(:server))
+      end
+    end
+
+    assert_redirected_to location_positions_path(locations(:main))
+    assert_nil Position.find_by(id: position_id)
+    assert_nil Shift.find_by(id: shift_id)
+  end
+
+  test "positions list shows a delete button for each position" do
+    sign_in users(:manager)
+
+    get location_positions_path(locations(:main))
+
+    assert_response :success
+    assert_select "form[action='#{location_position_path(locations(:main), positions(:server))}'] button", text: "Delete"
+  end
+
+  test "edit position page includes a visible delete action" do
+    sign_in users(:manager)
+
+    get edit_location_position_path(locations(:main), positions(:server))
+
+    assert_response :success
+    assert_select "form[action='#{location_position_path(locations(:main), positions(:server))}'] button", text: "Delete Position"
+  end
+
   test "a signed-in user can reorder positions within a division" do
     sign_in users(:manager)
 
@@ -121,6 +207,37 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal [ "Bartender", "Server" ], locations(:main).positions.foh.ordered.pluck(:name)
+  end
+
+  test "employees page includes per-position drag-and-drop rank lists" do
+    sign_in users(:manager)
+
+    get location_employees_path(locations(:main))
+
+    assert_response :success
+    assert_select "tbody[data-controller='employee-sort'][data-employee-sort-url-value='#{reorder_employees_location_position_path(locations(:main), positions(:server))}']", minimum: 1
+    assert_select "tr[data-employee-sort-target='row'][data-employee-id='#{employees(:sam).id}']"
+    assert_select ".position-drag-handle", minimum: 1
+  end
+
+  test "a signed-in user can reorder employees within a position rank list" do
+    sign_in users(:manager)
+    alex = locations(:main).employees.create!(
+      first_name: "Alex",
+      last_name: "Assistant",
+      phone_number: "555-3333",
+      email: "alex@example.com"
+    )
+    alex.positions << positions(:server)
+
+    patch reorder_employees_location_position_path(locations(:main), positions(:server)), params: {
+      employee_position: {
+        ordered_ids: [ alex.id, employees(:sam).id ]
+      }
+    }, as: :json
+
+    assert_response :success
+    assert_equal [ "Alex Assistant", "Sam Server" ], positions(:server).reload.ranked_active_employees.map(&:display_name)
   end
 
   test "a position cannot be reordered into a different division" do
@@ -180,7 +297,29 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     get location_employees_path(locations(:main))
 
     assert_response :success
-    assert_match(/Alex Zed.*Sam Server/m, response.body)
+    assert_match(/FOH.*Sam Server/m, response.body)
+    assert_match(/Unassigned.*Alex Zed/m, response.body)
+  end
+
+  test "employees index is split into foh and boh sections" do
+    sign_in users(:manager)
+    boh_position = locations(:main).positions.create!(name: "Prep Cook", section: "boh", color: Position::COLOR_PALETTE.first)
+    boh_employee = locations(:main).employees.create!(
+      first_name: "Casey",
+      last_name: "Cook",
+      email: "casey-cook@example.com"
+    )
+    boh_employee.positions << boh_position
+
+    get location_employees_path(locations(:main))
+
+    assert_response :success
+    assert_select ".employee-division-section .card-header h2", text: "FOH"
+    assert_select ".employee-division-section .card-header h2", text: "BOH"
+    assert_select ".employee-division-section", text: /Sam Server/
+    assert_select ".employee-division-section", text: /Casey Cook/
+    assert_match(/FOH.*Sam Server/m, response.body)
+    assert_match(/BOH.*Casey Cook/m, response.body)
   end
 
   test "a user cannot access another account location" do
@@ -194,6 +333,16 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     sign_in users(:manager)
 
     get edit_location_position_path(locations(:other), positions(:other_server))
+    assert_response :not_found
+  end
+
+  test "a user cannot delete another account position" do
+    sign_in users(:manager)
+
+    assert_no_difference -> { Position.count } do
+      delete location_position_path(locations(:other), positions(:other_server))
+    end
+
     assert_response :not_found
   end
 

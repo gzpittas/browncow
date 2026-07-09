@@ -1,8 +1,4 @@
 <div class="d-grid gap-4">
-  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div class="badge text-bg-light border"><%= @section_label %></div>
-  </div>
-
   <% @positions.each do |position| %>
     <section class="card border-0 shadow-sm schedule-board">
       <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -18,7 +14,7 @@
             <thead>
               <tr>
                 <% @week_dates.each do |date| %>
-                  <th class="text-center bg-white <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
+                  <th class="text-center bg-white <%= "schedule-weekend-column" if schedule_weekend?(date) %> <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
                 <% end %>
               </tr>
             </thead>
@@ -26,7 +22,7 @@
               <tr>
                 <% @week_dates.each do |date| %>
                   <% shifts = @shifts_by_position_and_date[[ position.id, date ]] || [] %>
-                  <td class="schedule-cell <%= "schedule-today-column" if schedule_today?(date) %>"
+                  <td class="schedule-cell <%= "schedule-weekend-column" if schedule_weekend?(date) %> <%= "schedule-today-column" if schedule_today?(date) %>"
                       data-schedule-quick-edit-target="cell"
                       data-action="click->schedule-quick-edit#cellClick dragenter->schedule-quick-edit#dragEnter dragover->schedule-quick-edit#dragOver dragleave->schedule-quick-edit#dragLeave drop->schedule-quick-edit#drop"
                       data-view-mode="positions"
@@ -34,9 +30,15 @@
                       data-position-id="<%= position.id %>">
                     <div class="d-grid gap-2">
                       <% shifts.each do |shift| %>
-                        <%= render "shift_pill", shift: shift, title: shift.employee.display_name, secondary_text: shift_time_range(shift), view_mode: "positions" %>
+                        <%= render "shift_pill", shift: shift, title: shift.employee.display_name, time_lines: shift_time_range_lines(shift), view_mode: "positions" %>
                       <% end %>
-                      <%= link_to "+ Add #{position.name}", new_location_schedule_shift_path(@location, @schedule, position_id: position.id, shift_date: date, view: "positions", section: @section_mode), class: "schedule-add-link" %>
+                      <% if @schedule.editable? %>
+                        <%= link_to new_location_schedule_shift_path(@location, @schedule, position_id: position.id, shift_date: date, view: "positions", section: @section_mode),
+                              class: "schedule-add-link",
+                              data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: location_schedule_path(@location, @schedule, view: "positions", section: @section_mode) } do %>
+                          <span class="schedule-add-link-label">+ Add <%= position.name %></span>
+                        <% end %>
+                      <% end %>
                     </div>
                   </td>
                 <% end %>

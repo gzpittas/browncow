@@ -1,7 +1,8 @@
+<% time_display = schedule_time_display_for(@location.account) %>
 <div class="print-position-schedule">
   <% @positions.each do |position| %>
     <% position_employees = @employees_by_position[position] || [] %>
-    <section class="print-position-section">
+    <section class="print-position-section" style="--print-position-color: <%= position.display_color %>;">
       <h2><%= position.name.pluralize %></h2>
 
       <% if position_employees.any? %>
@@ -19,16 +20,22 @@
               <tr>
                 <th><%= employee.display_name %></th>
                 <% @week_dates.each do |date| %>
-                  <% shifts = @shifts_by_employee_position_and_date[[ employee.id, position.id, date ]] || [] %>
+                  <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
                   <td>
                     <% if shifts.any? %>
                       <% shifts.each do |shift| %>
                         <div class="print-shift-line">
-                          <strong><%= shift_time_range(shift) %></strong>
+                          <strong><%= shift.position.name %></strong>
+                          <% if time_display == "large" %>
+                            <span class="print-shift-time-compact"><%= shift_compact_time_range(shift) %></span>
+                          <% else %>
+                            <span class="print-shift-time-stack">
+                              <span><%= shift_time_range_lines(shift).first %></span>
+                              <span><%= shift_time_range_lines(shift).last %></span>
+                            </span>
+                          <% end %>
                         </div>
                       <% end %>
-                    <% else %>
-                      <span class="print-off">Off</span>
                     <% end %>
                   </td>
                 <% end %>

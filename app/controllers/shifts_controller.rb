@@ -3,8 +3,10 @@ class ShiftsController < ApplicationController
   before_action :require_account!
   before_action :set_location
   before_action :set_schedule
+  before_action :ensure_schedule_editable!
   before_action :set_shift, only: [ :edit, :update, :destroy, :move, :copy ]
-  before_action :set_form_context, only: [ :new, :create, :edit, :update ]
+  before_action :set_form_context, only: [ :new, :create ]
+  before_action :set_form_context_from_shift, only: [ :edit, :update ]
 
   def new
     @shift = @schedule.shifts.build(
@@ -44,11 +46,19 @@ class ShiftsController < ApplicationController
 
   def move
     original_date = @shift.shift_date
+    original_position = @shift.position
+    original_employee = @shift.employee
 
     if @shift.update(quick_edit_shift_params)
-      respond_to_quick_edit_success("Shift moved to #{shift_date_message(@shift.shift_date)}.")
+      respond_to_quick_edit_success(
+        move_shift_message(@shift, original_date:, original_position:, original_employee:),
+        shift: @shift,
+        action: "move"
+      )
     else
       @shift.shift_date = original_date
+      @shift.position = original_position
+      @shift.employee = original_employee
       respond_to_quick_edit_failure(@shift.errors.full_messages.to_sentence)
     end
   end
@@ -66,7 +76,7 @@ class ShiftsController < ApplicationController
 
     copied_shift = @schedule.shifts.build(
       employee: @shift.employee,
-      position: @shift.position,
+      position: quick_edit_position || @shift.position,
       shift_date: destination_date,
       starts_at: @shift.starts_at,
       ends_at: @shift.ends_at,
@@ -74,7 +84,7 @@ class ShiftsController < ApplicationController
     )
 
     if copied_shift.save
-      respond_to_quick_edit_success("Shift copied to #{shift_date_message(copied_shift.shift_date)}.")
+      respond_to_quick_edit_success("Shift copied to #{shift_date_message(copied_shift.shift_date)}.", shift: copied_shift, action: "copy")
     else
       respond_to_quick_edit_failure(copied_shift.errors.full_messages.to_sentence)
     end
@@ -88,6 +98,17 @@ class ShiftsController < ApplicationController
 
   def set_schedule
     @schedule = @location.schedules.find(params[:schedule_id])
+  end
+
+  def ensure_schedule_editable!
+    return if @schedule.editable?
+
+    message = "Unpublish this schedule before making changes."
+
+    respond_to do |format|
+      format.html { redirect_to schedule_return_path, alert: message }
+      format.json { render json: { error: message }, status: :unprocessable_entity }
+    end
   end
 
   def set_shift
@@ -110,10 +131,10 @@ class ShiftsController < ApplicationController
 
   def set_form_context_from_shift
     @section_mode = store_schedule_section_mode!(params[:section].presence || session[:schedule_section_mode] || @shift.position.section)
-    @selected_employee = @shift.employee if params[:employee_id].present?
+    @selected_employee = @shift.employee
     @selected_position = @shift.position if params[:position_id].present?
     @employees = @selected_position ? @selected_position.employees.active.order(:first_name, :last_name) : employee_scope_for_section.distinct.order(:first_name, :last_name)
-    @positions = @selected_employee ? scoped_employee_positions.ordered : position_scope_for_section.ordered
+    @positions = @selected_employee ? employee_positions_for_form(@selected_employee, include_position: @shift.position).ordered : position_scope_for_section.ordered
   end
 
   def shift_params
@@ -121,7 +142,7 @@ class ShiftsController < ApplicationController
   end
 
   def quick_edit_shift_params
-    params.require(:shift).permit(:shift_date)
+    params.require(:shift).permit(:shift_date, :position_id, :employee_id)
   end
 
   def quick_edit_shift_date
@@ -131,15 +152,31 @@ class ShiftsController < ApplicationController
     nil
   end
 
+  def quick_edit_position
+    position_id = quick_edit_shift_params[:position_id].presence
+    return if position_id.blank?
+
+    @location.positions.find_by(id: position_id)
+  end
+
   def schedule_return_path
     view = normalized_schedule_view_mode(params[:view])
     section = params[:section].presence || (defined?(@section_mode) && @section_mode) || current_schedule_section_mode
     location_schedule_path(@location, @schedule, view: view, section: section)
   end
 
-  def respond_to_quick_edit_success(message)
+  def respond_to_quick_edit_success(message, shift:, action:, include_shift_html: true)
     respond_to do |format|
-      format.json { render json: { message: message, redirect_url: schedule_return_path } }
+      format.json do
+        render json: {
+          message: message,
+          action: action,
+          shift_id: shift.id,
+          shift_date: shift.shift_date.iso8601,
+          shift_html: include_shift_html ? rendered_shift_pill(shift) : nil,
+          redirect_url: schedule_return_path
+        }
+      end
       format.html { redirect_to schedule_return_path, notice: message }
     end
   end
@@ -155,6 +192,56 @@ class ShiftsController < ApplicationController
 
   def shift_date_message(date)
     date.strftime("%A")
+  end
+
+  def move_shift_message(shift, original_date:, original_position:, original_employee:)
+    date_changed = shift.shift_date != original_date
+    position_changed = shift.position_id != original_position.id
+    employee_changed = shift.employee_id != original_employee.id
+
+    if employee_changed && date_changed && position_changed
+      "Shift reassigned to #{shift.employee.display_name} for #{shift.position.name} on #{shift_date_message(shift.shift_date)}."
+    elsif employee_changed && position_changed
+      "Shift reassigned to #{shift.employee.display_name} for #{shift.position.name}."
+    elsif employee_changed && date_changed
+      "Shift reassigned to #{shift.employee.display_name} on #{shift_date_message(shift.shift_date)}."
+    elsif employee_changed
+      "Shift reassigned to #{shift.employee.display_name}."
+    elsif date_changed && position_changed
+      "Shift moved to #{shift.position.name} on #{shift_date_message(shift.shift_date)}."
+    elsif position_changed
+      "Shift moved to #{shift.position.name}."
+    else
+      "Shift moved to #{shift_date_message(shift.shift_date)}."
+    end
+  end
+
+  def rendered_shift_pill(shift)
+    @section_mode = params[:section].presence || current_schedule_section_mode
+
+    render_to_string(
+      partial: "schedules/shift_pill",
+      formats: [ :html ],
+      locals: shift_pill_locals(shift)
+    )
+  end
+
+  def shift_pill_locals(shift)
+    view_mode = normalized_schedule_view_mode(params[:view])
+    locals = {
+      shift: shift,
+      title: shift.employee.display_name,
+      view_mode: view_mode,
+      time_lines: helpers.shift_time_range_lines(shift)
+    }
+
+    if view_mode == "employees"
+      locals.merge(secondary_text: shift.position.name)
+    elsif view_mode == "both"
+      locals.merge(secondary_text: shift.position.name)
+    else
+      locals
+    end
   end
 
   def selected_position_for_section
@@ -184,5 +271,12 @@ class ShiftsController < ApplicationController
     return scope if @section_mode == "all"
 
     scope.where(section: @section_mode)
+  end
+
+  def employee_positions_for_form(employee, include_position: nil)
+    position_ids = employee.positions.active.ids
+    position_ids << include_position.id if include_position.present?
+
+    position_scope_for_section.where(id: position_ids.uniq)
   end
 end

@@ -1,6 +1,7 @@
+<% time_display = schedule_time_display_for(@location.account) %>
 <div class="print-position-schedule">
   <% @positions.each do |position| %>
-    <section class="print-position-section">
+    <section class="print-position-section" style="--print-position-color: <%= position.display_color %>;">
       <h2><%= position.name.pluralize %></h2>
 
       <div class="print-position-days">
@@ -9,9 +10,16 @@
           <div class="print-day-block">
             <h3><%= schedule_print_position_day_label(date) %></h3>
             <% shifts.each do |shift| %>
-              <div class="print-shift-line">
+              <div class="print-shift-line print-position-shift-line">
                 <strong><%= shift.employee.display_name %></strong>
-                <span><%= shift_time_range(shift) %></span>
+                <% if time_display == "large" %>
+                  <span class="print-shift-time-compact"><%= shift_compact_time_range(shift) %></span>
+                <% else %>
+                  <span class="print-shift-time-stack">
+                    <span><%= shift_time_range_lines(shift).first %></span>
+                    <span><%= shift_time_range_lines(shift).last %></span>
+                  </span>
+                <% end %>
               </div>
             <% end %>
           </div>

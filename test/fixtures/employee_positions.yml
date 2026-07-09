@@ -1,7 +1,9 @@
 sam_server:
   employee: sam
   position: server
+  employee_position_order: 1
 
 other_employee_server:
   employee: other_employee
   position: other_server
+  employee_position_order: 1

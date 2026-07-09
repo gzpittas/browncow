@@ -1,3 +1,9 @@
+@use '@fortawesome/fontawesome-free/scss/variables' with (
+  $font-path: "./webfonts"
+);
+@use '@fortawesome/fontawesome-free/scss/fontawesome';
+@use '@fortawesome/fontawesome-free/scss/solid';
+
 @import 'bootstrap/scss/bootstrap';
 @import 'bootstrap-icons/font/bootstrap-icons';
 @import 'color_palette';
@@ -13,6 +19,7 @@
 }
 
 body {
+  background: var(--menurooster-putty) !important;
   color: #2f2a24;
 }
 
@@ -30,6 +37,30 @@ body {
   --bs-btn-border-color: var(--hc-primary);
   --bs-btn-hover-bg: var(--hc-primary);
   --bs-btn-hover-border-color: var(--hc-primary);
+}
+
+.btn-menurooster-red {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--menurooster-red-medium);
+  --bs-btn-border-color: var(--menurooster-red-medium);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--menurooster-red-dark);
+  --bs-btn-hover-border-color: var(--menurooster-red-dark);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--menurooster-red-dark);
+  --bs-btn-active-border-color: var(--menurooster-red-dark);
+}
+
+.btn-menurooster-green {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--menurooster-green-medium);
+  --bs-btn-border-color: var(--menurooster-green-medium);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--menurooster-green-dark);
+  --bs-btn-hover-border-color: var(--menurooster-green-dark);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--menurooster-green-dark);
+  --bs-btn-active-border-color: var(--menurooster-green-dark);
 }
 
 .welcome-panel {
@@ -53,6 +84,10 @@ body {
   max-width: 760px;
 }
 
+.form-control::placeholder {
+  color: rgba(47, 42, 36, 0.4);
+}
+
 .schedule-card-disabled {
   opacity: 0.76;
 }
@@ -71,6 +106,377 @@ body {
   grid-template-columns: repeat(7, minmax(0, 1fr));
   margin-bottom: 1rem;
   max-width: 52rem;
+}
+
+.schedule-hero-date {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  line-height: 0.9;
+}
+
+.schedule-hero-stack {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.schedule-header-left,
+.schedule-header-right {
+  display: flex;
+  min-width: 0;
+}
+
+.schedule-header-left {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.35rem;
+  justify-content: flex-start;
+}
+
+.schedule-header-right {
+  justify-content: flex-end;
+}
+
+.schedule-header-center {
+  min-width: 0;
+}
+
+.schedule-header-toolbar {
+  align-items: start;
+  display: grid;
+  gap: 1rem 1.5rem;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  margin-top: 1rem;
+}
+
+.schedule-header-main {
+  display: flex;
+  flex: 1 1 32rem;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.schedule-header-summary {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  justify-content: space-between;
+}
+
+.schedule-week-title {
+  align-items: baseline;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.schedule-schedule-controls {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.schedule-schedule-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.schedule-section-display {
+  color: var(--menurooster-blue-medium);
+  font-family: Verdana, "Segoe UI", sans-serif;
+  font-size: clamp(3.75rem, 8vw, 6rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.88;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+body.app-background-section-boh {
+  background: var(--menurooster-putty) !important;
+}
+
+body.app-background-section-foh {
+  background: var(--menurooster-putty) !important;
+}
+
+body.app-background-section-all {
+  background: var(--menurooster-putty) !important;
+}
+
+.btn-call-to-action,
+.btn-call-to-action-primary,
+.btn-call-to-action-secondary,
+.btn-call-to-action-view {
+  align-items: center;
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  font-family: Verdana, "Segoe UI", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  height: 4rem;
+  justify-content: center;
+  line-height: 1;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  width: 4rem;
+}
+
+.btn-call-to-action-primary {
+  background-color: var(--menurooster-blue);
+  color: var(--menurooster-white);
+}
+
+.btn-call-to-action-primary:hover {
+  background-color: var(--menurooster-blue-soft);
+  color: var(--menurooster-white);
+  transform: scale(1.03);
+}
+
+.btn-call-to-action-primary:active {
+  background-color: var(--menurooster-grey-10);
+  color: var(--menurooster-blue-light);
+  transform: scale(0.98);
+}
+
+.btn-call-to-action-primary:focus-visible,
+.btn-call-to-action:focus-visible {
+  outline: 2px solid var(--menurooster-blue);
+  outline-offset: 3px;
+}
+
+.btn-call-to-action {
+  background-color: var(--menurooster-yellow);
+  color: var(--menurooster-blue);
+}
+
+.btn-call-to-action:hover {
+  background-color: var(--menurooster-yellow-light);
+  color: var(--menurooster-blue-medium);
+  transform: scale(1.05);
+}
+
+.btn-call-to-action:active {
+  background-color: var(--menurooster-yellow-dark);
+  color: var(--menurooster-blue);
+  transform: scale(0.98);
+}
+
+.btn-call-to-action-view {
+  background-color: var(--menurooster-blue-light);
+  color: var(--menurooster-white);
+}
+
+.btn-call-to-action-view:hover {
+  background-color: var(--menurooster-blue-soft);
+  color: var(--menurooster-white);
+  transform: scale(1.05);
+}
+
+.btn-call-to-action-view:active {
+  transform: scale(0.98);
+}
+
+.current-menu-toggle {
+  background-color: var(--menurooster-purple) !important;
+  color: var(--menurooster-white) !important;
+}
+
+.current-menu-toggle:hover {
+  background-color: var(--menurooster-purple-dark) !important;
+  color: var(--menurooster-white) !important;
+}
+
+.current-menu-toggle:focus-visible {
+  outline: 2px solid var(--menurooster-purple) !important;
+  outline-offset: 3px;
+}
+
+.cta-with-label {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 4rem;
+}
+
+.cta-label {
+  color: #444;
+  display: block;
+  font-family: Verdana, "Segoe UI", sans-serif;
+  font-size: 0.55rem;
+  font-weight: 600;
+  line-height: 1.1;
+  margin-top: 0.25rem;
+  text-align: center;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.schedule-mini-month-nav {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.schedule-mini-month-control {
+  min-width: 2.85rem;
+  width: 2.85rem;
+}
+
+.schedule-mini-month-control .btn-call-to-action,
+.schedule-mini-month-control .btn-call-to-action-primary,
+.schedule-mini-month-control .btn-call-to-action-secondary,
+.schedule-mini-month-control .btn-call-to-action-view {
+  font-size: 1rem;
+  height: 2.85rem;
+  width: 2.85rem;
+}
+
+.schedule-mini-month-nav .cta-label {
+  font-size: 0.45rem;
+  line-height: 1;
+  margin-top: 0.2rem;
+}
+
+.calendar-nav-blue-medium {
+  background-color: var(--menurooster-blue-medium);
+  color: var(--menurooster-white);
+}
+
+.calendar-nav-blue-medium:hover {
+  background-color: var(--menurooster-blue);
+  color: var(--menurooster-white);
+}
+
+.calendar-nav-blue-medium:active {
+  background-color: var(--menurooster-french-grey-50);
+  color: var(--menurooster-white);
+}
+
+.schedule-mini-month {
+  background: #fffaf4;
+  border: 1px solid rgba(47, 42, 36, 0.12);
+  border-radius: 0.65rem;
+  box-shadow: 0 0.15rem 0.35rem rgba(47, 42, 36, 0.06);
+  padding: 0.7rem 0.8rem 0.8rem;
+  width: min(100%, 17.5rem);
+}
+
+.schedule-mini-month-title {
+  color: #5f564d;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+  text-align: right;
+}
+
+.schedule-mini-month-weekdays,
+.schedule-mini-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.schedule-mini-month-weekdays {
+  color: #8a7f74;
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.schedule-mini-month-weekdays span {
+  border-bottom: 1px solid rgba(47, 42, 36, 0.14);
+  padding-bottom: 0.3rem;
+}
+
+.schedule-mini-month-grid {
+  border-left: 1px solid rgba(47, 42, 36, 0.12);
+  border-top: 1px solid rgba(47, 42, 36, 0.12);
+}
+
+.schedule-mini-month-day {
+  align-items: center;
+  aspect-ratio: 1;
+  background: transparent;
+  border-right: 1px solid rgba(47, 42, 36, 0.12);
+  border-bottom: 1px solid rgba(47, 42, 36, 0.12);
+  color: #3a332c;
+  display: flex;
+  font-size: 0.86rem;
+  font-weight: 600;
+  justify-content: center;
+  line-height: 1;
+  min-height: 2rem;
+  text-decoration: none;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.schedule-mini-month-day:hover {
+  background: rgba(47, 42, 36, 0.05);
+  color: #2f2a24;
+}
+
+.schedule-mini-month-day.has-schedule {
+  background: color-mix(in srgb, var(--hc-primary) 9%, white);
+  color: #2f2a24;
+  font-weight: 700;
+}
+
+.schedule-mini-month-day.is-outside-month {
+  color: #b5aba1;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.schedule-mini-month-day.has-schedule.is-outside-month {
+  background: color-mix(in srgb, var(--hc-primary) 6%, white);
+  color: #8a7f74;
+}
+
+.schedule-mini-month-day.is-in-schedule-week {
+  background: color-mix(in srgb, var(--hc-primary) 14%, white);
+  color: var(--hc-primary-dark);
+}
+
+.schedule-mini-month-day.is-today {
+  background: var(--menurooster-yellow-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--menurooster-yellow-dark) 32%, white);
+}
+
+.schedule-hero-date-prefix {
+  color: #6d6258;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.schedule-hero-date-month {
+  color: #5f564d;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.schedule-hero-date-day {
+  color: #2f2a24;
+  font-size: 6rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.9;
 }
 
 .schedule-week-card {
@@ -117,8 +523,18 @@ body {
   width: calc(100% / 7);
 }
 
-.schedule-today-column {
-  background: var(--menurooster-yellow-soft) !important;
+.schedule-table th.schedule-weekend-column,
+.schedule-table td.schedule-weekend-column,
+.schedule-table-seven th.schedule-weekend-column,
+.schedule-table-seven td.schedule-weekend-column {
+  background-color: var(--menurooster-french-grey-03) !important;
+}
+
+.schedule-table th.schedule-today-column,
+.schedule-table td.schedule-today-column,
+.schedule-table-seven th.schedule-today-column,
+.schedule-table-seven td.schedule-today-column {
+  background-color: var(--menurooster-yellow-wisp) !important;
 }
 
 .schedule-name-column {
@@ -129,21 +545,94 @@ body {
   min-height: 7rem;
 }
 
+.schedule-table-striped tbody tr:nth-of-type(odd) > td.schedule-cell:not(.schedule-today-column) {
+  background: var(--menurooster-white);
+}
+
+.schedule-table-striped tbody tr:nth-of-type(even) > td.schedule-cell:not(.schedule-today-column) {
+  background: var(--menurooster-french-grey-02);
+}
+
+.schedule-table-striped tbody tr + tr > td.schedule-cell {
+  border-top: 2px solid rgba(47, 42, 36, 0.18);
+}
+
+.schedule-cell-has-shift {
+  background:
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 14%, white),
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 14%, white)
+    ),
+    inherit;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--position-color, var(--hc-primary)) 22%, white);
+}
+
+.schedule-cell-has-shift.schedule-today-column {
+  background:
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 12%, white),
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 12%, white)
+    ),
+    var(--menurooster-yellow-wisp);
+}
+
 .shift-pill {
-  border: 1px solid color-mix(in srgb, var(--position-color, var(--hc-primary)) 28%, white);
-  border-left: 4px solid var(--position-color, var(--hc-primary));
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 10%, white);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 16%, white),
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 28%, white)
+    );
+  border: 1px solid color-mix(in srgb, var(--position-color, var(--hc-primary)) 38%, white);
+  border-radius: 0.6rem;
+  box-shadow:
+    0 0.2rem 0.55rem rgba(47, 42, 36, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   color: #2f2a24;
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.25;
-  padding: 0.5rem 0.6rem;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
 }
 
 .shift-pill:hover {
-  background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 16%, white);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 22%, white),
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 34%, white)
+    );
+  border-color: color-mix(in srgb, var(--position-color, var(--hc-primary)) 48%, white);
+  box-shadow:
+    0 0.3rem 0.75rem rgba(47, 42, 36, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
   color: #2f2a24;
+}
+
+.shift-pill.is-employee-highlighted {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 18%, white),
+      color-mix(in srgb, var(--position-color, var(--hc-primary)) 24%, var(--menurooster-yellow-soft))
+    );
+  border-color: color-mix(in srgb, #f08a24 68%, white);
+  box-shadow:
+    0 0 0 2.5px color-mix(in srgb, #f6b15d 82%, white),
+    0 0.5rem 1.05rem rgba(133, 82, 24, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+[data-controller~="schedule-quick-edit"].has-employee-highlight .shift-pill:not(.is-employee-highlighted):not(.is-dragging) {
+  box-shadow:
+    0 0.12rem 0.35rem rgba(47, 42, 36, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  filter: saturate(0.8);
+  opacity: 0.72;
 }
 
 .shift-pill.is-dragging {
@@ -172,47 +661,63 @@ body {
 .shift-pill-title-link:hover,
 .shift-pill-secondary-link:hover,
 .shift-pill-time-link:hover {
-  background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 16%, white);
+  background: transparent;
   color: #2f2a24;
 }
 
 .shift-pill-with-actions {
   padding: 0;
+  position: relative;
 }
 
 .shift-pill-main {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.shift-pill-link {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-right: 1.85rem;
+}
+
+.shift-pill-color-mark {
+  align-self: center;
+  background: var(--position-color, var(--hc-primary));
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--position-color, var(--hc-primary)) 18%, white);
+  flex: 0 0 auto;
+  height: 0.55rem;
+  margin-left: 0.5rem;
+  width: 0.55rem;
+}
+
+.shift-pill-title-row {
+  align-items: center;
+  display: flex;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.38rem 0.32rem 0.12rem 0;
 }
 
 .shift-pill-action-row {
-  align-items: stretch;
-  border-bottom: 1px solid color-mix(in srgb, var(--position-color, var(--hc-primary)) 20%, white);
+  position: absolute;
+  right: 0.32rem;
+  top: 0.38rem;
+  align-items: flex-start;
   display: flex;
   justify-content: flex-end;
-  min-height: 1.85rem;
+  z-index: 1;
 }
 
-.shift-pill-title-link {
-  display: block;
+.shift-pill-detail-row {
+  align-items: baseline;
+  display: flex;
+  gap: 0.45rem;
   min-width: 0;
-  padding: 0.38rem 0.45rem 0.08rem;
-  text-align: left;
-}
-
-.shift-pill-secondary-link,
-.shift-pill-time-link {
-  display: block;
-  text-align: left;
-}
-
-.shift-pill-secondary-link {
-  padding: 0.05rem 0.45rem 0;
-}
-
-.shift-pill-time-link {
-  padding: 0.05rem 0.45rem 0.45rem;
-  text-align: left;
+  padding: 0.05rem 0.5rem 0.5rem 1.4rem;
 }
 
 .shift-pill-title,
@@ -220,13 +725,80 @@ body {
 .shift-pill-time {
   display: block;
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shift-pill-title {
+  letter-spacing: 0;
 }
 
 .shift-pill-secondary,
 .shift-pill-time {
-  font-size: 0.8125rem;
+  color: #6d6258;
+  font-size: 0.75rem;
   padding: 0;
+}
+
+.shift-pill-time-cluster {
+  align-items: center;
+  display: flex;
+  gap: 0.45rem;
+  justify-content: flex-start;
+  max-width: 100%;
+}
+
+.shift-pill-time-cluster-large {
+  justify-content: flex-end;
+  margin-left: auto;
+  text-align: right;
+  width: 100%;
+}
+
+.shift-pill-time-compact {
+  color: #2f2a24;
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.shift-pill-time-stack,
+.print-shift-time-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+  text-align: right;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.shift-pill-employee-view .shift-pill-detail-row {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.04rem;
+  padding-top: 0;
+}
+
+.shift-pill-employee-view .shift-pill-title-row {
+  padding-bottom: 0;
+}
+
+.shift-pill-employee-view .shift-pill-time-cluster {
+  justify-content: flex-start;
+}
+
+.shift-pill-employee-view .shift-pill-time-cluster-large {
+  justify-content: flex-end;
+}
+
+.shift-pill-employee-view .shift-pill-time-stack {
+  width: fit-content;
 }
 
 .shift-pill-delete-form {
@@ -261,39 +833,53 @@ body {
 
 .shift-pill-delete {
   align-items: center;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.48);
   border: 0;
-  border-left: 1px solid color-mix(in srgb, var(--position-color, var(--hc-primary)) 20%, white);
-  border-radius: 0 0.5rem 0 0;
-  color: #6d6258;
+  border-radius: 999px;
+  color: #7a6d62;
   display: inline-flex;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   justify-content: center;
-  min-height: 2rem;
-  min-width: 2rem;
-  padding: 0.25rem 0.45rem;
+  height: 1.35rem;
+  min-height: 1.35rem;
+  min-width: 1.35rem;
+  padding: 0;
   vertical-align: top;
+  width: 1.35rem;
 }
 
 .shift-pill-delete:hover {
-  background: color-mix(in srgb, var(--position-color, var(--hc-primary)) 18%, white);
+  background: #fff1f1;
   color: #8b1e1e;
 }
 
-.shift-pill-single-row .shift-pill-title-link {
-  padding-bottom: 0.45rem;
-}
-
 .schedule-add-link {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.5);
   display: block;
   border: 1px dashed rgba(47, 42, 36, 0.22);
   border-radius: 0.5rem;
   color: #6d6258;
+  display: grid;
   font-size: 0.8125rem;
+  gap: 0.1rem;
   padding: 0.45rem 0.55rem;
   text-align: center;
   text-decoration: none;
+}
+
+.schedule-add-link-context {
+  color: #5f564d;
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.schedule-add-link-label {
+  display: block;
 }
 
 .schedule-add-link:hover {
@@ -317,17 +903,144 @@ body {
 }
 
 .schedule-quick-edit-message {
+  background: #fffaf4;
+  border: 1px solid rgba(47, 42, 36, 0.12);
+  border-radius: 0.65rem;
+  color: #3a332c;
   max-width: 54rem;
+  padding: 0.8rem 0.9rem;
+}
+
+.schedule-quick-edit-message.is-error {
+  background: #fff3f1;
+  border-color: rgba(139, 30, 30, 0.18);
+  color: #7a2b23;
+}
+
+.form-error-messages {
+  background: #fff3f1;
+  border: 1px solid rgba(139, 30, 30, 0.18);
+  border-radius: 0.65rem;
+  color: #7a2b23;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
 }
 
 .navbar-brand {
   letter-spacing: 0;
 }
 
+.navbar {
+  background-color: var(--menurooster-french-grey-10);
+}
+
+.navbar-current-schedule-btn {
+  font-size: 1rem;
+  height: 2.85rem;
+  line-height: 1;
+  padding: 0;
+  width: 2.85rem;
+}
+
+.navbar-current-schedule-control {
+  margin: 0 0.15rem;
+}
+
+.navbar-employees-control {
+  margin: 0 0.15rem;
+}
+
+.navbar-employees-btn {
+  background-color: var(--menurooster-blue-medium) !important;
+  color: var(--menurooster-white) !important;
+  font-size: 1rem;
+  height: 2.85rem;
+  line-height: 1;
+  padding: 0;
+  width: 2.85rem;
+}
+
+.navbar-employees-btn:hover {
+  background-color: var(--menurooster-blue) !important;
+  color: var(--menurooster-white) !important;
+}
+
+.navbar-employees-btn:active {
+  background-color: var(--menurooster-blue-dark) !important;
+  color: var(--menurooster-white) !important;
+}
+
+.navbar-employees-btn:focus-visible {
+  outline: 2px solid var(--menurooster-blue-medium) !important;
+  outline-offset: 3px;
+}
+
+.navbar-settings-toggle {
+  text-decoration: none;
+}
+
+.navbar .dropdown-menu {
+  border-radius: 0.4rem;
+  min-width: 12rem;
+}
+
+.navbar .cta-label {
+  color: var(--menurooster-blue) !important;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.navbar .dropdown-item {
+  font-size: 0.95rem;
+}
+
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus {
+  background: color-mix(in srgb, var(--menurooster-purple) 8%, white);
+}
+
+.navbar-settings-control {
+  margin: 0 0.15rem;
+}
+
+.navbar-settings-btn {
+  background-color: var(--menurooster-french-grey-20) !important;
+  color: var(--menurooster-blue) !important;
+  font-size: 1rem;
+  height: 2.85rem;
+  line-height: 1;
+  padding: 0;
+  width: 2.85rem;
+}
+
+.navbar-settings-btn:hover {
+  background-color: var(--menurooster-french-grey-30) !important;
+  color: var(--menurooster-blue-medium) !important;
+}
+
+.navbar-settings-btn:active {
+  background-color: var(--menurooster-french-grey-40) !important;
+  color: var(--menurooster-blue) !important;
+}
+
+.navbar-settings-btn.dropdown-toggle::after {
+  display: none;
+}
+
+.schedule-hero-stack {
+  align-items: center;
+}
+
+.schedule-mini-month-nav {
+  justify-content: center;
+  width: 100%;
+}
+
 .position-color-palette {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 0.65rem;
+  grid-template-columns: repeat(9, 2.1rem);
+  width: fit-content;
 }
 
 .position-color-choice {
@@ -350,6 +1063,12 @@ body {
   display: inline-block;
   height: 2.1rem;
   width: 2.1rem;
+}
+
+@media (max-width: 767.98px) {
+  .position-color-palette {
+    grid-template-columns: repeat(6, 2.1rem);
+  }
 }
 
 .position-color-input:focus-visible + .position-color-swatch {
@@ -400,6 +1119,126 @@ tbody[data-controller~="position-sort"] tr[draggable="true"] {
 
 tbody[data-controller~="position-sort"] tr.is-dragging {
   opacity: 0.55;
+}
+
+.public-schedule-body {
+  background: var(--menurooster-putty);
+  color: #2f2a24;
+}
+
+.public-schedule-lock {
+  max-width: 32rem;
+}
+
+.public-schedule-header {
+  align-items: flex-end;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.public-shift-pill {
+  cursor: default;
+}
+
+.public-shift-pill-link {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.public-shift-pill-link:focus-visible {
+  outline: 2px solid var(--hc-primary);
+  outline-offset: 2px;
+}
+
+.public-shift-pill .shift-pill-title-row {
+  padding-right: 0.5rem;
+}
+
+.public-shift-pill .shift-pill-time-cluster {
+  margin-left: auto;
+}
+
+.public-employee-week {
+  max-width: 42rem;
+}
+
+.public-employee-week-header {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.public-employee-week-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.public-employee-day {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(47, 42, 36, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.8rem;
+}
+
+.public-employee-day-today {
+  background:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.68)),
+    var(--menurooster-yellow-wisp);
+  border-color: color-mix(in srgb, var(--menurooster-yellow) 32%, white);
+}
+
+.public-employee-day-heading {
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.public-employee-day-name {
+  font-weight: 700;
+}
+
+.public-employee-day-date,
+.public-employee-off-day {
+  color: #6d6258;
+}
+
+.public-employee-shifts {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.public-employee-shifts .shift-pill {
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.public-employee-shifts .shift-pill-color-mark {
+  height: 0.7rem;
+  width: 0.7rem;
+}
+
+.public-employee-shifts .shift-pill-title-row {
+  padding: 0.75rem 0.85rem 0.15rem 0;
+}
+
+.public-employee-shifts .shift-pill-detail-row {
+  padding: 0.15rem 0.9rem 0.85rem 1.65rem;
+}
+
+.public-employee-shifts .shift-pill-secondary,
+.public-employee-shifts .shift-pill-time {
+  font-size: 0.9rem;
+}
+
+.public-employee-shifts .shift-pill-time-compact {
+  font-size: 2rem;
 }
 
 .print-body {
@@ -473,9 +1312,13 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
 }
 
 .print-position-section {
+  background: color-mix(in srgb, var(--print-position-color, #ffffff) 6%, white);
   break-inside: avoid;
+  border: 1px solid color-mix(in srgb, var(--print-position-color, #cfcfcf) 18%, #cfcfcf);
+  border-radius: 0.3rem;
   margin-top: 0.85rem;
   page-break-inside: avoid;
+  padding: 0.45rem 0.5rem 0.5rem;
 }
 
 .print-position-section h2 {
@@ -509,10 +1352,14 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
   text-transform: uppercase;
 }
 
-.print-day-block .print-shift-line,
-.print-day-block .print-off {
+.print-day-block .print-shift-line {
   margin-left: 0.35rem;
   margin-right: 0.35rem;
+}
+
+.print-position-shift-line + .print-position-shift-line {
+  border-top: 1px solid #c9c9c9;
+  padding-top: 0.3rem;
 }
 
 .print-shift-line {
@@ -526,6 +1373,15 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
 .print-shift-line strong,
 .print-shift-line span {
   display: block;
+}
+
+.print-shift-time-compact {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .print-employee-table {
@@ -559,6 +1415,27 @@ tbody[data-controller~="position-sort"] tr.is-dragging {
   .schedule-week-cards {
     gap: 0.5rem;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .schedule-header-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-header-summary {
+    align-items: flex-start;
+  }
+
+  .schedule-hero-stack {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .schedule-header-right {
+    justify-content: flex-start;
+  }
+
+  .schedule-mini-month {
+    width: 100%;
   }
 }
 

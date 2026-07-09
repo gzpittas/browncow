@@ -51,11 +51,22 @@
                   <div class="d-inline-flex gap-2">
                     <%= link_to "Open", location_schedule_path(@location, schedule), class: "btn btn-sm btn-primary" %>
                     <%= link_to "Copy", new_location_schedule_path(@location, copy_from_schedule_id: schedule.id), class: "btn btn-sm btn-outline-primary" %>
-                    <%= link_to "Manage", edit_location_schedule_path(@location, schedule), class: "btn btn-sm btn-outline-secondary" %>
-                    <%= button_to "Delete", location_schedule_path(@location, schedule),
-                          method: :delete,
-                          class: "btn btn-sm btn-outline-danger",
-                          form: { class: "d-inline", onsubmit: "return confirm('Delete this schedule? This will permanently delete all shifts within this week.')" } %>
+                    <% if schedule.published? %>
+                      <%= button_to "Unpublish", unpublish_location_schedule_path(@location, schedule),
+                            method: :patch,
+                            class: "btn btn-sm btn-menurooster-green",
+                            form: { class: "d-inline", onsubmit: "return confirm('Unpublish this schedule? It will be removed from the public employee schedule until you publish it again.')" } %>
+                    <% else %>
+                      <%= button_to "Publish", publish_location_schedule_path(@location, schedule),
+                            method: :patch,
+                            class: "btn btn-sm btn-menurooster-red",
+                            form: { class: "d-inline" } %>
+                      <%= link_to "Manage", edit_location_schedule_path(@location, schedule), class: "btn btn-sm btn-outline-secondary" %>
+                      <%= button_to "Delete", location_schedule_path(@location, schedule),
+                            method: :delete,
+                            class: "btn btn-sm btn-outline-danger",
+                            form: { class: "d-inline", onsubmit: "return confirm('Delete this schedule? This will permanently delete all shifts within this week.')" } %>
+                    <% end %>
                   </div>
                 </td>
               </tr>

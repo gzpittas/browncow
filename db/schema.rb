@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_25_143000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_02_143000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,12 +19,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_25_143000) do
     t.string "email"
     t.string "name", null: false
     t.string "phone_number"
+    t.boolean "public_schedule_enabled", default: false, null: false
+    t.string "public_schedule_password_digest"
+    t.string "public_schedule_slug"
+    t.string "schedule_time_display", default: "stacked", null: false
     t.datetime "updated_at", null: false
+    t.index ["public_schedule_slug"], name: "index_accounts_on_public_schedule_slug", unique: true
   end
 
   create_table "employee_positions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "employee_id", null: false
+    t.integer "employee_position_order", default: 0, null: false
     t.bigint "position_id", null: false
     t.datetime "updated_at", null: false
     t.index ["employee_id", "position_id"], name: "index_employee_positions_on_employee_id_and_position_id", unique: true

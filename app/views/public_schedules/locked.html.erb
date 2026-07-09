@@ -1,0 +1,26 @@
+<% content_for :title, "#{@account.name} Schedule" %>
+
+<div class="public-schedule-lock card border-0 shadow-sm mx-auto">
+  <div class="card-body p-4 p-md-5">
+    <div class="mb-4">
+      <p class="text-secondary fw-semibold mb-1"><%= @account.name %></p>
+      <h1 class="h3 fw-semibold mb-2">Employee schedule</h1>
+      <p class="text-secondary mb-0">Enter the schedule password to view the current posted schedule.</p>
+    </div>
+
+    <% if flash[:alert].present? %>
+      <div class="alert alert-danger"><%= flash[:alert] %></div>
+    <% end %>
+
+    <%= form_with url: unlock_public_schedule_path(@account.public_schedule_slug), method: :post do |f| %>
+      <div class="mb-3">
+        <%= label_tag :password, "Schedule password", class: "form-label" %>
+        <%= password_field_tag :password, nil, class: "form-control", autofocus: true, autocomplete: "current-password" %>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <%= f.submit "View Schedule", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

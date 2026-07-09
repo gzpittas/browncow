@@ -28,4 +28,23 @@ class ScheduleTest < ActiveSupport::TestCase
     assert_equal Date.new(2026, 6, 28), Schedule.week_start_for(Date.new(2026, 7, 1))
     assert_equal Date.new(2026, 6, 28), Schedule.week_start_for(Date.new(2026, 6, 28))
   end
+
+  test "status must be draft or published" do
+    schedule = locations(:main).schedules.build(week_start_date: Date.new(2026, 6, 28), status: "archived")
+
+    assert_not schedule.valid?
+    assert_includes schedule.errors[:status], "is not included in the list"
+  end
+
+  test "published schedules are not editable" do
+    schedule = schedules(:main_week)
+
+    assert schedule.draft?
+    assert schedule.editable?
+
+    schedule.update!(status: "published")
+
+    assert schedule.published?
+    assert_not schedule.editable?
+  end
 end

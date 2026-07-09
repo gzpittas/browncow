@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["alert", "cell", "message"]
+  static targets = ["alert", "cell", "message", "shift"]
 
   connect() {
     this.copyShift = null
@@ -26,6 +26,7 @@ export default class extends Controller {
     document.addEventListener("keydown", this.keyDownHandler)
     document.addEventListener("keyup", this.keyUpHandler)
     window.addEventListener("blur", this.blurHandler)
+    this.restoreViewport()
   }
 
   disconnect() {
@@ -54,6 +55,16 @@ export default class extends Controller {
     this.markTargets(this.draggedShift)
     document.addEventListener("pointermove", this.pointerMoveHandler)
     document.addEventListener("pointerup", this.pointerUpHandler)
+  }
+
+  highlightEmployeeShifts(event) {
+    this.setEmployeeShiftHighlight(event.currentTarget.dataset.employeeId, true)
+  }
+
+  clearEmployeeShiftHighlights(event) {
+    if (event?.relatedTarget && event.currentTarget.contains(event.relatedTarget)) return
+
+    this.setEmployeeShiftHighlight(event.currentTarget.dataset.employeeId, false)
   }
 
   dragStart(event) {
@@ -87,7 +98,7 @@ export default class extends Controller {
   dragOver(event) {
     if (!this.draggedShift) return
 
-    if (this.validCellForShift(event.currentTarget, this.draggedShift)) {
+    if (this.validCellForShift(event.currentTarget, this.draggedShift, this.dragAction(event))) {
       event.preventDefault()
       const action = this.dragAction(event)
       this.draggedShift.dragAction = action
@@ -106,15 +117,17 @@ export default class extends Controller {
 
     event.preventDefault()
     const cell = event.currentTarget
-    if (!this.validCellForShift(cell, this.draggedShift)) {
+    if (!this.validCellForShift(cell, this.draggedShift, this.dragAction(event))) {
       this.showError("Choose another valid day for this shift.")
       return
     }
 
+    const sourceShift = { ...this.draggedShift }
+
     if (this.dragAction(event) === "copy") {
-      this.sendQuickEdit(this.draggedShift.copyUrl, "POST", cell.dataset.shiftDate)
+      this.sendQuickEdit(this.draggedShift.copyUrl, "POST", cell, cell, sourceShift)
     } else {
-      this.sendQuickEdit(this.draggedShift.moveUrl, "PATCH", cell.dataset.shiftDate)
+      this.sendQuickEdit(this.draggedShift.moveUrl, "PATCH", cell, cell, sourceShift)
     }
   }
 
@@ -146,12 +159,12 @@ export default class extends Controller {
 
     if (!didDrag) return
 
-    if (!cell || !this.validCellForShift(cell, shift)) {
+    if (!cell || !this.validCellForShift(cell, shift, "copy")) {
       this.showError("Choose another valid day for the copied shift.")
       return
     }
 
-    this.sendQuickEdit(shift.copyUrl, "POST", cell.dataset.shiftDate)
+    this.sendQuickEdit(shift.copyUrl, "POST", cell, cell, { ...shift })
   }
 
   startCopy(event) {
@@ -175,16 +188,16 @@ export default class extends Controller {
     if (event.target.closest("a, button, form")) return
 
     const cell = event.currentTarget
-    if (!this.validCellForShift(cell, this.copyShift)) {
+    if (!this.validCellForShift(cell, this.copyShift, "copy")) {
       this.showError("Choose another valid day for the copied shift.")
       this.markTargets(this.copyShift)
       return
     }
 
-    this.sendQuickEdit(this.copyShift.copyUrl, "POST", cell.dataset.shiftDate)
+    this.sendQuickEdit(this.copyShift.copyUrl, "POST", cell, cell, { ...this.copyShift })
   }
 
-  async sendQuickEdit(url, method, shiftDate) {
+  async sendQuickEdit(url, method, cell, targetCell, sourceShift = null) {
     const csrfToken = document.querySelector("meta[name='csrf-token']")?.content
 
     try {
@@ -197,14 +210,21 @@ export default class extends Controller {
         },
         body: JSON.stringify({
           shift: {
-            shift_date: shiftDate
+            shift_date: cell.dataset.shiftDate,
+            position_id: cell.dataset.positionId,
+            employee_id: cell.dataset.employeeId
           }
         })
       })
 
       const payload = await response.json()
       if (response.ok) {
-        window.location.href = payload.redirect_url || window.location.href
+        if (payload.shift_html && targetCell) {
+          this.applyQuickEdit(payload, targetCell, sourceShift)
+        } else {
+          const redirectUrl = payload.redirect_url || window.location.href
+          window.location.href = redirectUrl
+        }
       } else {
         this.showError(payload.error || "Shift could not be updated.")
       }
@@ -219,6 +239,7 @@ export default class extends Controller {
       date: element.dataset.shiftDate,
       employeeId: element.dataset.employeeId,
       positionId: element.dataset.positionId,
+      assignedPositionIds: (element.dataset.assignedPositionIds || "").split(",").filter(Boolean),
       label: element.dataset.shiftLabel,
       moveUrl: element.dataset.moveUrl,
       copyUrl: element.dataset.copyUrl
@@ -250,18 +271,26 @@ export default class extends Controller {
     this.optionPointerDrag.ghost.style.top = `${event.clientY - ghostRect.height / 2}px`
   }
 
-  validCellForShift(cell, shift) {
-    if (!cell.dataset.shiftDate || cell.dataset.shiftDate === shift.date) return false
+  validCellForShift(cell, shift, action = "move") {
+    if (!cell.dataset.shiftDate) return false
+
+    const sameDate = cell.dataset.shiftDate === shift.date
+    const samePosition = cell.dataset.positionId === shift.positionId
+    const sameEmployee = !cell.dataset.employeeId || cell.dataset.employeeId === shift.employeeId
+    const targetAssignedPositionIds = (cell.dataset.assignedPositionIds || "").split(",").filter(Boolean)
+
+    if (action === "copy" && sameDate) return false
+    if (action === "move" && sameDate && samePosition && sameEmployee) return false
 
     if (cell.dataset.viewMode === "employees") {
-      return cell.dataset.employeeId === shift.employeeId
+      return targetAssignedPositionIds.includes(shift.positionId)
     }
 
     if (cell.dataset.viewMode === "positions") {
-      return cell.dataset.positionId === shift.positionId
+      return shift.assignedPositionIds.includes(cell.dataset.positionId)
     }
 
-    return cell.dataset.employeeId === shift.employeeId && cell.dataset.positionId === shift.positionId
+    return Boolean(cell.dataset.employeeId && cell.dataset.positionId)
   }
 
   markTargets(shift) {
@@ -283,6 +312,18 @@ export default class extends Controller {
     })
   }
 
+  setEmployeeShiftHighlight(employeeId, highlighted) {
+    if (!employeeId) return
+
+    this.shiftTargets.forEach((shift) => {
+      if (shift.dataset.employeeId === employeeId) {
+        shift.classList.toggle("is-employee-highlighted", highlighted)
+      }
+    })
+
+    this.element.classList.toggle("has-employee-highlight", highlighted)
+  }
+
   cleanupOptionPointerDrag() {
     if (this.optionPointerDrag?.shiftElement) {
       this.optionPointerDrag.shiftElement.classList.remove("is-dragging")
@@ -299,6 +340,157 @@ export default class extends Controller {
     document.removeEventListener("pointerup", this.pointerUpHandler)
   }
 
+  rememberMiniCalendarViewport(event) {
+    if (event.defaultPrevented) return
+    if (event.button !== 0) return
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+
+    this.storeViewport(event.currentTarget.href)
+  }
+
+  rememberScheduleViewport(event) {
+    if (event.defaultPrevented) return
+    if (event.button !== 0) return
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+
+    this.storeViewport(event.currentTarget.dataset.returnUrl || event.currentTarget.href)
+  }
+
+  rememberScheduleViewportSubmit(event) {
+    if (event.defaultPrevented) return
+
+    this.storeViewport(event.currentTarget.dataset.returnUrl || event.currentTarget.action)
+  }
+
+  storeViewport(url) {
+    try {
+      const destination = new URL(url, window.location.href)
+      sessionStorage.setItem("scheduleViewport", JSON.stringify({
+        path: destination.pathname,
+        search: destination.search,
+        x: window.scrollX,
+        y: window.scrollY
+      }))
+    } catch (_error) {
+      sessionStorage.removeItem("scheduleViewport")
+    }
+  }
+
+  restoreViewport() {
+    try {
+      const storedViewport = sessionStorage.getItem("scheduleViewport")
+      if (!storedViewport) return
+
+      const viewport = JSON.parse(storedViewport)
+      if (viewport.path !== window.location.pathname || viewport.search !== window.location.search) return
+
+      sessionStorage.removeItem("scheduleViewport")
+      window.scrollTo(viewport.x || 0, viewport.y || 0)
+      requestAnimationFrame(() => {
+        window.scrollTo(viewport.x || 0, viewport.y || 0)
+      })
+    } catch (_error) {
+      sessionStorage.removeItem("scheduleViewport")
+    }
+  }
+
+  applyQuickEdit(payload, targetCell, sourceShift = null) {
+    const template = document.createElement("template")
+    template.innerHTML = payload.shift_html.trim()
+    const updatedShift = template.content.firstElementChild
+    if (!updatedShift) return
+
+    if (targetCell.dataset.viewMode === "both") {
+      this.applyQuickEditBoth(payload, updatedShift, sourceShift)
+      this.copyShift = null
+      this.draggedShift = null
+      this.clearTargetMarks()
+      this.showInfo(payload.message)
+      return
+    }
+
+    if (payload.action === "move") {
+      this.element.querySelector(`[data-shift-id="${CSS.escape(String(payload.shift_id))}"]`)?.remove()
+    }
+
+    const addLink = targetCell.querySelector(".schedule-add-link")
+    if (addLink) {
+      addLink.before(updatedShift)
+    } else {
+      targetCell.querySelector(".d-grid")?.append(updatedShift)
+    }
+
+    this.copyShift = null
+    this.draggedShift = null
+    this.clearTargetMarks()
+    this.showInfo(payload.message)
+  }
+
+  applyQuickEditBoth(payload, updatedShift, sourceShift = null) {
+    if (payload.action === "move" && sourceShift) {
+      this.bothViewCellsFor(sourceShift.employeeId, sourceShift.date).forEach((cell) => {
+        cell.querySelectorAll(`[data-shift-id="${CSS.escape(String(payload.shift_id))}"]`).forEach((shift) => shift.remove())
+        this.syncBothViewCell(cell)
+      })
+    }
+
+    this.bothViewCellsFor(updatedShift.dataset.employeeId, updatedShift.dataset.shiftDate).forEach((cell) => {
+      cell.querySelectorAll(`[data-shift-id="${CSS.escape(String(payload.shift_id))}"]`).forEach((shift) => shift.remove())
+      const addLink = cell.querySelector(".schedule-add-link")
+      const nextShift = updatedShift.cloneNode(true)
+
+      if (addLink) {
+        addLink.before(nextShift)
+      } else {
+        cell.querySelector(".d-grid")?.append(nextShift)
+      }
+
+      this.syncBothViewCell(cell)
+    })
+  }
+
+  bothViewCellsFor(employeeId, shiftDate) {
+    if (!employeeId || !shiftDate) return []
+
+    return Array.from(this.element.querySelectorAll(
+      `[data-schedule-quick-edit-target~="cell"][data-view-mode="both"][data-employee-id="${CSS.escape(String(employeeId))}"][data-shift-date="${CSS.escape(String(shiftDate))}"]`
+    ))
+  }
+
+  syncBothViewCell(cell) {
+    const grid = cell.querySelector(".d-grid")
+    if (!grid) return
+
+    const hasShift = grid.querySelector(".shift-pill") !== null
+    const addLink = grid.querySelector(".schedule-add-link")
+
+    cell.classList.toggle("schedule-cell-has-shift", hasShift)
+
+    if (hasShift) {
+      addLink?.remove()
+      return
+    }
+
+    if (addLink || !cell.dataset.addUrl) return
+
+    const link = document.createElement("a")
+    link.href = cell.dataset.addUrl
+    link.className = "schedule-add-link"
+    link.dataset.action = "click->schedule-quick-edit#rememberScheduleViewport"
+    if (cell.dataset.returnUrl) link.dataset.returnUrl = cell.dataset.returnUrl
+
+    const context = document.createElement("span")
+    context.className = "schedule-add-link-context"
+    context.textContent = cell.dataset.addContext || ""
+
+    const label = document.createElement("span")
+    label.className = "schedule-add-link-label"
+    label.textContent = cell.dataset.addLabel || "+ Add Shift"
+
+    link.append(context, label)
+    grid.append(link)
+  }
+
   showInfo(message) {
     this.showMessage(message, "info")
   }
@@ -308,15 +500,15 @@ export default class extends Controller {
   }
 
   showMessage(message, kind) {
-    this.alertTarget.classList.remove("d-none", "alert-info", "alert-danger")
-    this.alertTarget.classList.add("d-flex", `alert-${kind}`)
+    this.alertTarget.classList.remove("d-none", "is-error")
+    this.alertTarget.classList.add("d-flex")
+    if (kind === "danger") this.alertTarget.classList.add("is-error")
     this.messageTarget.textContent = message
   }
 
   hideMessage() {
     this.alertTarget.classList.add("d-none")
-    this.alertTarget.classList.remove("d-flex", "alert-danger")
-    this.alertTarget.classList.add("alert-info")
+    this.alertTarget.classList.remove("d-flex", "is-error")
     this.messageTarget.textContent = ""
   }
 }
