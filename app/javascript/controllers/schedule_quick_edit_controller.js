@@ -209,7 +209,8 @@ export default class extends Controller {
         body: JSON.stringify({
           shift: {
             shift_date: cell.dataset.shiftDate,
-            position_id: cell.dataset.positionId
+            position_id: cell.dataset.positionId,
+            employee_id: cell.dataset.employeeId
           }
         })
       })
@@ -274,19 +275,20 @@ export default class extends Controller {
     const sameDate = cell.dataset.shiftDate === shift.date
     const samePosition = cell.dataset.positionId === shift.positionId
     const sameEmployee = !cell.dataset.employeeId || cell.dataset.employeeId === shift.employeeId
+    const targetAssignedPositionIds = (cell.dataset.assignedPositionIds || "").split(",").filter(Boolean)
 
     if (action === "copy" && sameDate) return false
     if (action === "move" && sameDate && samePosition && sameEmployee) return false
 
     if (cell.dataset.viewMode === "employees") {
-      return cell.dataset.employeeId === shift.employeeId
+      return targetAssignedPositionIds.includes(shift.positionId)
     }
 
     if (cell.dataset.viewMode === "positions") {
       return shift.assignedPositionIds.includes(cell.dataset.positionId)
     }
 
-    return cell.dataset.employeeId === shift.employeeId && shift.assignedPositionIds.includes(cell.dataset.positionId)
+    return Boolean(cell.dataset.employeeId && cell.dataset.positionId)
   }
 
   markTargets(shift) {

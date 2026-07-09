@@ -30,7 +30,8 @@
                         data-view-mode="both"
                         data-shift-date="<%= date.iso8601 %>"
                         data-employee-id="<%= employee.id %>"
-                        data-position-id="<%= position.id %>">
+                        data-position-id="<%= position.id %>"
+                        data-assigned-position-ids="<%= employee.positions.active.ids.join(",") %>">
                     <div class="d-grid gap-2">
                       <% shifts.each do |shift| %>
                           <%= render "shift_pill",

@@ -25,7 +25,8 @@
                     data-action="click->schedule-quick-edit#cellClick dragenter->schedule-quick-edit#dragEnter dragover->schedule-quick-edit#dragOver dragleave->schedule-quick-edit#dragLeave drop->schedule-quick-edit#drop"
                     data-view-mode="employees"
                     data-shift-date="<%= date.iso8601 %>"
-                    data-employee-id="<%= employee.id %>">
+                    data-employee-id="<%= employee.id %>"
+                    data-assigned-position-ids="<%= employee.positions.active.ids.join(",") %>">
                   <div class="d-grid gap-2">
                     <% shifts.each do |shift| %>
                       <%= render "shift_pill", shift: shift, title: shift.employee.display_name, secondary_text: shift.position.name, time_lines: shift_time_range_lines(shift), view_mode: "employees" %>

@@ -47,12 +47,20 @@ class ShiftsController < ApplicationController
   def move
     original_date = @shift.shift_date
     original_position = @shift.position
+    original_employee = @shift.employee
 
     if @shift.update(quick_edit_shift_params)
-      respond_to_quick_edit_success(move_shift_message(@shift, original_date:, original_position:), shift: @shift, action: "move")
+      employee_changed = @shift.employee_id != original_employee.id
+      respond_to_quick_edit_success(
+        move_shift_message(@shift, original_date:, original_position:, original_employee:),
+        shift: @shift,
+        action: "move",
+        include_shift_html: !employee_changed
+      )
     else
       @shift.shift_date = original_date
       @shift.position = original_position
+      @shift.employee = original_employee
       respond_to_quick_edit_failure(@shift.errors.full_messages.to_sentence)
     end
   end
@@ -136,7 +144,7 @@ class ShiftsController < ApplicationController
   end
 
   def quick_edit_shift_params
-    params.require(:shift).permit(:shift_date, :position_id)
+    params.require(:shift).permit(:shift_date, :position_id, :employee_id)
   end
 
   def quick_edit_shift_date
@@ -159,7 +167,7 @@ class ShiftsController < ApplicationController
     location_schedule_path(@location, @schedule, view: view, section: section)
   end
 
-  def respond_to_quick_edit_success(message, shift:, action:)
+  def respond_to_quick_edit_success(message, shift:, action:, include_shift_html: true)
     respond_to do |format|
       format.json do
         render json: {
@@ -167,7 +175,7 @@ class ShiftsController < ApplicationController
           action: action,
           shift_id: shift.id,
           shift_date: shift.shift_date.iso8601,
-          shift_html: rendered_shift_pill(shift),
+          shift_html: include_shift_html ? rendered_shift_pill(shift) : nil,
           redirect_url: schedule_return_path
         }
       end
@@ -188,11 +196,20 @@ class ShiftsController < ApplicationController
     date.strftime("%A")
   end
 
-  def move_shift_message(shift, original_date:, original_position:)
+  def move_shift_message(shift, original_date:, original_position:, original_employee:)
     date_changed = shift.shift_date != original_date
     position_changed = shift.position_id != original_position.id
+    employee_changed = shift.employee_id != original_employee.id
 
-    if date_changed && position_changed
+    if employee_changed && date_changed && position_changed
+      "Shift reassigned to #{shift.employee.display_name} for #{shift.position.name} on #{shift_date_message(shift.shift_date)}."
+    elsif employee_changed && position_changed
+      "Shift reassigned to #{shift.employee.display_name} for #{shift.position.name}."
+    elsif employee_changed && date_changed
+      "Shift reassigned to #{shift.employee.display_name} on #{shift_date_message(shift.shift_date)}."
+    elsif employee_changed
+      "Shift reassigned to #{shift.employee.display_name}."
+    elsif date_changed && position_changed
       "Shift moved to #{shift.position.name} on #{shift_date_message(shift.shift_date)}."
     elsif position_changed
       "Shift moved to #{shift.position.name}."
