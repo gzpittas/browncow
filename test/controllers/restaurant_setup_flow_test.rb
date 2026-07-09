@@ -215,6 +215,20 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     get location_employees_path(locations(:main))
 
     assert_response :success
+    assert_select ".nav-tabs button#employees-list-tab[data-bs-toggle='tab'][data-bs-target='#employees-list-panel'][aria-selected='true']", text: "Employees"
+    assert_select ".nav-tabs button#employees-rank-tab[data-bs-toggle='tab'][data-bs-target='#employees-rank-panel'][aria-selected='false']", text: "Rank by Position"
+    assert_select ".tab-pane#employees-list-panel.show.active"
+    assert_select ".tab-pane#employees-rank-panel"
+    assert_select "#employees-list-subtabs button#employees-list-foh-tab[data-bs-target='#employees-list-foh-panel'][aria-selected='true']", text: "FOH"
+    assert_select "#employees-list-subtabs button#employees-list-boh-tab[data-bs-target='#employees-list-boh-panel'][aria-selected='false']", text: "BOH"
+    assert_select "#employees-list-subtabs button#employees-list-all-tab[data-bs-target='#employees-list-all-panel'][aria-selected='false']", text: "All"
+    assert_select "#employees-rank-subtabs button#employees-rank-foh-tab[data-bs-target='#employees-rank-foh-panel'][aria-selected='true']", text: "FOH"
+    assert_select "#employees-rank-subtabs button#employees-rank-boh-tab[data-bs-target='#employees-rank-boh-panel'][aria-selected='false']", text: "BOH"
+    assert_select ".tab-pane#employees-list-foh-panel.show.active"
+    assert_select ".tab-pane#employees-list-boh-panel"
+    assert_select ".tab-pane#employees-list-all-panel"
+    assert_select ".tab-pane#employees-rank-foh-panel.show.active"
+    assert_select ".tab-pane#employees-rank-boh-panel"
     assert_select "tbody[data-controller='employee-sort'][data-employee-sort-url-value='#{reorder_employees_location_position_path(locations(:main), positions(:server))}']", minimum: 1
     assert_select "tr[data-employee-sort-target='row'][data-employee-id='#{employees(:sam).id}']"
     assert_select ".position-drag-handle", minimum: 1
