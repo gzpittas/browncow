@@ -88,10 +88,14 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
       kind: "request_off",
       date: Date.new(2026, 6, 23)
     )
+    employees(:sam).employee_availability_blocks.create!(
+      kind: "unavailable",
+      weekday: Date.new(2026, 6, 24).wday
+    )
 
     assert_difference -> { locations(:main).schedules.count }, 1 do
       assert_difference -> { Shift.count }, 1 do
-        assert_difference -> { EmployeeAvailabilityBlock.request_off.count }, 1 do
+        assert_no_difference -> { EmployeeAvailabilityBlock.request_off.count } do
           post location_schedules_path(locations(:main)), params: {
             schedule: {
               week_start_date: "2026-06-28",
@@ -105,13 +109,17 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
 
     schedule = locations(:main).schedules.find_by!(week_start_date: Date.new(2026, 6, 28))
     copied_shift = schedule.shifts.find_by!(employee: employees(:sam), position: positions(:server))
-    copied_request_off = employees(:sam).employee_availability_blocks.request_off.find_by!(date: Date.new(2026, 6, 30))
 
     assert_equal Date.new(2026, 6, 29), copied_shift.shift_date
     assert_equal "16:00", copied_shift.starts_at.strftime("%H:%M")
     assert_equal "22:00", copied_shift.ends_at.strftime("%H:%M")
-    assert copied_request_off.active?
-    assert_redirected_to location_schedule_path(locations(:main), schedule)
+    assert_nil employees(:sam).employee_availability_blocks.request_off.find_by(date: Date.new(2026, 6, 30))
+
+    get location_schedule_path(locations(:main), schedule, view: "employees", section: "foh")
+
+    assert_response :success
+    assert_select "td[data-view-mode='employees'][data-employee-id='#{employees(:sam).id}'][data-shift-date='2026-07-01'] .availability-marker-unavailable[title='Unavailable'] .availability-marker-label", text: "UN/A"
+    assert_select "td[data-view-mode='employees'][data-employee-id='#{employees(:sam).id}'][data-shift-date='2026-06-30'] .availability-marker-request-off", count: 0
   end
 
   test "copying a schedule always copies every division" do
