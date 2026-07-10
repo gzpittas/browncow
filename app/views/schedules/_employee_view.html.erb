@@ -1,9 +1,10 @@
 <div class="card border-0 shadow-sm schedule-board">
   <div class="card-body p-0">
     <div class="table-responsive">
-      <table class="table table-bordered align-top mb-0 schedule-table schedule-table-seven schedule-table-striped">
+      <table class="table table-bordered align-top mb-0 schedule-table schedule-table-seven schedule-table-with-names schedule-table-striped">
         <thead>
           <tr>
+            <th class="schedule-name-column text-start bg-white">Name</th>
             <% @week_dates.each do |date| %>
               <th class="text-center bg-white <%= "schedule-weekend-column" if schedule_weekend?(date) %> <%= "schedule-today-column" if schedule_today?(date) %>"><%= schedule_day_label(date) %></th>
             <% end %>
@@ -12,6 +13,9 @@
         <tbody>
           <% @employees.each do |employee| %>
             <tr>
+              <th scope="row" class="schedule-name-column schedule-employee-row-heading">
+                <span><%= employee.compact_display_name %></span>
+              </th>
               <% @week_dates.each do |date| %>
                 <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
                 <% availability_blocks = @availability_blocks_by_employee_and_date[[ employee.id, date ]] || [] %>
@@ -63,7 +67,7 @@
 
           <% if @employees.empty? %>
             <tr>
-              <td colspan="7" class="p-4 p-md-5 text-center">
+              <td colspan="8" class="p-4 p-md-5 text-center">
                 <h2 class="h5 fw-semibold mb-2">Add employees first</h2>
                 <p class="text-secondary mb-3">The schedule grid will show active employees for this location.</p>
                 <%= link_to "Add Employees", location_employees_path(@location), class: "btn btn-primary" %>

@@ -14,4 +14,8 @@ class Employee < ApplicationRecord
   def display_name
     [ first_name, last_name ].compact_blank.join(" ")
   end
+
+  def compact_display_name
+    [ first_name, last_name.presence&.first ].compact_blank.join(" ")
+  end
 end

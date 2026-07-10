@@ -537,8 +537,41 @@ body.app-background-section-all {
   background-color: var(--menurooster-yellow-wisp) !important;
 }
 
-.schedule-name-column {
-  width: 12rem !important;
+.schedule-table-with-names .schedule-name-column {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .schedule-table-with-names {
+    min-width: 1120px;
+  }
+
+  .schedule-table-with-names .schedule-name-column {
+    background: var(--menurooster-white) !important;
+    display: table-cell;
+    left: 0;
+    position: sticky;
+    width: 10.5rem !important;
+    z-index: 2;
+  }
+
+  .schedule-table-with-names th:not(.schedule-name-column),
+  .schedule-table-with-names td:not(.schedule-name-column) {
+    width: calc((100% - 10.5rem) / 7);
+  }
+}
+
+.schedule-employee-row-heading {
+  color: #3d362f;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+
+.schedule-employee-row-heading span {
+  display: block;
+  overflow-wrap: anywhere;
 }
 
 .schedule-cell {

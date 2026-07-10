@@ -867,7 +867,9 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
 
     get location_schedule_path(locations(:main), schedules(:main_week), view: "employees")
     assert_response :success
-    assert_select "table.schedule-table.schedule-table-striped thead tr th:first-child", text: "Sun 21"
+    assert_select "table.schedule-table-with-names thead tr th.schedule-name-column", text: "Name"
+    assert_select "table.schedule-table-with-names tbody tr th.schedule-employee-row-heading", text: "Sam S"
+    assert_select "table.schedule-table.schedule-table-striped thead tr th:nth-child(2)", text: "Sun 21"
     assert_select ".shift-pill", text: /Server/
     assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
     assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
@@ -1278,7 +1280,9 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Name", count: 0
-    assert_select "table.schedule-table thead tr th:first-child", text: "Sun 21"
+    assert_select "table.schedule-table-with-names thead tr th.schedule-name-column", text: "Name"
+    assert_select "table.schedule-table-with-names tbody tr th.schedule-employee-row-heading", text: "Sam S"
+    assert_select "table.schedule-table thead tr th:nth-child(2)", text: "Sun 21"
     assert_select ".shift-pill", text: /Sam Server/
     assert_select ".shift-pill-employee-view .shift-pill-secondary", text: "Server"
   end
@@ -1310,8 +1314,10 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_match(/aria-label="Schedule section".*aria-label="Schedule view".*aria-label="Employee order"/m, response.body)
     assert_select ".schedule-schedule-controls .btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Name"
     assert_select ".card-header h2", text: /Server/
-    assert_select "table.schedule-table.schedule-table-striped thead tr th:first-child", text: "Sun 21"
-    assert_select "table.schedule-table.schedule-table-striped thead tr th.schedule-weekend-column:first-child", text: "Sun 21"
+    assert_select "table.schedule-table-with-names thead tr th.schedule-name-column", text: "Name"
+    assert_select "table.schedule-table-with-names tbody tr th.schedule-employee-row-heading", text: "Sam S"
+    assert_select "table.schedule-table.schedule-table-striped thead tr th:nth-child(2)", text: "Sun 21"
+    assert_select "table.schedule-table.schedule-table-striped thead tr th.schedule-weekend-column:nth-child(2)", text: "Sun 21"
     assert_select "table.schedule-table.schedule-table-striped thead tr th.schedule-weekend-column:last-child", text: "Sat 27"
     assert_select ".shift-pill .shift-pill-title", text: "Sam Server"
     assert_select ".shift-pill .shift-pill-secondary", text: "Server"
