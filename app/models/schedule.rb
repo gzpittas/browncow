@@ -67,6 +67,13 @@ class Schedule < ApplicationRecord
         notes: shift.notes
       )
     end
+
+    target_schedule.location
+      .employee_availability_blocks
+      .active
+      .request_off
+      .where(date: target_schedule.week_dates)
+      .delete_all
   end
 
   private
