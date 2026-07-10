@@ -14,7 +14,6 @@ class SchedulesController < ApplicationController
 
   def new
     @selected_source_schedule = selected_source_schedule
-    @copy_section = selected_copy_section
     selected_week = params[:week_start_date].presence || default_new_schedule_week_start(@selected_source_schedule)
     @schedule = @location.schedules.build(week_start_date: selected_week)
   end
@@ -22,7 +21,6 @@ class SchedulesController < ApplicationController
   def create
     week_start_date = schedule_params[:week_start_date].presence || Schedule.week_start_for(Date.current)
     @selected_source_schedule = selected_source_schedule
-    @copy_section = selected_copy_section
     @schedule = @location.schedules.build(
       schedule_params.slice(:notes).merge(week_start_date: week_start_date, status: "draft")
     )
@@ -119,9 +117,9 @@ class SchedulesController < ApplicationController
   end
 
   def prepare_schedule_view
-    @view_mode = store_schedule_view_mode!(params[:view].presence || session[:schedule_view_mode])
     @section_mode = store_schedule_section_mode!(params[:section].presence || session[:schedule_section_mode])
-    @both_view_employee_sort_mode = store_both_view_employee_sort_mode!(params[:employee_order].presence || session[:both_view_employee_sort_mode])
+    @view_mode = store_schedule_view_mode!(params[:view].presence || schedule_view_mode_for_section(@section_mode), section: @section_mode)
+    @both_view_employee_sort_mode = store_both_view_employee_sort_mode!(params[:employee_order].presence || both_view_employee_sort_mode_for_section(@section_mode), section: @section_mode)
     @section_label = schedule_section_label(@section_mode)
     @week_dates = @schedule.week_dates
     @mini_calendar_date = mini_calendar_date
@@ -134,6 +132,8 @@ class SchedulesController < ApplicationController
     @shifts_by_employee_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.shift_date ] }
     @shifts_by_position_and_date = @shifts.group_by { |shift| [ shift.position_id, shift.shift_date ] }
     @shifts_by_employee_position_and_date = @shifts.group_by { |shift| [ shift.employee_id, shift.position_id, shift.shift_date ] }
+    @availability_blocks = availability_blocks_for_week
+    @availability_blocks_by_employee_and_date = availability_blocks_by_employee_and_date(@availability_blocks)
     @employees_by_position = @positions.index_with do |position|
       employees_for_position(position)
     end
@@ -142,9 +142,9 @@ class SchedulesController < ApplicationController
   end
 
   def schedule_params
-    return ActionController::Parameters.new.permit(:week_start_date, :notes, :source_schedule_id, :copy_section) if params[:schedule].blank?
+    return ActionController::Parameters.new.permit(:week_start_date, :notes, :source_schedule_id) if params[:schedule].blank?
 
-    params.require(:schedule).permit(:week_start_date, :notes, :source_schedule_id, :copy_section)
+    params.require(:schedule).permit(:week_start_date, :notes, :source_schedule_id)
   end
 
   def selected_source_schedule
@@ -152,12 +152,6 @@ class SchedulesController < ApplicationController
     return if source_schedule_id.blank?
 
     @location.schedules.find(source_schedule_id)
-  end
-
-  def selected_copy_section
-    requested_section = schedule_params[:copy_section].presence || params[:copy_section].presence || params[:section].presence
-
-    normalized_schedule_section_mode(requested_section) || "all"
   end
 
   def default_new_schedule_week_start(source_schedule)
@@ -175,14 +169,14 @@ class SchedulesController < ApplicationController
       @location,
       @schedule,
       view: normalized_schedule_view_mode(params[:view]),
-      section: normalized_schedule_section_mode(params[:section]) || @copy_section
+      section: normalized_schedule_section_mode(params[:section]) || current_schedule_section_mode
     )
   end
 
   def create_schedule_with_optional_copy
     Schedule.transaction do
       @schedule.save!
-      @selected_source_schedule&.copy_shifts_to!(@schedule, section: @copy_section)
+      @selected_source_schedule&.copy_shifts_to!(@schedule)
     end
 
     true
@@ -215,6 +209,41 @@ class SchedulesController < ApplicationController
     return scope if @section_mode == "all"
 
     scope.where(positions: { section: @section_mode })
+  end
+
+  def availability_blocks_for_week
+    employee_ids = @employees.map(&:id)
+    return EmployeeAvailabilityBlock.none if employee_ids.empty?
+
+    EmployeeAvailabilityBlock
+      .active
+      .where(employee_id: employee_ids)
+      .where(
+        "(kind = ? AND date IN (?)) OR (kind = ? AND weekday IN (?))",
+        "request_off",
+        @week_dates,
+        "unavailable",
+        @week_dates.map(&:wday)
+      )
+      .order(:kind)
+  end
+
+  def availability_blocks_by_employee_and_date(blocks)
+    grouped = Hash.new { |hash, key| hash[key] = [] }
+
+    blocks.each do |block|
+      availability_dates_for(block).each do |date|
+        grouped[[ block.employee_id, date ]] << block
+      end
+    end
+
+    grouped
+  end
+
+  def availability_dates_for(block)
+    return [ block.date ].compact if block.request_off?
+
+    @week_dates.select { |date| date.wday == block.weekday }
   end
 
   def schedule_section_label(section_mode)

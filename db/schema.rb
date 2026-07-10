@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_02_143000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_10_121000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -25,6 +25,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_143000) do
     t.string "schedule_time_display", default: "stacked", null: false
     t.datetime "updated_at", null: false
     t.index ["public_schedule_slug"], name: "index_accounts_on_public_schedule_slug", unique: true
+  end
+
+  create_table "employee_availability_blocks", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.boolean "all_day", default: true, null: false
+    t.datetime "created_at", null: false
+    t.date "date"
+    t.bigint "employee_id", null: false
+    t.time "ends_at"
+    t.string "kind", null: false
+    t.text "notes"
+    t.time "starts_at"
+    t.datetime "updated_at", null: false
+    t.integer "weekday"
+    t.index ["employee_id", "kind", "date"], name: "index_availability_blocks_on_employee_request_date", unique: true, where: "((active = true) AND ((kind)::text = 'request_off'::text))"
+    t.index ["employee_id", "kind", "weekday"], name: "index_availability_blocks_on_employee_unavailable_weekday", unique: true, where: "((active = true) AND ((kind)::text = 'unavailable'::text))"
+    t.index ["employee_id"], name: "index_employee_availability_blocks_on_employee_id"
   end
 
   create_table "employee_positions", force: :cascade do |t|
@@ -118,12 +135,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_143000) do
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
+    t.string "schedule_boh_employee_order_preference", default: "alphabetical", null: false
+    t.string "schedule_boh_view_preference", default: "positions", null: false
+    t.string "schedule_foh_employee_order_preference", default: "alphabetical", null: false
+    t.string "schedule_foh_view_preference", default: "positions", null: false
+    t.string "schedule_section_preference", default: "foh", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_users_on_account_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "employee_availability_blocks", "employees"
   add_foreign_key "employee_positions", "employees"
   add_foreign_key "employee_positions", "positions"
   add_foreign_key "employees", "locations"

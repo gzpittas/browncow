@@ -40,7 +40,7 @@ class PublicSchedulesController < ApplicationController
 
   def set_public_schedule_context
     @view_mode = normalized_schedule_view_mode(params[:view])
-    @section_mode = normalized_schedule_section_mode(params[:section]) || "all"
+    @section_mode = normalized_schedule_section_mode(params[:section]) || "foh"
     @available_schedules = public_available_schedules
     @schedule = selected_public_schedule
     return if @schedule.blank?

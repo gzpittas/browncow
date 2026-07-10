@@ -668,7 +668,7 @@ body.app-background-section-all {
     inset 0 1px 0 rgba(255, 255, 255, 0.78);
   opacity: 0.92;
   pointer-events: none;
-  animation: shift-pill-ghost-fade 2.6s ease-out forwards;
+  animation: shift-pill-ghost-fade 2.3s ease-out forwards;
 }
 
 .shift-pill-move-ghost .shift-pill-link,
@@ -958,6 +958,123 @@ body.app-background-section-all {
   border-color: var(--hc-primary);
   color: var(--hc-primary);
   background: #fffaf4;
+}
+
+.schedule-add-link-disabled,
+.schedule-add-link-disabled:hover {
+  background: rgba(255, 255, 255, 0.34);
+  border-color: rgba(47, 42, 36, 0.14);
+  color: #7b7167;
+  cursor: default;
+}
+
+.availability-markers {
+  align-items: center;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.availability-slot {
+  flex: 0 0 2.65rem;
+  min-width: 0;
+}
+
+.availability-marker {
+  align-items: center;
+  border: 1px solid rgba(47, 42, 36, 0.14);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.62rem;
+  font-weight: 800;
+  gap: 0.12rem;
+  justify-content: center;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  min-height: 1.25rem;
+  min-width: 100%;
+  padding: 0.16rem 0.2rem 0.16rem 0.38rem;
+  text-transform: uppercase;
+}
+
+.availability-marker-label {
+  white-space: nowrap;
+}
+
+.availability-marker-request-off {
+  background: #fff1d6;
+  border-color: #e9b75f;
+  color: #7a4316;
+}
+
+.availability-marker-unavailable {
+  background: #eee7f5;
+  border-color: #b59bc9;
+  color: #56356f;
+}
+
+.availability-marker-remove-form,
+.availability-action-form {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.availability-marker-remove {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.6);
+  border: 0;
+  border-radius: 999px;
+  color: inherit;
+  display: inline-flex;
+  font-size: 0.74rem;
+  font-weight: 900;
+  height: 0.85rem;
+  justify-content: center;
+  line-height: 1;
+  opacity: 0.68;
+  padding: 0;
+  width: 0.85rem;
+}
+
+.availability-marker-remove:hover {
+  background: rgba(255, 255, 255, 0.95);
+  opacity: 1;
+}
+
+.availability-action-form {
+  opacity: 0.52;
+  transition: opacity 160ms ease;
+}
+
+.schedule-cell:hover .availability-action-form,
+.schedule-cell:focus-within .availability-action-form {
+  opacity: 1;
+}
+
+.availability-action {
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px dashed rgba(47, 42, 36, 0.22);
+  border-radius: 999px;
+  color: #6a5f55;
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1.1;
+  min-width: 100%;
+  padding: 0.24rem 0.34rem;
+  white-space: nowrap;
+}
+
+.availability-action:hover {
+  background: #fffaf4;
+  border-color: var(--hc-primary);
+  color: var(--hc-primary);
+}
+
+.availability-action-unavailable:hover {
+  background: #f5eff9;
+  border-color: #8c5a97;
+  color: #56356f;
 }
 
 .schedule-cell.is-valid-shift-target {

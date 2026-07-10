@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  SCHEDULE_SECTION_MODES = %w[foh boh all].freeze
+  SCHEDULE_SECTION_MODES = %w[foh boh].freeze
   SCHEDULE_VIEW_MODES = %w[positions employees both].freeze
 
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
 
   before_action :configure_permitted_parameters, if: :devise_controller?
 
-  helper_method :current_schedule_location, :current_schedule_record, :current_schedule_destination_for, :current_schedule_section_mode, :current_schedule_view_mode, :current_both_view_employee_sort_mode
+  helper_method :current_schedule_location, :current_schedule_record, :current_schedule_destination_for, :current_schedule_section_mode, :current_schedule_view_mode, :current_both_view_employee_sort_mode, :schedule_section_switch_params
 
   protected
 
@@ -36,6 +36,7 @@ class ApplicationController < ActionController::Base
   def signed_in_landing_path_for(user)
     return new_account_path if user.account.blank?
 
+    session[:schedule_section_mode] = normalized_schedule_section_mode(user.schedule_section_preference) || "foh"
     remembered_schedule = remembered_schedule_for(user)
     return location_schedule_path(remembered_schedule.location, remembered_schedule, view: current_schedule_view_mode, section: current_schedule_section_mode) if remembered_schedule
 
@@ -66,8 +67,8 @@ class ApplicationController < ActionController::Base
     return new_account_path if user.account.blank?
 
     remembered_schedule = remembered_schedule_for(user)
-    selected_view = normalized_schedule_view_mode(view.presence || current_schedule_view_mode)
     selected_section = normalized_schedule_section_mode(section) || current_schedule_section_mode
+    selected_view = normalized_schedule_view_mode(view.presence || schedule_view_mode_for_section(selected_section))
 
     return location_schedule_path(remembered_schedule.location, remembered_schedule, view: selected_view, section: selected_section) if remembered_schedule
 
@@ -81,44 +82,62 @@ class ApplicationController < ActionController::Base
   end
 
   def current_schedule_section_mode
-    normalized_schedule_section_mode(session[:schedule_section_mode]) || "foh"
+    normalized_schedule_section_mode(session[:schedule_section_mode]) ||
+      normalized_schedule_section_mode(current_user&.schedule_section_preference) ||
+      "foh"
   end
 
   def current_schedule_view_mode
-    normalized_schedule_view_mode(session[:schedule_view_mode])
+    schedule_view_mode_for_section(current_schedule_section_mode)
   end
 
   def current_both_view_employee_sort_mode
-    normalized_both_view_employee_sort_mode(session[:both_view_employee_sort_mode]) || "alphabetical"
+    both_view_employee_sort_mode_for_section(current_schedule_section_mode)
   end
 
   def store_schedule_section_mode!(value)
     normalized_value = normalized_schedule_section_mode(value) || "foh"
     session[:schedule_section_mode] = normalized_value
+    current_user&.update_column(:schedule_section_preference, normalized_value) if current_user&.persisted? && current_user.schedule_section_preference != normalized_value
     normalized_value
   end
 
-  def store_schedule_view_mode!(value)
+  def store_schedule_view_mode!(value, section: current_schedule_section_mode)
+    section = normalized_schedule_section_mode(section) || "foh"
     normalized_value = normalized_schedule_view_mode(value)
     session[:schedule_view_mode] = normalized_value
+    session[schedule_view_session_key(section)] = normalized_value
+    store_user_schedule_preference!(schedule_view_preference_column(section), normalized_value)
     normalized_value
   end
 
   def remember_schedule_context!(location:, schedule:, view:, section:)
     session[:current_schedule_location_id] = location.id
     session[:current_schedule_id] = schedule.id
-    store_schedule_view_mode!(view)
     store_schedule_section_mode!(section)
+    store_schedule_view_mode!(view, section: section)
   end
 
-  def store_both_view_employee_sort_mode!(value)
+  def store_both_view_employee_sort_mode!(value, section: current_schedule_section_mode)
+    section = normalized_schedule_section_mode(section) || "foh"
     normalized_value = normalized_both_view_employee_sort_mode(value) || "alphabetical"
     session[:both_view_employee_sort_mode] = normalized_value
+    session[both_view_employee_sort_session_key(section)] = normalized_value
+    store_user_schedule_preference!(both_view_employee_sort_preference_column(section), normalized_value)
     normalized_value
+  end
+
+  def schedule_section_switch_params(section)
+    section = normalized_schedule_section_mode(section) || current_schedule_section_mode
+    view = schedule_view_mode_for_section(section)
+    params = { view: view, section: section }
+    params[:employee_order] = both_view_employee_sort_mode_for_section(section) if view == "both"
+    params
   end
 
   def normalized_schedule_section_mode(value)
     normalized_value = value.to_s
+    return "foh" if normalized_value == "all"
     return normalized_value if SCHEDULE_SECTION_MODES.include?(normalized_value)
 
     nil
@@ -136,6 +155,49 @@ class ApplicationController < ActionController::Base
     return normalized_value if %w[alphabetical ranked].include?(normalized_value)
 
     nil
+  end
+
+  def schedule_view_mode_for_section(section)
+    section = normalized_schedule_section_mode(section) || "foh"
+
+    normalized_schedule_view_mode(
+      session[schedule_view_session_key(section)] ||
+        current_user&.public_send(schedule_view_preference_column(section)) ||
+        session[:schedule_view_mode]
+    )
+  end
+
+  def both_view_employee_sort_mode_for_section(section)
+    section = normalized_schedule_section_mode(section) || "foh"
+
+    normalized_both_view_employee_sort_mode(
+      session[both_view_employee_sort_session_key(section)] ||
+        current_user&.public_send(both_view_employee_sort_preference_column(section)) ||
+        session[:both_view_employee_sort_mode]
+    ) || "alphabetical"
+  end
+
+  def schedule_view_session_key(section)
+    "schedule_#{section}_view_mode"
+  end
+
+  def both_view_employee_sort_session_key(section)
+    "schedule_#{section}_both_view_employee_sort_mode"
+  end
+
+  def schedule_view_preference_column(section)
+    "schedule_#{section}_view_preference"
+  end
+
+  def both_view_employee_sort_preference_column(section)
+    "schedule_#{section}_employee_order_preference"
+  end
+
+  def store_user_schedule_preference!(column, value)
+    return unless current_user&.persisted?
+    return if current_user.public_send(column) == value
+
+    current_user.update_column(column, value)
   end
 
   def remembered_schedule_for(user)

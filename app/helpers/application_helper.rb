@@ -150,14 +150,6 @@ module ApplicationHelper
     end
   end
 
-  def schedule_copy_section_options
-    [
-      [ "BOH only", "boh" ],
-      [ "FOH only", "foh" ],
-      [ "BOH + FOH", "all" ]
-    ]
-  end
-
   def position_section_options
     Position::SECTIONS.map { |key, label| [ label, key ] }
   end

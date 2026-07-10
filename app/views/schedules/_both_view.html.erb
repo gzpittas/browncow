@@ -24,7 +24,8 @@
                 <tr>
                   <% @week_dates.each do |date| %>
                     <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
-                    <td class="schedule-cell <%= "schedule-weekend-column" if schedule_weekend?(date) %> <%= "schedule-today-column" if schedule_today?(date) %>"
+                    <% availability_blocks = @availability_blocks_by_employee_and_date[[ employee.id, date ]] || [] %>
+                    <td class="schedule-cell <%= "schedule-weekend-column" if schedule_weekend?(date) %> <%= "schedule-today-column" if schedule_today?(date) %> <%= "schedule-cell-has-availability" if availability_blocks.any? %>"
                         data-schedule-quick-edit-target="cell"
                         data-action="click->schedule-quick-edit#cellClick dragenter->schedule-quick-edit#dragEnter dragover->schedule-quick-edit#dragOver dragleave->schedule-quick-edit#dragLeave drop->schedule-quick-edit#drop"
                         data-view-mode="both"
@@ -35,9 +36,14 @@
                         data-add-url="<%= new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, position_id: position.id, shift_date: date, view: "both", section: @section_mode) %>"
                         data-add-context="<%= employee.display_name %>"
                         data-add-label="+ Add Shift"
-                        data-add-mode="empty_only"
+                        data-add-mode="<%= availability_blocks.any? ? "none" : "empty_only" %>"
                         data-return-url="<%= location_schedule_path(@location, @schedule, view: "both", section: @section_mode) %>">
                     <div class="d-grid gap-2">
+                      <%= render "availability_markers",
+                            employee: employee,
+                            date: date,
+                            availability_blocks: availability_blocks,
+                            view_mode: "both" %>
                       <% shifts.each do |shift| %>
                           <%= render "shift_pill",
                                 shift: shift,
@@ -46,7 +52,11 @@
                                 time_lines: shift_time_range_lines(shift),
                                 view_mode: "both" %>
                       <% end %>
-                      <% if @schedule.editable? && shifts.empty? %>
+                      <% if @schedule.editable? && shifts.empty? && availability_blocks.any? %>
+                        <span class="schedule-add-link schedule-add-link-disabled" aria-disabled="true">
+                          <span class="schedule-add-link-context"><%= employee.display_name %></span>
+                        </span>
+                      <% elsif @schedule.editable? && shifts.empty? %>
                         <%= link_to new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, position_id: position.id, shift_date: date, view: "both", section: @section_mode),
                               class: "schedule-add-link",
                               data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: location_schedule_path(@location, @schedule, view: "both", section: @section_mode) } do %>

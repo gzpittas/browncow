@@ -3,6 +3,7 @@ class Location < ApplicationRecord
 
   has_many :positions, dependent: :destroy
   has_many :employees, dependent: :destroy
+  has_many :employee_availability_blocks, through: :employees
   has_many :schedules, dependent: :destroy
 
   validates :name, presence: true

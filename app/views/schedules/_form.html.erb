@@ -16,15 +16,6 @@
       <%= f.select :week_start_date, schedule_week_options(@location, @schedule.week_start_date), { selected: @schedule.week_start_date&.iso8601 }, class: "form-select" %>
       <div class="form-text">This is the new week that will receive the copied shifts.</div>
     </div>
-
-    <div class="mb-4">
-      <%= f.label :copy_section, "Copy which division?", class: "form-label" %>
-      <%= f.select :copy_section,
-            options_for_select(schedule_copy_section_options, @copy_section),
-            {},
-            class: "form-select" %>
-      <div class="form-text">Use BOH or FOH to copy only the schedule you are working on, or BOH + FOH to copy the full week.</div>
-    </div>
   <% else %>
     <div class="mb-3">
       <div class="form-label">Schedule week</div>

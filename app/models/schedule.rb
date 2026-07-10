@@ -67,9 +67,26 @@ class Schedule < ApplicationRecord
         notes: shift.notes
       )
     end
+
+    copy_request_off_blocks_to!(target_schedule)
   end
 
   private
+
+  def copy_request_off_blocks_to!(target_schedule)
+    EmployeeAvailabilityBlock
+      .active
+      .request_off
+      .where(employee_id: location.employees.select(:id), date: week_dates)
+      .find_each do |block|
+        day_offset = (block.date - week_start_date).to_i
+
+        block.employee.employee_availability_blocks.find_or_create_by!(
+          kind: "request_off",
+          date: target_schedule.week_start_date + day_offset.days
+        )
+      end
+  end
 
   def week_start_date_is_sunday
     return if week_start_date.blank?

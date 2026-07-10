@@ -21,6 +21,7 @@ Rails.application.routes.draw do
     resources :employees, except: [ :show, :destroy ] do
       patch :deactivate, on: :member
     end
+    resources :employee_availability_blocks, only: [ :create, :destroy ]
 
     resources :schedules do
       get :print, on: :member

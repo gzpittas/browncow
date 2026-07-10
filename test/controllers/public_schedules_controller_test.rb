@@ -35,8 +35,10 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "nav", count: 0
     assert_select "a[href='#{new_user_session_path}']", count: 0
-    assert_select ".btn-group[aria-label='Schedule view'] a", text: "Positions"
+    assert_select ".btn-group[aria-label='Schedule view'] a", text: "Position"
+    assert_select ".btn-group[aria-label='Schedule view'] a", text: "Name"
     assert_select ".btn-group[aria-label='Schedule section'] a", text: "FOH"
+    assert_select ".btn-group[aria-label='Schedule section'] a", text: "BOH"
     assert_select ".shift-pill", text: /Sam Server/
     assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "4:00 PM"
     assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "10:00 PM"
@@ -63,8 +65,8 @@ class PublicSchedulesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".btn-group[aria-label='Schedule week'] a", text: "This Week"
     assert_select ".btn-group[aria-label='Schedule week'] a", text: "Next Week"
-    assert_select ".btn-group[aria-label='Schedule view'] .btn.btn-primary", text: "Employees"
-    assert_select ".btn-group[aria-label='Schedule section'] .btn.btn-primary", text: "Both"
+    assert_select ".btn-group[aria-label='Schedule view'] .btn.btn-primary", count: 0
+    assert_select ".btn-group[aria-label='Schedule section'] .btn.btn-primary", text: "FOH"
     assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "12:00 PM"
     assert_select ".shift-pill .shift-pill-time-stack .shift-pill-time", text: "6:00 PM"
   end

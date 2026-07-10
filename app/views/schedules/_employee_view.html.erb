@@ -14,10 +14,12 @@
             <tr>
               <% @week_dates.each do |date| %>
                 <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>
+                <% availability_blocks = @availability_blocks_by_employee_and_date[[ employee.id, date ]] || [] %>
                 <% cell_classes = ["schedule-cell"] %>
                 <% cell_classes << "schedule-weekend-column" if schedule_weekend?(date) %>
                 <% cell_classes << "schedule-today-column" if schedule_today?(date) %>
                 <% cell_classes << "schedule-cell-has-shift" if shifts.any? %>
+                <% cell_classes << "schedule-cell-has-availability" if availability_blocks.any? %>
                 <% cell_style = shifts.any? ? "--position-color: #{shifts.first.position.display_color}" : nil %>
                 <td class="<%= cell_classes.join(" ") %>"
                     style="<%= cell_style %>"
@@ -30,14 +32,23 @@
                     data-add-url="<%= new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, shift_date: date, view: "employees", section: @section_mode) %>"
                     data-add-context="<%= employee.display_name %>"
                     data-add-label="+ Add Shift"
-                    data-add-mode="empty_only"
+                    data-add-mode="<%= availability_blocks.any? ? "none" : "empty_only" %>"
                     data-return-url="<%= location_schedule_path(@location, @schedule, view: "employees", section: @section_mode) %>">
                   <div class="d-grid gap-2">
+                    <%= render "availability_markers",
+                          employee: employee,
+                          date: date,
+                          availability_blocks: availability_blocks,
+                          view_mode: "employees" %>
                     <% shifts.each do |shift| %>
                       <%= render "shift_pill", shift: shift, title: shift.employee.display_name, secondary_text: shift.position.name, time_lines: shift_time_range_lines(shift), view_mode: "employees" %>
                     <% end %>
-                    <% if @schedule.editable? && shifts.empty? %>
-                      <%= link_to new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, shift_date: date, view: "employees", section: @section_mode),
+                      <% if @schedule.editable? && shifts.empty? && availability_blocks.any? %>
+                        <span class="schedule-add-link schedule-add-link-disabled" aria-disabled="true">
+                          <span class="schedule-add-link-context"><%= employee.display_name %></span>
+                        </span>
+                      <% elsif @schedule.editable? && shifts.empty? %>
+                        <%= link_to new_location_schedule_shift_path(@location, @schedule, employee_id: employee.id, shift_date: date, view: "employees", section: @section_mode),
                             class: "schedule-add-link",
                             data: { action: "click->schedule-quick-edit#rememberScheduleViewport", return_url: location_schedule_path(@location, @schedule, view: "employees", section: @section_mode) } do %>
                         <span class="schedule-add-link-context"><%= employee.display_name %></span>

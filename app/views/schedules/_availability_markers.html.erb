@@ -1,0 +1,82 @@
+<% availability_blocks = Array(availability_blocks) %>
+<% request_off_block = availability_blocks.find(&:request_off?) %>
+<% unavailable_block = availability_blocks.find(&:unavailable?) %>
+<% return_path = location_schedule_path(@location, @schedule, view: view_mode, section: @section_mode) %>
+
+<% if availability_blocks.any? || @schedule.editable? %>
+  <div class="availability-markers">
+    <div class="availability-slot availability-slot-request-off">
+      <% if request_off_block.present? %>
+        <div class="availability-marker availability-marker-request-off" title="<%= request_off_block.label %>">
+          <span class="availability-marker-label"><%= request_off_block.short_label %></span>
+          <% if @schedule.editable? %>
+            <%= button_to location_employee_availability_block_path(@location, request_off_block),
+                  method: :delete,
+                  params: { return_to: return_path },
+                  form_class: "availability-marker-remove-form",
+                  form: { data: { action: "submit->schedule-quick-edit#rememberScheduleViewportSubmit", return_url: return_path } },
+                  class: "availability-marker-remove",
+                  title: "Remove #{request_off_block.label}" do %>
+              <span aria-hidden="true">×</span>
+              <span class="visually-hidden">Remove <%= request_off_block.label %></span>
+            <% end %>
+          <% end %>
+        </div>
+      <% elsif @schedule.editable? %>
+        <%= button_to "R/O",
+              location_employee_availability_blocks_path(@location),
+              method: :post,
+              params: {
+                return_to: return_path,
+                employee_availability_block: {
+                  employee_id: employee.id,
+                  kind: "request_off",
+                  date: date.iso8601
+                }
+              },
+              form_class: "availability-action-form",
+              form: { data: { action: "submit->schedule-quick-edit#rememberScheduleViewportSubmit", return_url: return_path } },
+              title: "Request Off",
+              "aria-label": "Mark #{employee.display_name} request off for #{date.to_fs(:long)}",
+              class: "availability-action availability-action-request-off" %>
+      <% end %>
+    </div>
+
+    <div class="availability-slot availability-slot-unavailable">
+      <% if unavailable_block.present? %>
+        <div class="availability-marker availability-marker-unavailable" title="<%= unavailable_block.label %>">
+          <span class="availability-marker-label"><%= unavailable_block.short_label %></span>
+          <% if @schedule.editable? %>
+            <%= button_to location_employee_availability_block_path(@location, unavailable_block),
+                  method: :delete,
+                  params: { return_to: return_path },
+                  form_class: "availability-marker-remove-form",
+                  form: { data: { action: "submit->schedule-quick-edit#rememberScheduleViewportSubmit", return_url: return_path } },
+                  class: "availability-marker-remove",
+                  title: "Remove #{unavailable_block.label}" do %>
+              <span aria-hidden="true">×</span>
+              <span class="visually-hidden">Remove <%= unavailable_block.label %></span>
+            <% end %>
+          <% end %>
+        </div>
+      <% elsif @schedule.editable? %>
+        <%= button_to "UN/A",
+              location_employee_availability_blocks_path(@location),
+              method: :post,
+              params: {
+                return_to: return_path,
+                employee_availability_block: {
+                  employee_id: employee.id,
+                  kind: "unavailable",
+                  date: date.iso8601
+                }
+              },
+              form_class: "availability-action-form",
+              form: { data: { action: "submit->schedule-quick-edit#rememberScheduleViewportSubmit", return_url: return_path } },
+              title: "Unavailable",
+              "aria-label": "Mark #{employee.display_name} unavailable on #{date.strftime("%A")}s",
+              class: "availability-action availability-action-unavailable" %>
+        <% end %>
+    </div>
+  </div>
+<% end %>

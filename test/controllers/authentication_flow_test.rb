@@ -27,6 +27,21 @@ class AuthenticationFlowTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a user signs in to their saved schedule section" do
+    users(:manager).update!(schedule_section_preference: "boh")
+
+    travel_to Date.new(2026, 6, 25) do
+      post user_session_path, params: {
+        user: {
+          email: users(:manager).email,
+          password: "password123"
+        }
+      }
+
+      assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "boh")
+    end
+  end
+
   test "signed-in root redirects to the current weekly schedule when it exists" do
     sign_in users(:manager)
 
@@ -35,6 +50,17 @@ class AuthenticationFlowTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "foh")
+  end
+
+  test "signed-in root redirects to the saved schedule section" do
+    users(:manager).update!(schedule_section_preference: "boh")
+    sign_in users(:manager)
+
+    travel_to Date.new(2026, 6, 25) do
+      get root_path
+    end
+
+    assert_redirected_to location_schedule_path(locations(:main), schedules(:main_week), view: "positions", section: "boh")
   end
 
   test "a user with a location but no current schedule signs in to the schedule list" do
