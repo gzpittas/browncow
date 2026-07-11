@@ -14,7 +14,9 @@
           <% @employees.each do |employee| %>
             <tr>
               <th scope="row" class="schedule-name-column schedule-employee-row-heading">
-                <span><%= employee.compact_display_name %></span>
+                <%= link_to edit_location_employee_path(@location, employee, return_to: request.fullpath), class: "schedule-name-link" do %>
+                  <span><%= employee.compact_display_name %></span>
+                <% end %>
               </th>
               <% @week_dates.each do |date| %>
                 <% shifts = @shifts_by_employee_and_date[[ employee.id, date ]] || [] %>

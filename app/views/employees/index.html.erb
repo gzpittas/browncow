@@ -23,116 +23,154 @@
 <% elsif @employees.any? %>
   <% foh_positions = @sortable_positions.select { |position| position.section == "foh" } %>
   <% boh_positions = @sortable_positions.select { |position| position.section == "boh" } %>
+  <% active_section = params[:section].in?(%w[foh boh all]) ? params[:section] : "foh" %>
+  <% active_order = active_section == "all" ? "alphabetical" : (params[:order] == "ranked" ? "ranked" : "alphabetical") %>
   <div class="d-grid gap-4">
     <ul class="nav nav-tabs" id="employees-tabs" role="tablist">
       <li class="nav-item" role="presentation">
         <button
-          class="nav-link active"
-          id="employees-list-tab"
+          class="nav-link <%= "active" if active_section == "foh" %>"
+          id="employees-foh-tab"
           data-bs-toggle="tab"
-          data-bs-target="#employees-list-panel"
+          data-bs-target="#employees-foh-panel"
           type="button"
           role="tab"
-          aria-controls="employees-list-panel"
-          aria-selected="true">
-          Employees
+          aria-controls="employees-foh-panel"
+          aria-selected="<%= active_section == "foh" %>">
+          FOH
         </button>
       </li>
       <li class="nav-item" role="presentation">
         <button
-          class="nav-link"
-          id="employees-rank-tab"
+          class="nav-link <%= "active" if active_section == "boh" %>"
+          id="employees-boh-tab"
           data-bs-toggle="tab"
-          data-bs-target="#employees-rank-panel"
+          data-bs-target="#employees-boh-panel"
           type="button"
           role="tab"
-          aria-controls="employees-rank-panel"
-          aria-selected="false">
-          Rank by Position
+          aria-controls="employees-boh-panel"
+          aria-selected="<%= active_section == "boh" %>">
+          BOH
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link <%= "active" if active_section == "all" %>"
+          id="employees-all-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#employees-all-panel"
+          type="button"
+          role="tab"
+          aria-controls="employees-all-panel"
+          aria-selected="<%= active_section == "all" %>">
+          ALL
         </button>
       </li>
     </ul>
 
     <div class="tab-content">
       <section
-        class="tab-pane fade show active"
-        id="employees-list-panel"
+        class="tab-pane fade <%= "show active" if active_section == "foh" %>"
+        id="employees-foh-panel"
         role="tabpanel"
-        aria-labelledby="employees-list-tab"
+        aria-labelledby="employees-foh-tab"
         tabindex="0">
         <div class="pt-4 d-grid gap-4">
-          <ul class="nav nav-tabs mb-3" id="employees-list-subtabs" role="tablist">
+          <ul class="nav nav-tabs mb-3" id="employees-foh-subtabs" role="tablist">
             <li class="nav-item" role="presentation">
               <button
-                class="nav-link active"
-                id="employees-list-foh-tab"
+                class="nav-link <%= "active" if active_order == "alphabetical" %>"
+                id="employees-foh-alphabetical-tab"
                 data-bs-toggle="tab"
-                data-bs-target="#employees-list-foh-panel"
+                data-bs-target="#employees-foh-alphabetical-panel"
                 type="button"
                 role="tab"
-                aria-controls="employees-list-foh-panel"
-                aria-selected="true">
-                FOH
+                aria-controls="employees-foh-alphabetical-panel"
+                aria-selected="<%= active_order == "alphabetical" %>">
+                Alphabetical
               </button>
             </li>
             <li class="nav-item" role="presentation">
               <button
-                class="nav-link"
-                id="employees-list-boh-tab"
+                class="nav-link <%= "active" if active_order == "ranked" %>"
+                id="employees-foh-ranked-tab"
                 data-bs-toggle="tab"
-                data-bs-target="#employees-list-boh-panel"
+                data-bs-target="#employees-foh-ranked-panel"
                 type="button"
                 role="tab"
-                aria-controls="employees-list-boh-panel"
-                aria-selected="false">
-                BOH
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link"
-                id="employees-list-all-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#employees-list-all-panel"
-                type="button"
-                role="tab"
-                aria-controls="employees-list-all-panel"
-                aria-selected="false">
-                All
+                aria-controls="employees-foh-ranked-panel"
+                aria-selected="<%= active_order == "ranked" %>">
+                Rank Order
               </button>
             </li>
           </ul>
 
           <div class="tab-content">
             <section
-              class="tab-pane fade show active"
-              id="employees-list-foh-panel"
+              class="tab-pane fade <%= "show active" if active_order == "alphabetical" %>"
+              id="employees-foh-alphabetical-panel"
               role="tabpanel"
-              aria-labelledby="employees-list-foh-tab"
+              aria-labelledby="employees-foh-alphabetical-tab"
               tabindex="0">
               <%= render "employee_section", title: "FOH", employees: @employees_by_section["foh"], section_key: "foh" %>
             </section>
 
             <section
-              class="tab-pane fade"
-              id="employees-list-boh-panel"
+              class="tab-pane fade <%= "show active" if active_order == "ranked" %>"
+              id="employees-foh-ranked-panel"
               role="tabpanel"
-              aria-labelledby="employees-list-boh-tab"
+              aria-labelledby="employees-foh-ranked-tab"
               tabindex="0">
-              <%= render "employee_section", title: "BOH", employees: @employees_by_section["boh"], section_key: "boh" %>
-            </section>
-
-            <section
-              class="tab-pane fade"
-              id="employees-list-all-panel"
-              role="tabpanel"
-              aria-labelledby="employees-list-all-tab"
-              tabindex="0">
-              <div class="d-grid gap-4">
-                <%= render "employee_section", title: "All Employees", employees: @employees, section_key: nil %>
-                <% if @unassigned_employees.any? %>
-                  <%= render "employee_section", title: "Unassigned", employees: @unassigned_employees, section_key: nil %>
-                <% end %>
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                  <div>
+                    <h2 class="h5 fw-semibold mb-1">Rank Order</h2>
+                    <p class="text-secondary mb-0">Drag employees within each FOH position to control rank order for the combined schedule view.</p>
+                  </div>
+                  <span class="badge text-bg-light border"><%= pluralize(foh_positions.count, "position") %></span>
+                </div>
+                <div class="card-body p-4 d-grid gap-4">
+                  <% if foh_positions.any? %>
+                    <div class="d-grid gap-4">
+                      <% foh_positions.each do |position| %>
+                        <% ranked_employee_positions = position.employee_positions.joins(:employee).merge(Employee.active).includes(:employee).ordered %>
+                        <section class="border rounded p-3 bg-light-subtle">
+                          <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                            <div>
+                              <h3 class="h6 fw-semibold mb-1"><%= position.name %></h3>
+                              <p class="text-secondary mb-0"><%= position.section_label %></p>
+                            </div>
+                            <span class="badge text-bg-light border"><%= pluralize(ranked_employee_positions.count, "ranked employee") %></span>
+                          </div>
+                          <% if ranked_employee_positions.any? %>
+                            <div class="table-responsive">
+                              <table class="table align-middle mb-0">
+                                <tbody
+                                  data-controller="employee-sort"
+                                  data-employee-sort-url-value="<%= reorder_employees_location_position_path(@location, position) %>">
+                                  <% ranked_employee_positions.each do |employee_position| %>
+                                    <tr draggable="true" data-employee-sort-target="row" data-employee-id="<%= employee_position.employee_id %>">
+                                      <td class="position-drag-column text-center text-secondary">
+                                        <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none px-1 position-drag-handle" aria-label="Drag to reorder">
+                                          <i class="bi bi-grip-vertical"></i>
+                                        </button>
+                                      </td>
+                                      <td class="fw-medium"><%= employee_position.employee.display_name %></td>
+                                    </tr>
+                                  <% end %>
+                                </tbody>
+                              </table>
+                            </div>
+                          <% else %>
+                            <div class="text-secondary">No active employees assigned to this position.</div>
+                          <% end %>
+                        </section>
+                      <% end %>
+                    </div>
+                  <% else %>
+                    <div class="text-secondary">No FOH positions available for ranking yet.</div>
+                  <% end %>
+                </div>
               </div>
             </section>
           </div>
@@ -140,147 +178,124 @@
       </section>
 
       <section
-        class="tab-pane fade"
-        id="employees-rank-panel"
+        class="tab-pane fade <%= "show active" if active_section == "boh" %>"
+        id="employees-boh-panel"
         role="tabpanel"
-        aria-labelledby="employees-rank-tab"
+        aria-labelledby="employees-boh-tab"
         tabindex="0">
-        <div class="card border-0 shadow-sm mt-4">
-          <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <div>
-              <h2 class="h5 fw-semibold mb-1">Rank By Position</h2>
-              <p class="text-secondary mb-0">Drag employees within each position to control rank order for the combined schedule view.</p>
-            </div>
-            <span class="badge text-bg-light border"><%= pluralize(@sortable_positions.count, "position") %></span>
-          </div>
-          <div class="card-body p-4 d-grid gap-4">
-            <ul class="nav nav-tabs mb-3" id="employees-rank-subtabs" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link active"
-                  id="employees-rank-foh-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#employees-rank-foh-panel"
-                  type="button"
-                  role="tab"
-                  aria-controls="employees-rank-foh-panel"
-                  aria-selected="true">
-                  FOH
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link"
-                  id="employees-rank-boh-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#employees-rank-boh-panel"
-                  type="button"
-                  role="tab"
-                  aria-controls="employees-rank-boh-panel"
-                  aria-selected="false">
-                  BOH
-                </button>
-              </li>
-            </ul>
+        <div class="pt-4 d-grid gap-4">
+          <ul class="nav nav-tabs mb-3" id="employees-boh-subtabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link <%= "active" if active_order == "alphabetical" %>"
+                id="employees-boh-alphabetical-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#employees-boh-alphabetical-panel"
+                type="button"
+                role="tab"
+                aria-controls="employees-boh-alphabetical-panel"
+                aria-selected="<%= active_order == "alphabetical" %>">
+                Alphabetical
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link <%= "active" if active_order == "ranked" %>"
+                id="employees-boh-ranked-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#employees-boh-ranked-panel"
+                type="button"
+                role="tab"
+                aria-controls="employees-boh-ranked-panel"
+                aria-selected="<%= active_order == "ranked" %>">
+                Rank Order
+              </button>
+            </li>
+          </ul>
 
-            <div class="tab-content">
-              <section
-                class="tab-pane fade show active"
-                id="employees-rank-foh-panel"
-                role="tabpanel"
-                aria-labelledby="employees-rank-foh-tab"
-                tabindex="0">
-                <% if foh_positions.any? %>
-                  <div class="d-grid gap-4">
-                    <% foh_positions.each do |position| %>
-                      <% ranked_employee_positions = position.employee_positions.joins(:employee).merge(Employee.active).includes(:employee).ordered %>
-                      <section class="border rounded p-3 bg-light-subtle">
-                        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-                          <div>
-                            <h3 class="h6 fw-semibold mb-1"><%= position.name %></h3>
-                            <p class="text-secondary mb-0"><%= position.section_label %></p>
-                          </div>
-                          <span class="badge text-bg-light border"><%= pluralize(ranked_employee_positions.count, "ranked employee") %></span>
-                        </div>
-                        <% if ranked_employee_positions.any? %>
-                          <div class="table-responsive">
-                            <table class="table align-middle mb-0">
-                              <tbody
-                                data-controller="employee-sort"
-                                data-employee-sort-url-value="<%= reorder_employees_location_position_path(@location, position) %>">
-                                <% ranked_employee_positions.each do |employee_position| %>
-                                  <tr draggable="true" data-employee-sort-target="row" data-employee-id="<%= employee_position.employee_id %>">
-                                    <td class="position-drag-column text-center text-secondary">
-                                      <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none px-1 position-drag-handle" aria-label="Drag to reorder">
-                                        <i class="bi bi-grip-vertical"></i>
-                                      </button>
-                                    </td>
-                                    <td class="fw-medium"><%= employee_position.employee.display_name %></td>
-                                  </tr>
-                                <% end %>
-                              </tbody>
-                            </table>
-                          </div>
-                        <% else %>
-                          <div class="text-secondary">No active employees assigned to this position.</div>
-                        <% end %>
-                      </section>
-                    <% end %>
-                  </div>
-                <% else %>
-                  <div class="text-secondary">No FOH positions available for ranking yet.</div>
-                <% end %>
-              </section>
+          <div class="tab-content">
+            <section
+              class="tab-pane fade <%= "show active" if active_order == "alphabetical" %>"
+              id="employees-boh-alphabetical-panel"
+              role="tabpanel"
+              aria-labelledby="employees-boh-alphabetical-tab"
+              tabindex="0">
+              <%= render "employee_section", title: "BOH", employees: @employees_by_section["boh"], section_key: "boh" %>
+            </section>
 
-              <section
-                class="tab-pane fade"
-                id="employees-rank-boh-panel"
-                role="tabpanel"
-                aria-labelledby="employees-rank-boh-tab"
-                tabindex="0">
-                <% if boh_positions.any? %>
-                  <div class="d-grid gap-4">
-                    <% boh_positions.each do |position| %>
-                      <% ranked_employee_positions = position.employee_positions.joins(:employee).merge(Employee.active).includes(:employee).ordered %>
-                      <section class="border rounded p-3 bg-light-subtle">
-                        <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-                          <div>
-                            <h3 class="h6 fw-semibold mb-1"><%= position.name %></h3>
-                            <p class="text-secondary mb-0"><%= position.section_label %></p>
-                          </div>
-                          <span class="badge text-bg-light border"><%= pluralize(ranked_employee_positions.count, "ranked employee") %></span>
-                        </div>
-                        <% if ranked_employee_positions.any? %>
-                          <div class="table-responsive">
-                            <table class="table align-middle mb-0">
-                              <tbody
-                                data-controller="employee-sort"
-                                data-employee-sort-url-value="<%= reorder_employees_location_position_path(@location, position) %>">
-                                <% ranked_employee_positions.each do |employee_position| %>
-                                  <tr draggable="true" data-employee-sort-target="row" data-employee-id="<%= employee_position.employee_id %>">
-                                    <td class="position-drag-column text-center text-secondary">
-                                      <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none px-1 position-drag-handle" aria-label="Drag to reorder">
-                                        <i class="bi bi-grip-vertical"></i>
-                                      </button>
-                                    </td>
-                                    <td class="fw-medium"><%= employee_position.employee.display_name %></td>
-                                  </tr>
-                                <% end %>
-                              </tbody>
-                            </table>
-                          </div>
-                        <% else %>
-                          <div class="text-secondary">No active employees assigned to this position.</div>
-                        <% end %>
-                      </section>
-                    <% end %>
+            <section
+              class="tab-pane fade <%= "show active" if active_order == "ranked" %>"
+              id="employees-boh-ranked-panel"
+              role="tabpanel"
+              aria-labelledby="employees-boh-ranked-tab"
+              tabindex="0">
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                  <div>
+                    <h2 class="h5 fw-semibold mb-1">Rank Order</h2>
+                    <p class="text-secondary mb-0">Drag employees within each BOH position to control rank order for the combined schedule view.</p>
                   </div>
-                <% else %>
-                  <div class="text-secondary">No BOH positions available for ranking yet.</div>
-                <% end %>
-              </section>
-            </div>
+                  <span class="badge text-bg-light border"><%= pluralize(boh_positions.count, "position") %></span>
+                </div>
+                <div class="card-body p-4 d-grid gap-4">
+                  <% if boh_positions.any? %>
+                    <div class="d-grid gap-4">
+                      <% boh_positions.each do |position| %>
+                        <% ranked_employee_positions = position.employee_positions.joins(:employee).merge(Employee.active).includes(:employee).ordered %>
+                        <section class="border rounded p-3 bg-light-subtle">
+                          <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                            <div>
+                              <h3 class="h6 fw-semibold mb-1"><%= position.name %></h3>
+                              <p class="text-secondary mb-0"><%= position.section_label %></p>
+                            </div>
+                            <span class="badge text-bg-light border"><%= pluralize(ranked_employee_positions.count, "ranked employee") %></span>
+                          </div>
+                          <% if ranked_employee_positions.any? %>
+                            <div class="table-responsive">
+                              <table class="table align-middle mb-0">
+                                <tbody
+                                  data-controller="employee-sort"
+                                  data-employee-sort-url-value="<%= reorder_employees_location_position_path(@location, position) %>">
+                                  <% ranked_employee_positions.each do |employee_position| %>
+                                    <tr draggable="true" data-employee-sort-target="row" data-employee-id="<%= employee_position.employee_id %>">
+                                      <td class="position-drag-column text-center text-secondary">
+                                        <button type="button" class="btn btn-sm btn-link text-secondary text-decoration-none px-1 position-drag-handle" aria-label="Drag to reorder">
+                                          <i class="bi bi-grip-vertical"></i>
+                                        </button>
+                                      </td>
+                                      <td class="fw-medium"><%= employee_position.employee.display_name %></td>
+                                    </tr>
+                                  <% end %>
+                                </tbody>
+                              </table>
+                            </div>
+                          <% else %>
+                            <div class="text-secondary">No active employees assigned to this position.</div>
+                          <% end %>
+                        </section>
+                      <% end %>
+                    </div>
+                  <% else %>
+                    <div class="text-secondary">No BOH positions available for ranking yet.</div>
+                  <% end %>
+                </div>
+              </div>
+            </section>
           </div>
+        </div>
+      </section>
+
+      <section
+        class="tab-pane fade <%= "show active" if active_section == "all" %>"
+        id="employees-all-panel"
+        role="tabpanel"
+        aria-labelledby="employees-all-tab"
+        tabindex="0">
+        <div class="pt-4 d-grid gap-4">
+          <%= render "employee_section", title: "All Employees", employees: @employees, section_key: nil %>
+          <% if @unassigned_employees.any? %>
+            <%= render "employee_section", title: "Unassigned", employees: @unassigned_employees, section_key: nil %>
+          <% end %>
         </div>
       </section>
     </div>

@@ -15,13 +15,16 @@
               <th>Positions</th>
               <th>Contact</th>
               <th>Status</th>
-              <th class="text-end">Actions</th>
             </tr>
           </thead>
           <tbody>
             <% employees.each do |employee| %>
               <tr>
-                <td class="fw-medium"><%= employee.display_name %></td>
+                <td class="fw-medium">
+                  <%= link_to employee.display_name,
+                      edit_location_employee_path(@location, employee, return_to: request.fullpath),
+                      class: "schedule-name-link" %>
+                </td>
                 <td>
                   <% positions = section_positions_for.call(employee) %>
                   <% if positions.any? %>
@@ -41,14 +44,6 @@
                   <span class="badge <%= employee.active? ? "text-bg-success" : "text-bg-secondary" %>">
                     <%= employee.active? ? "Active" : "Inactive" %>
                   </span>
-                </td>
-                <td class="text-end">
-                  <div class="d-inline-flex gap-2">
-                    <%= link_to "Edit", edit_location_employee_path(@location, employee), class: "btn btn-sm btn-outline-secondary" %>
-                    <% if employee.active? %>
-                      <%= button_to "Mark Inactive", deactivate_location_employee_path(@location, employee), method: :patch, class: "btn btn-sm btn-outline-secondary" %>
-                    <% end %>
-                  </div>
                 </td>
               </tr>
             <% end %>

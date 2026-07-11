@@ -15,6 +15,7 @@ class EmployeesController < ApplicationController
 
   def new
     @employee = @location.employees.build
+    @back_path = location_employees_path(@location)
   end
 
   def create
@@ -29,6 +30,7 @@ class EmployeesController < ApplicationController
   end
 
   def edit
+    @back_path = safe_return_path || location_employees_path(@location)
   end
 
   def update
@@ -36,8 +38,9 @@ class EmployeesController < ApplicationController
     assign_positions
 
     if @employee.save
-      redirect_to location_employees_path(@location), notice: "Employee updated."
+      redirect_to(safe_return_path || location_employees_path(@location), notice: "Employee updated.")
     else
+      @back_path = safe_return_path || location_employees_path(@location)
       render :edit, status: :unprocessable_entity
     end
   end
@@ -82,5 +85,17 @@ class EmployeesController < ApplicationController
     Position::SECTIONS.keys.index_with do |section|
       employees.select { |employee| employee.positions.any? { |position| position.section == section } }
     end
+  end
+
+  def safe_return_path
+    return_to = params[:return_to].presence
+    return if return_to.blank?
+
+    redirect_uri = URI.parse(return_to)
+    return if redirect_uri.host.present?
+
+    return_to
+  rescue URI::InvalidURIError
+    nil
   end
 end

@@ -153,6 +153,48 @@ class ScheduleFlowTest < ActionDispatch::IntegrationTest
     assert_redirected_to location_schedule_path(locations(:main), schedule, view: "positions", section: "boh")
   end
 
+  test "schedule employee names link to the employee page" do
+    sign_in users(:manager)
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")
+
+    assert_response :success
+    assert_select "th.schedule-name-column.schedule-employee-row-heading a.schedule-name-link[href='#{edit_location_employee_path(locations(:main), employees(:sam), return_to: location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh"))}']", text: "Sam S"
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh")
+
+    assert_response :success
+    assert_select "th.schedule-name-column.schedule-employee-row-heading a.schedule-name-link[href='#{edit_location_employee_path(locations(:main), employees(:sam), return_to: location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "foh"))}']", text: "Sam S"
+  end
+
+  test "employee edit back button returns to the schedule view" do
+    sign_in users(:manager)
+    return_to = location_schedule_path(locations(:main), schedules(:main_week), view: "employees", section: "foh")
+
+    get edit_location_employee_path(locations(:main), employees(:sam), return_to: return_to)
+
+    assert_response :success
+    assert_select "a.btn.btn-outline-secondary[href='#{return_to}']", text: "Back"
+  end
+
+  test "name view includes a manage rank order link" do
+    sign_in users(:manager)
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "boh", employee_order: "ranked")
+
+    assert_response :success
+    assert_select "a[href='#{location_employees_path(locations(:main), section: "boh", order: "ranked")}']", text: "Manage Rank Order"
+  end
+
+  test "name view hides manage rank order link outside ranked mode" do
+    sign_in users(:manager)
+
+    get location_schedule_path(locations(:main), schedules(:main_week), view: "both", section: "boh", employee_order: "alphabetical")
+
+    assert_response :success
+    assert_select "a[href='#{location_employees_path(locations(:main), section: "boh", order: "ranked")}']", count: 0
+  end
+
   test "duplicate schedules for the same location and week are blocked" do
     sign_in users(:manager)
 

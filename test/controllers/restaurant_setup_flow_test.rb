@@ -215,23 +215,43 @@ class RestaurantSetupFlowTest < ActionDispatch::IntegrationTest
     get location_employees_path(locations(:main))
 
     assert_response :success
-    assert_select ".nav-tabs button#employees-list-tab[data-bs-toggle='tab'][data-bs-target='#employees-list-panel'][aria-selected='true']", text: "Employees"
-    assert_select ".nav-tabs button#employees-rank-tab[data-bs-toggle='tab'][data-bs-target='#employees-rank-panel'][aria-selected='false']", text: "Rank by Position"
-    assert_select ".tab-pane#employees-list-panel.show.active"
-    assert_select ".tab-pane#employees-rank-panel"
-    assert_select "#employees-list-subtabs button#employees-list-foh-tab[data-bs-target='#employees-list-foh-panel'][aria-selected='true']", text: "FOH"
-    assert_select "#employees-list-subtabs button#employees-list-boh-tab[data-bs-target='#employees-list-boh-panel'][aria-selected='false']", text: "BOH"
-    assert_select "#employees-list-subtabs button#employees-list-all-tab[data-bs-target='#employees-list-all-panel'][aria-selected='false']", text: "All"
-    assert_select "#employees-rank-subtabs button#employees-rank-foh-tab[data-bs-target='#employees-rank-foh-panel'][aria-selected='true']", text: "FOH"
-    assert_select "#employees-rank-subtabs button#employees-rank-boh-tab[data-bs-target='#employees-rank-boh-panel'][aria-selected='false']", text: "BOH"
-    assert_select ".tab-pane#employees-list-foh-panel.show.active"
-    assert_select ".tab-pane#employees-list-boh-panel"
-    assert_select ".tab-pane#employees-list-all-panel"
-    assert_select ".tab-pane#employees-rank-foh-panel.show.active"
-    assert_select ".tab-pane#employees-rank-boh-panel"
+    assert_select ".nav-tabs button#employees-foh-tab[data-bs-target='#employees-foh-panel'][aria-selected='true']", text: "FOH"
+    assert_select ".nav-tabs button#employees-boh-tab[data-bs-target='#employees-boh-panel'][aria-selected='false']", text: "BOH"
+    assert_select ".nav-tabs button#employees-all-tab[data-bs-target='#employees-all-panel'][aria-selected='false']", text: "ALL"
+    assert_select ".tab-pane#employees-foh-panel.show.active"
+    assert_select ".tab-pane#employees-boh-panel"
+    assert_select ".tab-pane#employees-all-panel"
+    assert_select "#employees-foh-subtabs button#employees-foh-alphabetical-tab[data-bs-target='#employees-foh-alphabetical-panel'][aria-selected='true']", text: "Alphabetical"
+    assert_select "#employees-foh-subtabs button#employees-foh-ranked-tab[data-bs-target='#employees-foh-ranked-panel'][aria-selected='false']", text: "Rank Order"
+    assert_select ".tab-pane#employees-foh-alphabetical-panel.show.active"
+    assert_select ".tab-pane#employees-foh-ranked-panel"
     assert_select "tbody[data-controller='employee-sort'][data-employee-sort-url-value='#{reorder_employees_location_position_path(locations(:main), positions(:server))}']", minimum: 1
     assert_select "tr[data-employee-sort-target='row'][data-employee-id='#{employees(:sam).id}']"
     assert_select ".position-drag-handle", minimum: 1
+  end
+
+  test "employees page can open BOH rank order directly" do
+    sign_in users(:manager)
+
+    get location_employees_path(locations(:main), section: "boh", order: "ranked")
+
+    assert_response :success
+    assert_select ".nav-tabs button#employees-boh-tab[aria-selected='true']", text: "BOH"
+    assert_select ".tab-pane#employees-boh-panel.show.active"
+    assert_select "#employees-boh-subtabs button#employees-boh-ranked-tab[aria-selected='true']", text: "Rank Order"
+    assert_select ".tab-pane#employees-boh-ranked-panel.show.active"
+  end
+
+  test "employees page uses clickable names and no action buttons" do
+    sign_in users(:manager)
+
+    get location_employees_path(locations(:main))
+
+    assert_response :success
+    assert_select "table thead th", text: "Actions", count: 0
+    assert_select "a.schedule-name-link[href='#{edit_location_employee_path(locations(:main), employees(:sam), return_to: location_employees_path(locations(:main)))}']", text: "Sam Server"
+    assert_select "a", text: "Edit", count: 0
+    assert_select "button", text: "Mark Inactive", count: 0
   end
 
   test "a signed-in user can reorder employees within a position rank list" do

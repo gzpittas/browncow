@@ -10,10 +10,28 @@
            when "foh" then "FOH"
            end %>
       <div class="schedule-header-left">
-        <div class="schedule-hero-date schedule-week-title" aria-label="<%= schedule_header_title(@schedule) %>">
-          <span class="schedule-hero-date-prefix">Week of</span>
-          <span class="schedule-hero-date-month"><%= @schedule.week_start_date.strftime("%b").upcase %></span>
-          <span class="schedule-hero-date-day"><%= @schedule.week_start_date.day %></span>
+        <div class="schedule-hero-header-row">
+          <div class="schedule-hero-date schedule-week-title" aria-label="<%= schedule_header_title(@schedule) %>">
+            <span class="schedule-hero-date-prefix">Week of</span>
+            <span class="schedule-hero-date-month"><%= @schedule.week_start_date.strftime("%b").upcase %></span>
+            <span class="schedule-hero-date-day"><%= @schedule.week_start_date.day %></span>
+          </div>
+          <div class="schedule-publication-control">
+            <span class="schedule-publication-state text-secondary small fw-semibold text-uppercase">
+              <%= @schedule.published? ? "Published" : "DRAFT - UNPUBLISHED" %>
+            </span>
+            <% if @schedule.published? %>
+              <%= button_to "Unpublish", unpublish_location_schedule_path(@location, @schedule),
+                    method: :patch,
+                    class: "btn btn-menurooster-green",
+                    form: { class: "d-inline", onsubmit: "return confirm('Unpublish this schedule? It will be removed from the public employee schedule until you publish it again.')" } %>
+            <% else %>
+              <%= button_to "Publish", publish_location_schedule_path(@location, @schedule),
+                    method: :patch,
+                    class: "btn btn-menurooster-red",
+                    form: { class: "d-inline" } %>
+            <% end %>
+          </div>
         </div>
         <% if section_display.present? %>
           <div class="schedule-section-display" aria-label="<%= section_display %>">
@@ -112,28 +130,19 @@
       </div>
 
       <% if @view_mode == "both" %>
-        <div class="btn-group" role="group" aria-label="Employee order">
-          <%= link_to "Alphabetical", location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode, employee_order: "alphabetical"), class: "btn #{@both_view_employee_sort_mode == "alphabetical" ? "btn-primary" : "btn-outline-primary"}" %>
-          <%= link_to "Rank Order", location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode, employee_order: "ranked"), class: "btn #{@both_view_employee_sort_mode == "ranked" ? "btn-primary" : "btn-outline-primary"}" %>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <div class="btn-group" role="group" aria-label="Employee order">
+            <%= link_to "Alphabetical", location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode, employee_order: "alphabetical"), class: "btn #{@both_view_employee_sort_mode == "alphabetical" ? "btn-primary" : "btn-outline-primary"}" %>
+            <%= link_to "Rank Order", location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode, employee_order: "ranked"), class: "btn #{@both_view_employee_sort_mode == "ranked" ? "btn-primary" : "btn-outline-primary"}" %>
+          </div>
+          <% if @both_view_employee_sort_mode == "ranked" %>
+            <%= link_to "Manage Rank Order", location_employees_path(@location, section: @section_mode, order: "ranked"), class: "schedule-manage-rank-link" %>
+          <% end %>
         </div>
       <% end %>
     </div>
 
     <div class="schedule-schedule-actions">
-      <span class="schedule-publication-state text-secondary small fw-semibold text-uppercase">
-        <%= @schedule.published? ? "Published" : "Draft" %>
-      </span>
-      <% if @schedule.published? %>
-        <%= button_to "Unpublish", unpublish_location_schedule_path(@location, @schedule),
-              method: :patch,
-              class: "btn btn-menurooster-green",
-              form: { class: "d-inline", onsubmit: "return confirm('Unpublish this schedule? It will be removed from the public employee schedule until you publish it again.')" } %>
-      <% else %>
-        <%= button_to "Publish", publish_location_schedule_path(@location, @schedule),
-              method: :patch,
-              class: "btn btn-menurooster-red",
-              form: { class: "d-inline" } %>
-      <% end %>
       <%= link_to "Copy Schedule", new_location_schedule_path(@location, copy_from_schedule_id: @schedule.id, view: @view_mode, section: @section_mode), class: "btn btn-outline-primary" %>
       <%= link_to "Print Schedule", print_location_schedule_path(@location, @schedule, view: @view_mode, section: @section_mode), class: "btn btn-primary" %>
     </div>
